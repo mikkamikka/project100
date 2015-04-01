@@ -139,23 +139,23 @@ var atmoShader = {
 
 // Planets
 var planets = [
-	{name:"Mercury", radius:2435, rotationSpeed:0.02, tilt:0.0, distanceFromSun:58e6,
+	{name:"mercury", radius:2435, rotationSpeed:0.02, tilt:0.0, distanceFromSun:58e6,
 		distanceFromSunAU:0.387, period:88},
-	{name:"Venus", radius:6050, rotationSpeed:0.004, tilt:0.0, distanceFromSun:108e6,
+	{name:"venus", radius:6050, rotationSpeed:0.004, tilt:0.0, distanceFromSun:108e6,
 		distanceFromSunAU:0.723, period:224.7},
-	{name:"Earth", radius:6371, rotationSpeed:0.02, tilt:0.41, distanceFromSun:149.5e6,
+	{name:"earth", radius:6371, rotationSpeed:0.02, tilt:0.41, distanceFromSun:149.5e6,
 		distanceFromSunAU:1.0, period:365},
-	{name:"Mars", radius:3335, rotationSpeed:0.02, tilt:0.0, distanceFromSun:228e6,
+	{name:"mars", radius:3335, rotationSpeed:0.02, tilt:0.0, distanceFromSun:228e6,
 		distanceFromSunAU:1.524, period:687},
-	{name:"Jupiter", radius:71880, rotationSpeed:0.05, tilt:0.2, distanceFromSun:778e6,
+	{name:"jupiter", radius:71880, rotationSpeed:0.05, tilt:0.2, distanceFromSun:778e6,
 		distanceFromSunAU:5.203, period:4380},
-	{name:"Saturn", radius:60210, rotationSpeed:0.05, tilt:0.5, distanceFromSun:1427e6,
+	{name:"saturn", radius:60210, rotationSpeed:0.05, tilt:0.5, distanceFromSun:1427e6,
 		distanceFromSunAU:9.54, period:10753},
-	{name:"Uranus", radius:25650, rotationSpeed:0.03, tilt:0.41, distanceFromSun:2.86e9,
+	{name:"uranus", radius:25650, rotationSpeed:0.03, tilt:0.41, distanceFromSun:2.86e9,
 		distanceFromSunAU:19.2, period:30660},
-	{name:"Neptune", radius:24750, rotationSpeed:0.02, tilt:0.41, distanceFromSun:4.5e9,
+	{name:"neptune", radius:24750, rotationSpeed:0.02, tilt:0.41, distanceFromSun:4.5e9,
 		distanceFromSunAU:30.0, period:60225},
-	{name:"Pluto", radius:1000, rotationSpeed:0.02, tilt:0.41, distanceFromSun:6e9,
+	{name:"pluto", radius:1000, rotationSpeed:0.02, tilt:0.41, distanceFromSun:6e9,
 		distanceFromSunAU:42.0, period:80000},
 ];
 
