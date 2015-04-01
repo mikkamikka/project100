@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>lightyear.fm</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				background:#000;
+				color: #eee;
+				padding:0;
+				margin:0;
+				font-weight:bold;
+				overflow:hidden;
+
+				font-family:Monospace;
+				font-size:13px;
+				text-align:center;
+			}
+
+			#info {
+				position: absolute;
+				top: 0px; width: 100%;
+				padding: 5px;
+				z-index:100;
+			}
+
+			a {
+
+				color: #0080ff;
+			}
+
+			b { color:orange }
+		</style>
+
+		<script src="../build/three.min.js"></script>
+
+		<script src="js/controls/FlyControls.js"></script>
+		<script src="js/controls/OrbitControls.js"></script>
+
+		<script src="js/shaders/CopyShader.js"></script>
+		<script src="js/shaders/FilmShader.js"></script>
+		<script src="js/shaders/FresnelShader.js"></script>
+		<script src="js/shaders/FXAAShader.js"></script>
+
+		<script src="js/postprocessing/EffectComposer.js"></script>
+		<script src="js/postprocessing/ShaderPass.js"></script>
+		<script src="js/postprocessing/MaskPass.js"></script>
+		<script src="js/postprocessing/RenderPass.js"></script>
+		<script src="js/postprocessing/FilmPass.js"></script>
+		<script src="js/postprocessing/BokehPass.js"></script>
+		<script src="js/postprocessing/BloomPass.js"></script>
+
+		<script src="js/Detector.js"></script>
+		<script src="js/libs/stats.min.js"></script>
+		<script src="js/loaders/DDSLoader.js"></script>
+
+
+	</head>
+
+	<body oncontextmenu="return false;">
+
+		<div id="info"> lightyear.fm
+		</div>
+
+		<script src="solar_system.js"></script>
+		<script src="stars.js"></script>
+		<script src="named_stars.js"></script>
+		<script src="data/stars_named.json.js"></script>
+
+		<script>
+
+			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
+			var MARGIN = 0;
+			var SCREEN_HEIGHT = window.innerHeight - MARGIN * 2;
+			var SCREEN_WIDTH  = window.innerWidth;
+
+			var container, stats;
+			var camera, controls, scene, sceneCube, renderer, composer;
+			//var geometry, meshPlanet, meshClouds, meshMoon;
+			//var dirLight, pointLight, ambientLight;
+
+			var effectFXAA;
+
+			var d, dPlanet, dMoon, dMoonVec = new THREE.Vector3();
+
+			var clock = new THREE.Clock();
+			var delta;
+
+			var axis_x = new THREE.Vector3( 1, 0, 0 );
+			var axis_y = new THREE.Vector3( 0, 1, 0 );
+			var axis_z = new THREE.Vector3( 0, 0, 1 );
+
+			var globalObjScale = 1.0;
+			var globalDistanceScale = 0.01;
+
+			  var overRenderer;
+			  var curZoomSpeed = 0;
+			  var zoomSpeed = 50, fastZoom = false;
+
+			  var mouse = { x: 0, y: 0 }, mouseOnDown = { x: 0, y: 0 };
+			  var rotation = { x: 0.0, y: 0 },
+				  target = { x: 0.2, y: 0 },
+				  targetOnDown = { x: 0, y: 0 };
+
+			  var distance = 63000, distanceTarget = 63000;
+			  var padding = 40;
+			  var PI_HALF = Math.PI / 2;
+
+			init();
+			animate();
+
+			function init() {
+
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+
+				camera = new THREE.PerspectiveCamera( 25, SCREEN_WIDTH / SCREEN_HEIGHT, 50, 1e12 );
+				//camera.position.z = 63000;
+
+				scene = new THREE.Scene();
+				scene.fog = new THREE.FogExp2( 0x000000, 0.00000025 );
+
+
+				//controls = new THREE.FlyControls( camera );
+				//controls = new THREE.OrbitControls( camera );
+				//controls.minDistance = 1;
+				//controls.maxDistance = 5e12;
+
+				//controls.movementSpeed = 1000;
+				//controls.domElement = container;
+				//controls.rollSpeed = 0; //Math.PI / 240;
+				//controls.autoForward = false;
+				//controls.dragToLook = true;
+
+
+				renderer = new THREE.WebGLRenderer( { antialias: false , alpha: true } );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+				//renderer.sortObjects = false;
+				//renderer.setFaceCulling( THREE.CullFaceNone );
+				//renderer.gammaInput = true;
+				//renderer.gammaOutput = true;
+
+				renderer.autoClear = false;
+
+				container.appendChild( renderer.domElement );
+
+				stats = new Stats();
+				stats.domElement.style.position = 'absolute';
+				stats.domElement.style.top = '0px';
+				stats.domElement.style.zIndex = 100;
+				container.appendChild( stats.domElement );
+
+				window.addEventListener( 'resize', onWindowResize, false );
+
+				// postprocessing
+
+				var scenePass = new THREE.RenderPass( scene, camera );
+				scenePass.clear = false;
+
+				//var effectFilm = new THREE.FilmPass( 0.0, 0.75, 2048, false );
+				effectFXAA = new THREE.ShaderPass( THREE.FXAAShader );
+				//var effectBokeh = new THREE.ShaderPass( THREE.BokehPass );
+
+				effectFXAA.uniforms[ 'resolution' ].value.set( 1 / SCREEN_WIDTH, 1 / SCREEN_HEIGHT );
+
+				//effectFilm.renderToScreen = true;
+				effectFXAA.renderToScreen = true;
+
+				var parameters = { minFilter: THREE.LinearFilter,
+					magFilter: THREE.LinearFilter,
+					format: THREE.RGBAFormat,
+					stencilBuffer: true };
+
+				var renderTarget = new THREE.WebGLRenderTarget( SCREEN_WIDTH, SCREEN_HEIGHT, parameters );
+
+				composer = new THREE.EffectComposer( renderer, renderTarget );
+
+
+
+				initSolarSystem();
+				//initStars();
+				initNamedStars();
+
+
+				composer.addPass( scenePass );
+				//composer.addPass( effectFilm );
+				composer.addPass( effectFXAA );  //final pass
+
+
+				//Events
+				container.addEventListener('mousedown', onMouseDown, false);
+				container.addEventListener('mousewheel', onMouseWheel, false);
+
+				document.addEventListener('keydown', onDocumentKeyDown, false);
+				document.addEventListener('keyup', onDocumentKeyUp, false);
+
+				container.addEventListener('mouseover', function() {
+					overRenderer = true;
+				}, false);
+
+				container.addEventListener('mouseout', function() {
+				  overRenderer = false;
+				}, false);
+
+
+				console.log("Init done");
+			};
+
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+
+				render();
+				stats.update();
+
+			};
+
+			function render() {
+
+				zoom(curZoomSpeed);
+
+				rotation.x += (target.x - rotation.x) * 0.1;
+				rotation.y += (target.y - rotation.y) * 0.1;
+
+				distance += (distanceTarget - distance) * 0.3;
+
+				camera.position.x = distance * Math.sin(rotation.x) * Math.cos(rotation.y);
+				camera.position.y = distance * Math.sin(rotation.y);
+				camera.position.z = distance * Math.cos(rotation.x) * Math.cos(rotation.y);
+
+				camera.lookAt(scene.position);
+
+
+
+				delta = clock.getDelta();
+
+				renderSolarSystem(delta);
+
+				//controls.movementSpeed = 0.33 * d;
+				//controls.update( delta );
+
+				renderer.clear();
+				composer.render( delta );
+
+			};
+
+
+			//Event handlers
+
+			function onWindowResize( event ) {
+
+				SCREEN_HEIGHT = window.innerHeight;
+				SCREEN_WIDTH  = window.innerWidth;
+
+				renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+				effectFXAA.uniforms[ 'resolution' ].value.set( 1 / SCREEN_WIDTH, 1 / SCREEN_HEIGHT );
+
+				solarSystemResize();
+
+				camera.aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
+				camera.updateProjectionMatrix();
+
+				composer.reset();
+
+			};
+
+			function onMouseDown(event) {
+				event.preventDefault();
+
+				container.addEventListener('mousemove', onMouseMove, false);
+				container.addEventListener('mouseup', onMouseUp, false);
+				container.addEventListener('mouseout', onMouseOut, false);
+
+				mouseOnDown.x = - event.clientX;
+				mouseOnDown.y = event.clientY;
+
+				targetOnDown.x = target.x;
+				targetOnDown.y = target.y;
+
+				container.style.cursor = 'move';
+
+				switch ( event.button ) {
+
+					case 0: fastZoom ? curZoomSpeed = 10000 : curZoomSpeed = 1000;
+						break;
+					case 2: fastZoom ? curZoomSpeed = -10000 : curZoomSpeed = -1000;
+						break;
+
+				}
+
+			}
+
+			function onMouseMove(event) {
+				mouse.x = - event.clientX;
+				mouse.y = event.clientY;
+
+				var zoomDamp = distance/100000;
+
+				target.x = targetOnDown.x + (mouse.x - mouseOnDown.x) * 0.0005 * zoomDamp;
+				target.y = targetOnDown.y + (mouse.y - mouseOnDown.y) * 0.0005 * zoomDamp;
+
+				target.y = target.y > PI_HALF ? PI_HALF : target.y;
+				target.y = target.y < - PI_HALF ? - PI_HALF : target.y;
+			}
+
+			function onMouseUp(event) {
+				container.removeEventListener('mousemove', onMouseMove, false);
+				container.removeEventListener('mouseup', onMouseUp, false);
+				container.removeEventListener('mouseout', onMouseOut, false);
+				container.style.cursor = 'auto';
+				curZoomSpeed = 0;
+			}
+
+			function onMouseOut(event) {
+				container.removeEventListener('mousemove', onMouseMove, false);
+				container.removeEventListener('mouseup', onMouseUp, false);
+				container.removeEventListener('mouseout', onMouseOut, false);
+			}
+
+			function onMouseWheel(event) {
+				event.preventDefault();
+				//if (overRenderer) {
+				  zoom(event.wheelDeltaY * 30.3);
+				//}
+				return false;
+			}
+
+			function zoom(delta) {
+				distanceTarget -= delta;
+				//distanceTarget = distanceTarget > 1000 ? 1000 : distanceTarget;
+				//distanceTarget = distanceTarget < 350 ? 350 : distanceTarget;
+			}
+
+			function onDocumentKeyDown(event) {
+				//alert(event.keyCode);
+				switch (event.keyCode) {
+					case 38:
+						zoom(100);
+						event.preventDefault();
+						break;
+					case 40:
+						zoom(-100);
+						event.preventDefault();
+						break;
+					case 17:
+						fastZoom = true;
+						event.preventDefault();
+						break;
+				}
+			}
+			function onDocumentKeyUp(event) {
+				//alert(event.keyCode);
+				switch (event.keyCode) {
+					case 17:
+						fastZoom = false;
+						event.preventDefault();
+						break;
+				}
+			}
+
+
+		</script>
+	</body>
+</html>
