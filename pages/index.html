@@ -31,6 +31,23 @@
 			}
 
 			b { color:orange }
+
+			#distance {
+			  position: absolute;
+			  width:100%;
+			  height:30px;
+			  bottom:0px;
+			  color:#fff;
+				z-index: 10;
+			}
+			#button {
+				position: absolute;
+				padding: 0px;
+				left: 10px;
+				bottom:10px;
+				z-index: 10;
+			}
+
 		</style>
 
 		<script src="../build/three.min.js"></script>
@@ -68,12 +85,15 @@
 		<script src="named_stars.js"></script>
 		<script src="data/stars_named.json.js"></script>
 
+		<input type="button" id="button" value="Reset camera"   />
+  	<div id="distance"></div>
+
+
 		<script>
 
 			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
-			var MARGIN = 0;
-			var SCREEN_HEIGHT = window.innerHeight - MARGIN * 2;
+			var SCREEN_HEIGHT = window.innerHeight;
 			var SCREEN_WIDTH  = window.innerWidth;
 
 			var container, stats;
@@ -83,8 +103,6 @@
 
 			var effectFXAA;
 
-			var d, dPlanet, dMoon, dMoonVec = new THREE.Vector3();
-
 			var clock = new THREE.Clock();
 			var delta;
 
@@ -92,29 +110,47 @@
 			var axis_y = new THREE.Vector3( 0, 1, 0 );
 			var axis_z = new THREE.Vector3( 0, 0, 1 );
 
+
+
+
+
+
+		  var mouse = { x: 0, y: 0 }, mouseOnDown = { x: 0, y: 0 };
+		  var rotation = { x: 0.0, y: 0 },
+			  	target = { x: 0.2, y: 0 },
+			  	targetOnDown = { x: 0, y: 0 };
+
+
+			// Settings
+
 			var globalObjScale = 1.0;
 			var globalDistanceScale = 0.01;
 
-			  var overRenderer;
-			  var curZoomSpeed = 0;
-			  var zoomSpeed = 50, fastZoom = false;
+			var initialCameraDistance = 63000;
+		  var distance = initialCameraDistance,
+					distanceTarget = initialCameraDistance;
 
-			  var mouse = { x: 0, y: 0 }, mouseOnDown = { x: 0, y: 0 };
-			  var rotation = { x: 0.0, y: 0 },
-				  target = { x: 0.2, y: 0 },
-				  targetOnDown = { x: 0, y: 0 };
+			var curZoomSpeed = 0;
+			var zoomSpeed = 50, fastZoom = false;
 
-			  var distance = 63000, distanceTarget = 63000;
-			  var padding = 40;
-			  var PI_HALF = Math.PI / 2;
+		  var PI_HALF = Math.PI / 2;
 
 			init();
 			animate();
+
+			var OutDistance;					// UI
 
 			function init() {
 
 				container = document.createElement( 'div' );
 				document.body.appendChild( container );
+
+				OutDistance = document.getElementById('distance');
+
+				document.getElementById('button').onclick = function() {
+					distanceTarget = initialCameraDistance;
+					alert("fadgf");
+				};
 
 				camera = new THREE.PerspectiveCamera( 25, SCREEN_WIDTH / SCREEN_HEIGHT, 50, 1e12 );
 				//camera.position.z = 63000;
@@ -179,7 +215,6 @@
 				composer = new THREE.EffectComposer( renderer, renderTarget );
 
 
-
 				initSolarSystem();
 				//initStars();
 				initNamedStars();
@@ -217,6 +252,9 @@
 				render();
 				stats.update();
 
+				//OutDistance.innerHTML = "Distance from Earth: " + camera.position.distanceTo(earthPos);
+				OutDistance.innerHTML = "Distance from Earth: " + Math.round(distance) + " km";
+
 			};
 
 			function render() {
@@ -251,6 +289,8 @@
 
 
 			//Event handlers
+
+
 
 			function onWindowResize( event ) {
 

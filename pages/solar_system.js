@@ -724,29 +724,7 @@ function renderSolarSystem() {
 
   if (drawSkyBox) cameraCube.rotation.copy( camera.rotation );
 
-	//renderer.render( sceneCube, cameraCube );
-
-	//console.log(meshPlanet.rotation.y);
-
-	// slow down as we approach the surface
-
-/* 	dPlanet = camera.position.length();
-
-	dMoonVec.subVectors( camera.position, meshMoon.position );
-	dMoon = dMoonVec.length();
-
-	if ( dMoon < dPlanet ) {
-
-		d = ( dMoon - radius * moonScale * 1.01 );
-
-	} else {
-
-		d = ( dPlanet - radius * 1.01 );
-
-	} */
-
 }
-
 
 function solarSystemResize(){
 

@@ -55,14 +55,15 @@ Star.prototype.update = function(){
 function initStarBody(star){
 
 	var color = new THREE.Color( this.color );
+	//color.setAlpha(0.1);
 
 	star.body = new THREE.LensFlare();
 	star.body.add( textureFlare_star1, 256, 0.0, THREE.AdditiveBlending, color );
 	star.body.lensFlares[0].rotation = THREE.Math.degToRad( 0 );
-	star.body.add( textureFlare_ring1, 60, 0.75, THREE.AdditiveBlending );
-	star.body.add( textureFlare_ring2, 40, 0.8, THREE.AdditiveBlending );
-	star.body.add( textureFlare_ring3, 120, 0.9, THREE.AdditiveBlending );
-	star.body.add( textureFlare_ring4, 70, 1.0, THREE.AdditiveBlending );
+	star.body.add( textureFlare_ring1, 60, 0.75, THREE.AdditiveBlending, color );
+	star.body.add( textureFlare_ring2, 40, 0.8, THREE.AdditiveBlending, color );
+	star.body.add( textureFlare_ring3, 120, 0.9, THREE.AdditiveBlending, color );
+	star.body.add( textureFlare_ring4, 70, 1.0, THREE.AdditiveBlending, color );
 
 	star.body.customUpdateCallback = lensFlareUpdateCallback;
 	star.body.position.copy( star.position );
