@@ -1,10 +1,10 @@
 
 // Stars data from https://github.com/jaycrossler/StarDatabase
 var stars = [];
-var show_amount = 100;
+var show_amount = 716;
 var isHideDwarfs = true;
-var DistanceScale = 6e3;
-var maxFlareRange = 1e5;
+var DistanceScale = globalDistanceScale * LY;
+var maxFlareRange = globalDistanceScale * 149.5e6 * 30;  //30AU, Pluto orbit distance
 
 var textureFlare_star1 = THREE.ImageUtils.loadTexture( "textures/lensflare/lensflare_star1.png" ); // star
 

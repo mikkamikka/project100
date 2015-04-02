@@ -5,6 +5,7 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<style>
+
 			body {
 				background:#000;
 				color: #eee;
@@ -25,11 +26,7 @@
 				z-index:100;
 			}
 
-			a {
-
-				color: #0080ff;
-			}
-
+			a {	color: #0080ff }
 			b { color:orange }
 
 			#distance {
@@ -40,12 +37,19 @@
 			  color:#fff;
 				z-index: 10;
 			}
-			#button {
+			#button_reset {
 				position: absolute;
-				padding: 0px;
-				left: 10px;
-				bottom:10px;
+				top: 20px;
+				right: 20px;
+				padding: 8px;
+				color: #fff;
+				background-color: #555;
+				opacity: 0.5;
 				z-index: 10;
+			}
+			#button_reset:hover {
+				cursor: pointer;
+				opacity: 1;
 			}
 
 		</style>
@@ -72,20 +76,27 @@
 		<script src="js/libs/stats.min.js"></script>
 		<script src="js/loaders/DDSLoader.js"></script>
 
+		<!---- LY scripts ---->
+		<script src="settings.js"></script>
+		<script src="helper.js"></script>
+		<script src="solar_system.js"></script>
+		<script src="stars.js"></script>
+		<script src="named_stars.js"></script>
+		<script src="data/stars_named.json.js"></script>
+		<script src="data/stars_all.json.js"></script>
 
 	</head>
 
 	<body oncontextmenu="return false;">
 
-		<div id="info"> lightyear.fm
-		</div>
 
-		<script src="solar_system.js"></script>
-		<script src="stars.js"></script>
-		<script src="named_stars.js"></script>
-		<script src="data/stars_named.json.js"></script>
 
-		<input type="button" id="button" value="Reset camera"   />
+
+
+		<!---- UI ---->
+		<div id="info"> lightyear.fm </div>
+
+		<div id="button_reset" >Reset camera</div>
   	<div id="distance"></div>
 
 
@@ -98,47 +109,30 @@
 
 			var container, stats;
 			var camera, controls, scene, sceneCube, renderer, composer;
-			//var geometry, meshPlanet, meshClouds, meshMoon;
-			//var dirLight, pointLight, ambientLight;
 
 			var effectFXAA;
 
 			var clock = new THREE.Clock();
 			var delta;
 
-			var axis_x = new THREE.Vector3( 1, 0, 0 );
-			var axis_y = new THREE.Vector3( 0, 1, 0 );
-			var axis_z = new THREE.Vector3( 0, 0, 1 );
-
-
-
-
-
-
 		  var mouse = { x: 0, y: 0 }, mouseOnDown = { x: 0, y: 0 };
 		  var rotation = { x: 0.0, y: 0 },
 			  	target = { x: 0.2, y: 0 },
 			  	targetOnDown = { x: 0, y: 0 };
 
-
-			// Settings
-
-			var globalObjScale = 1.0;
-			var globalDistanceScale = 0.01;
-
-			var initialCameraDistance = 63000;
 		  var distance = initialCameraDistance,
 					distanceTarget = initialCameraDistance;
 
 			var curZoomSpeed = 0;
-			var zoomSpeed = 50, fastZoom = false;
 
-		  var PI_HALF = Math.PI / 2;
+			var OutDistance, ResetButton;					// UI
+
+
 
 			init();
 			animate();
 
-			var OutDistance;					// UI
+
 
 			function init() {
 
@@ -146,11 +140,12 @@
 				document.body.appendChild( container );
 
 				OutDistance = document.getElementById('distance');
+				ResetButton = document.getElementById('button_reset');
 
-				document.getElementById('button').onclick = function() {
-					distanceTarget = initialCameraDistance;
-					alert("fadgf");
-				};
+				ResetButton.addEventListener( 'click', function ( event ) {
+					//distance = initialCameraDistance;
+					distanceTarget -= distance - initialCameraDistance;
+				}, false );
 
 				camera = new THREE.PerspectiveCamera( 25, SCREEN_WIDTH / SCREEN_HEIGHT, 50, 1e12 );
 				//camera.position.z = 63000;
@@ -253,24 +248,14 @@
 				stats.update();
 
 				//OutDistance.innerHTML = "Distance from Earth: " + camera.position.distanceTo(earthPos);
-				OutDistance.innerHTML = "Distance from Earth: " + Math.round(distance) + " km";
+				OutDistance.innerHTML = "Distance from Earth: " + Math.round(distance) + " km   /   "
+																+ kmToLY(distance).toPrecision(3) + " light years";
 
 			};
 
 			function render() {
 
-				zoom(curZoomSpeed);
-
-				rotation.x += (target.x - rotation.x) * 0.1;
-				rotation.y += (target.y - rotation.y) * 0.1;
-
-				distance += (distanceTarget - distance) * 0.3;
-
-				camera.position.x = distance * Math.sin(rotation.x) * Math.cos(rotation.y);
-				camera.position.y = distance * Math.sin(rotation.y);
-				camera.position.z = distance * Math.cos(rotation.x) * Math.cos(rotation.y);
-
-				camera.lookAt(scene.position);
+				updateCamera();
 
 
 
@@ -288,9 +273,31 @@
 			};
 
 
+			function updateCamera(){
+
+				zoom(curZoomSpeed);
+
+				rotation.x += (target.x - rotation.x) * 0.1;
+				rotation.y += (target.y - rotation.y) * 0.1;
+
+				distance += (distanceTarget - distance) * 0.3;
+
+				camera.position.x = distance * Math.sin(rotation.x) * Math.cos(rotation.y);
+				camera.position.y = distance * Math.sin(rotation.y);
+				camera.position.z = distance * Math.cos(rotation.x) * Math.cos(rotation.y);
+
+				var speedAccel = Math.pow(distance / initialCameraDistance, 1);
+				//var speedAccel = Math.sqrt(distance / initialCameraDistance);
+				zoomSpeed += speedAccel;
+				fastZoomSpeed += speedAccel;
+				//wheelZoomStep += speedAccel/10;
+
+				camera.lookAt(new THREE.Vector3(earthPos.x, earthPos.y, earthPos.z - 35000));
+
+			};
+
+
 			//Event handlers
-
-
 
 			function onWindowResize( event ) {
 
@@ -326,9 +333,9 @@
 
 				switch ( event.button ) {
 
-					case 0: fastZoom ? curZoomSpeed = 10000 : curZoomSpeed = 1000;
+					case 0: fastZoom ? curZoomSpeed = fastZoomSpeed : curZoomSpeed = zoomSpeed;
 						break;
-					case 2: fastZoom ? curZoomSpeed = -10000 : curZoomSpeed = -1000;
+					case 2: fastZoom ? curZoomSpeed = -fastZoomSpeed : curZoomSpeed = -zoomSpeed;
 						break;
 
 				}
@@ -339,7 +346,7 @@
 				mouse.x = - event.clientX;
 				mouse.y = event.clientY;
 
-				var zoomDamp = distance/100000;
+				var zoomDamp = 0.6;
 
 				target.x = targetOnDown.x + (mouse.x - mouseOnDown.x) * 0.0005 * zoomDamp;
 				target.y = targetOnDown.y + (mouse.y - mouseOnDown.y) * 0.0005 * zoomDamp;
@@ -365,7 +372,7 @@
 			function onMouseWheel(event) {
 				event.preventDefault();
 				//if (overRenderer) {
-				  zoom(event.wheelDeltaY * 30.3);
+				  zoom(event.wheelDeltaY * wheelZoomStep);
 				//}
 				return false;
 			}
