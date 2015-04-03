@@ -79,6 +79,7 @@
 		<!---- LY scripts ---->
 		<script src="settings.js"></script>
 		<script src="helper.js"></script>
+		<script src="skybox.js"></script>
 		<script src="solar_system.js"></script>
 		<script src="stars.js"></script>
 		<script src="named_stars.js"></script>
@@ -117,7 +118,7 @@
 
 		  var mouse = { x: 0, y: 0 }, mouseOnDown = { x: 0, y: 0 };
 		  var rotation = { x: 0.0, y: 0 },
-			  	target = { x: 0.2, y: 0 },
+			  	target = { x: 0.2, y: 0.1 },
 			  	targetOnDown = { x: 0, y: 0 };
 
 		  var distance = initialCameraDistance,
@@ -209,7 +210,7 @@
 
 				composer = new THREE.EffectComposer( renderer, renderTarget );
 
-
+				initSkyBoxEquirec();
 				initSolarSystem();
 				//initStars();
 				initNamedStars();
@@ -261,7 +262,8 @@
 
 				delta = clock.getDelta();
 
-				renderSolarSystem(delta);
+				renderSkybox();
+				renderSolarSystem();
 				starsUpdate();
 
 				//controls.movementSpeed = 0.33 * d;
@@ -286,6 +288,9 @@
 				camera.position.y = distance * Math.sin(rotation.y);
 				camera.position.z = distance * Math.cos(rotation.x) * Math.cos(rotation.y);
 
+				//target.x = 0.2 - ( 1 - initialCameraDistance / distance )/10;
+
+
 				var speedAccel = Math.pow(distance / initialCameraDistance, 1);
 				//var speedAccel = Math.sqrt(distance / initialCameraDistance);
 				zoomSpeed += speedAccel;
@@ -308,6 +313,7 @@
 				effectFXAA.uniforms[ 'resolution' ].value.set( 1 / SCREEN_WIDTH, 1 / SCREEN_HEIGHT );
 
 				solarSystemResize();
+				skyboxResize();
 
 				camera.aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
 				camera.updateProjectionMatrix();

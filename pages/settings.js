@@ -7,3 +7,5 @@ var initialCameraDistance = 63000;
 
 var zoomSpeed = 1000, fastZoomSpeed = 100000, wheelZoomStep = 30,
     fastZoom = false;
+
+var drawSkyBox = true;

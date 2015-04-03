@@ -2,6 +2,8 @@
 var Sun  = {name:"Sun", radius:6.96e3 , rotationSpeed:0.02, distanceFromSun:0};
 
 
+
+
 // shader from https://github.com/dataarts/webgl-globe/blob/master/globe/globe.js
 var Shaders = {
     'earth' : {
@@ -160,8 +162,7 @@ var planets = [
 ];
 
 //Settings
-var drawOrbitCircles = true;
-var drawSkyBox = true;
+var drawOrbitCircles = false;
 var drawLensFlare = true;
 
 var radius = planets[2].radius;
@@ -190,9 +191,6 @@ function initSolarSystem() {
 
   var shader, uniforms, material;
 
-  //if (drawSkyBox) initSkyBox();
-
-  initSkyBoxEquirec();
 
 	//Sun
 	sunPos = earthPos.clone().add(new THREE.Vector3(0, 0, - planets[2].distanceFromSun * globalDistanceScale));
@@ -304,7 +302,7 @@ var earthClouds = THREE.ImageUtils.loadTexture( 'textures/planets/earth_clouds_2
 //////////////////////////////////////////////////////////////
 	var materialNormalMap = new THREE.MeshPhongMaterial( {
 		specular: 0x555555,
-		shininess: 20,
+		shininess: 0,
 		map: THREE.ImageUtils.loadTexture( "textures/planets/earth_color_4096.jpg" ),
 		specularMap: THREE.ImageUtils.loadTexture( "textures/planets/earth_specular_2048.jpg" ),
 		normalMap: THREE.ImageUtils.loadTexture( "textures/planets/earth_normal_2048.jpg" ),
@@ -332,7 +330,7 @@ var earthClouds = THREE.ImageUtils.loadTexture( 'textures/planets/earth_clouds_2
     shader = Shaders['atmosphere'];
     uniforms = THREE.UniformsUtils.clone(shader.uniforms);
 
-    uniforms['texture'].value = THREE.ImageUtils.loadTexture("textures/planets/earth_clouds_2048.png");
+    uniforms['texture'].value = THREE.ImageUtils.loadTexture("textures/planets/earth_clouds_2048_bright.jpg");
 
     material = new THREE.ShaderMaterial({
 
@@ -354,10 +352,10 @@ var earthClouds = THREE.ImageUtils.loadTexture( 'textures/planets/earth_clouds_2
      // night lights
      var materialLights = new THREE.MeshBasicMaterial( {
          map: THREE.ImageUtils.loadTexture( 'textures/planets/earth_lights_4096.jpg' ),
-         color: 'rgba(146, 85, 5, 0.1)',
+         color: 0xe2ba1a,
          blending: THREE.AdditiveBlending,
-         transparent: true,
-         depthTest: false
+         transparent: true
+         //depthTest: false
      } );
      meshLights = new THREE.Mesh( geometryEarth, materialLights );
      meshLights.rotation.z = tilt;
@@ -367,13 +365,14 @@ var earthClouds = THREE.ImageUtils.loadTexture( 'textures/planets/earth_clouds_2
      // clouds
    	geometryClouds = new THREE.SphereGeometry( planets[2].radius*1.02, 100, 50 );
    	var materialClouds = new THREE.MeshPhongMaterial( {
-        map: THREE.ImageUtils.loadTexture( "textures/planets/earth_clouds_2048.png" ),
+        map: THREE.ImageUtils.loadTexture( "textures/planets/earth_clouds_2048_bright.png" ),
         bumpMap: THREE.ImageUtils.loadTexture( "textures/planets/earth_clouds_bump2_2048.png" ),
-        bumpScale: 10,
+        bumpScale: 20,
         color: 0xffffff,
+        shininess: 10,
         //blending: THREE.AdditiveBlending,
-        transparent: true,
-        depthTest: false
+        transparent: true
+        //depthTest: false
    	} );
 
    	meshClouds = new THREE.Mesh( geometryClouds, materialClouds );
@@ -531,7 +530,7 @@ function lensFlareUpdateCallback( object ) {
              //flare.wantedRotation = flare.x * Math.PI * 0.25;
              //flare.rotation += ( flare.wantedRotation - flare.rotation ) * 0.25;
 
-             //flare.scale = 1 / camDistance * 65000;
+             flare.scale = 1 / camDistance * initialCameraDistance;
 
 				}
 
@@ -632,84 +631,6 @@ function OrbitCircle(radius){
 }
 
 
-function initSkyBoxCube(){
-
-	cameraCube = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1e9 );
-	sceneCube = new THREE.Scene();
-
-    var path = "textures/cube/MilkyWay/";
-  	var urls = [ path + "dark-s_px.jpg", path + "dark-s_nx.jpg",
-                path + "dark-s_py.jpg", path + "dark-s_ny.jpg",
-                path + "dark-s_pz.jpg", path + "dark-s_nz.jpg" ];
-
-  	var textureCube = THREE.ImageUtils.loadTextureCube( urls );
-  	textureCube.format = THREE.RGBFormat;
-  	var skyboxShader = THREE.ShaderLib[ "cube" ];
-  	skyboxShader.uniforms[ "tCube" ].value = textureCube;
-
-  	var skyboxMaterial = new THREE.ShaderMaterial( {
-
-  		fragmentShader: skyboxShader.fragmentShader,
-  		vertexShader: skyboxShader.vertexShader,
-  		uniforms: skyboxShader.uniforms,
-  		depthWrite: false,
-  		side: THREE.BackSide
-
-  	} ),
-
-  	mesh = new THREE.Mesh( new THREE.BoxGeometry( 1e5, 1e5, 1e5 ), skyboxMaterial );
-  	sceneCube.add( mesh );
-
-    var skyboxPass = new THREE.RenderPass( sceneCube, cameraCube );
-    composer.addPass( skyboxPass );
-
-}
-
-
-function initSkyBoxEquirec(){
-
-  //var loader = new THREE.DDSLoader();
-  //var textureEquirec = loader.load( 'textures/space/milkyway_eso0932argb.dds' );
-  //var textureEquirec = loader.load( 'textures/space/milkyway_eso0932argb_8bDXT5.dds' );
-  //textureEquirec.anisotropy = 4;
-
-  cameraCube = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1e12 );
-  sceneCube = new THREE.Scene();
-
-  // jpg texture
-  var textureEquirec = THREE.ImageUtils.loadTexture( "textures/space/milkyway_eso0932a.jpg" );
-
-  //textureEquirec.format = THREE.RGBAFormat;
-  textureEquirec.mapping = THREE.EquirectangularReflectionMapping;
-  //textureEquirec.magFilter = THREE.LinearFilter;
-  //textureEquirec.minFilter = THREE.LinearMipMapLinearFilter;
-
-  //var reflect_material = new THREE.MeshBasicMaterial( { color: 0xffffff, envMap: textureEquirec } );
-
-  var equirectShader = THREE.ShaderLib[ "equirect" ];
-  equirectShader.uniforms[ "tEquirect" ].value = textureEquirec;
-
-  var equirectMaterial = new THREE.ShaderMaterial( {
-  	fragmentShader: equirectShader.fragmentShader,
-  	vertexShader: equirectShader.vertexShader,
-  	uniforms: equirectShader.uniforms,
-    blending: THREE.AdditiveBlending,
-    transparent: true,
-  	//depthWrite: false,
-  	side: THREE.BackSide
-  } );
-
-  mesh = new THREE.Mesh( new THREE.BoxGeometry( 1e12, 1e12, 1e12 ), equirectMaterial );
-  //mesh.rotation.set( 0, 0, 0.3 );
-//  mesh.rotation.z = 0.0;
-  mesh.position.applyAxisAngle( axis_z, -45 * Math.PI / 180 );
-  sceneCube.add( mesh );
-
-
-  var skyboxPass = new THREE.RenderPass( sceneCube, cameraCube );
-  composer.addPass( skyboxPass );
-
-}
 
 
 
@@ -722,13 +643,9 @@ function renderSolarSystem() {
   meshLights.rotation.y += rotationSpeed * delta;
 
 
-  if (drawSkyBox) cameraCube.rotation.copy( camera.rotation );
-
 }
 
 function solarSystemResize(){
 
-  cameraCube.aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
-  cameraCube.updateProjectionMatrix();
 
 }
