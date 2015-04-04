@@ -43,7 +43,7 @@ function initSkyBoxEquirec(){
   sceneCube = new THREE.Scene();
 
   // jpg texture
-  var textureEquirec = THREE.ImageUtils.loadTexture( "textures/space/milkyway_eso0932a.jpg" );
+  var textureEquirec = THREE.ImageUtils.loadTexture( "textures/space/stars_skybox_4096.jpg" );
 
   //textureEquirec.format = THREE.RGBAFormat;
   textureEquirec.mapping = THREE.EquirectangularReflectionMapping;
@@ -80,11 +80,19 @@ function initSkyBoxEquirec(){
 
 function renderSkybox() {
 
-	//cameraCube.lookAt( meshEarth.position );
+	//cameraCube.lookAt( new THREE.Vector3( meshEarth.position.x, meshEarth.position.y + distance/10, meshEarth.position.z ) );
 
-  cameraCube.rotation.copy( new THREE.Euler(camera.rotation.x, camera.rotation.y + 1.5*PI, camera.rotation.z + 0.35));
+  cameraCube.rotation.copy( new THREE.Euler(camera.rotation.x,
+                                            camera.rotation.y + 1.5*PI,
+                                            camera.rotation.z + 0.35
+                                            )
+                          );
+
+  cameraCube.fov = 70 + (distance - initialCameraDistance)/1e12;
+
+
   //cameraCube.position.z += distance /1200;
-
+  cameraCube.updateProjectionMatrix();
 
 }
 
