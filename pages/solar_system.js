@@ -1,9 +1,6 @@
 // Sun
 var Sun  = {name:"Sun", radius:6.96e3 , rotationSpeed:0.02, distanceFromSun:0};
 
-
-
-
 // shader from https://github.com/dataarts/webgl-globe/blob/master/globe/globe.js
 var Shaders = {
     'earth' : {
@@ -77,65 +74,7 @@ var Shaders = {
     }
 };
 
-// shader from three.js examples///: webgl_shaders_tonemapping
-var atmoShader = {
-					side: THREE.BackSide,
-					// blending: THREE.AdditiveBlending,
-					transparent: true,
-					lights: true,
-					uniforms: THREE.UniformsUtils.merge( [
 
-						THREE.UniformsLib[ "common" ],
-						THREE.UniformsLib[ "lights" ],
-					] ),
-					vertexShader: [
-						"varying vec3 vViewPosition;",
-						"varying vec3 vNormal;",
-						THREE.ShaderChunk[ "lights_phong_pars_vertex" ],
-						"void main() {",
-					 		THREE.ShaderChunk[ "defaultnormal_vertex" ],
-
-							"	vNormal = normalize( transformedNormal );",
-							"vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
-							"vViewPosition = -mvPosition.xyz;",
-							"gl_Position = projectionMatrix * mvPosition;",
-						"}"
-
-					].join("\n"),
-
-					fragmentShader: [
-
-						THREE.ShaderChunk[ "lights_phong_pars_fragment" ],
-
-						"void main() {",
-							"vec3 normal = normalize( -vNormal );",
-							"vec3 viewPosition = normalize( vViewPosition );",
-							"#if MAX_DIR_LIGHTS > 0",
-
-								"vec3 dirDiffuse = vec3( 0.0 );",
-
-								"for( int i = 0; i < MAX_DIR_LIGHTS; i ++ ) {",
-
-									"vec4 lDirection = viewMatrix * vec4( directionalLightDirection[ i ], 0.0 );",
-									"vec3 dirVector = normalize( lDirection.xyz );",
-									"float dotProduct = dot( viewPosition, dirVector );",
-									"dotProduct = 1.0 * max( dotProduct, 0.0 ) + (1.0 - max( -dot( normal, dirVector ), 0.0 ));",
-									"dotProduct *= dotProduct;",
-									"dirDiffuse += max( 0.5 * dotProduct, 0.0 ) * directionalLightColor[ i ];",
-								"}",
-							"#endif",
-
-							//Fade out atmosphere at edge
-							"float viewDot = abs(dot( normal, viewPosition ));",
-							"viewDot = clamp( pow( viewDot + 0.6, 10.0 ), 0.0, 1.0);",
-
-							"vec3 colour = vec3( 0.05, 0.09, 0.13 ) * dirDiffuse;",
-							"gl_FragColor = vec4( colour, viewDot );",
-
-						"}"
-
-					].join("\n"),
-				};
 
 
 
@@ -192,8 +131,8 @@ function initSolarSystem() {
   var shader, uniforms, material;
 
 
-	//Sun
-	sunPos = earthPos.clone().add(new THREE.Vector3(0, 0, - planets[2].distanceFromSun * globalDistanceScale));
+	//// Sun
+	sunPos = earthPos.clone().add(new THREE.Vector3(0, 0, - planets[2].distanceFromSun * global.DistanceScale));
 	var sunGeometry = new THREE.SphereGeometry( Sun.radius, 100, 50 );
   var sunMaterial = new THREE.MeshPhongMaterial( {
 		map: THREE.ImageUtils.loadTexture( "textures/planets/sun.jpg" ),
@@ -205,101 +144,11 @@ function initSolarSystem() {
 	sunMesh = new THREE.Mesh( sunGeometry, sunMaterial );
 	sunMesh.position.set(sunPos.x, sunPos.y, sunPos.z);
 	//scene.add( sunMesh );
+  if (drawLensFlare) initLensFlare();    // instead of mesh
 
 
+  //// Earth
 
-
-
-
-
-
-	//Earth
-///////////////////////////////////////////////////////////////
-
-
-
-var earthMat = new THREE.MeshPhongMaterial( {
-                                            	color: 0xffffff,
-                                            	shininess: 1
-                                            } );
-
-var earthDiffuse = THREE.ImageUtils.loadTexture( 'textures/planets/earth_atmos_2048.jpg',
-                                                  undefined,
-                                                  function( tex ) {
-                                                  	earthMat.map = tex;
-                                                  	earthMat.needsUpdate = true;
-                                                  } );
-var earthSpecular = THREE.ImageUtils.loadTexture( 'textures/planets/earth_specular_2048.jpg',
-                                                    undefined,
-                                                    function( tex ) {
-                                                    	earthMat.specularMap = tex;
-                                                    	earthMat.needsUpdate = true;
-                                                    } );
-
- var earthNormal = THREE.ImageUtils.loadTexture( 'textures/planets/earth_normal_2048.jpg',
-                                                 undefined,
-                                                 function( tex ) {
-                                                 	//earthMat.normalMap = tex;
-                                                 	//earthMat.needsUpdate = true;
-                                                 } );
-
-var earthLightsMat = new THREE.MeshBasicMaterial( {
-                                                  	color: 0xffffff,
-                                                  	blending: THREE.AdditiveBlending,
-                                                  	transparent: true,
-                                                  	depthTest: false
-                                                  } );
-
-var earthLights = THREE.ImageUtils.loadTexture( 'textures/planets/earth_lights_2048.png',
-                                                undefined,
-                                                function( tex ) {
-                                                	earthLightsMat.map = tex;
-                                                	earthLightsMat.needsUpdate = true;
-                                                } );
-
-var earthCloudsMat = new THREE.MeshLambertMaterial( {
-                                                    	color: 0xffffff,
-                                                    	blending: THREE.NormalBlending,
-                                                    	transparent: true,
-                                                    	depthTest: false
-                                                    } );
-
-var earthClouds = THREE.ImageUtils.loadTexture( 'textures/planets/earth_clouds_2048.png',
-                                                undefined,
-                                                function( tex ) {
-                                                	earthCloudsMat.map = tex;
-                                                	earthCloudsMat.needsUpdate = true;
-                                                } );
-
-
-        var earthGeo = new THREE.SphereGeometry( planets[2].radius, 100, 50 );
-				var sphereMesh = new THREE.Mesh( earthGeo, earthMat );
-				//scene.add( sphereMesh );
-
-				var sphereLightsMesh = new THREE.Mesh( earthGeo, earthLightsMat );
-				//scene.add( sphereLightsMesh );
-
-				var sphereCloudsMesh = new THREE.Mesh( earthGeo, earthCloudsMat );
-				//scene.add( sphereCloudsMesh );
-
-				var sphereAtmoMesh = new THREE.Mesh( earthGeo, earthAtmoMat );
-				sphereAtmoMesh.scale.set( 1.05, 1.05, 1.05 );
-
-         var earthAtmoMat = new THREE.ShaderMaterial( atmoShader );
-        // // var earthMat = new THREE.MeshPhongMaterial( {
-        // //   color: 0xffffff,
-        // //   shininess: 2000
-        // // } );
-         var geometryAtmo = new THREE.SphereGeometry( planets[2].radius*1.05, 100, 50 );
-         var sphereAtmoMesh = new THREE.Mesh( geometryAtmo, earthAtmoMat );
-         sphereAtmoMesh.scale.set( 1.105, 1.105, 1.105 );
-
-         //scene.add( sphereAtmoMesh );
-
-
-
-
-//////////////////////////////////////////////////////////////
 	var materialNormalMap = new THREE.MeshPhongMaterial( {
 		specular: 0x555555,
 		shininess: 0,
@@ -315,14 +164,10 @@ var earthClouds = THREE.ImageUtils.loadTexture( 'textures/planets/earth_clouds_2
 	geometryEarth.computeTangents();
 
 	meshEarth = new THREE.Mesh( geometryEarth, materialNormalMap );
-	//meshEarth.position.set( 0, planets[2].distanceFromSun * globalDistanceScale, 0 );
+	//meshEarth.position.set( 0, planets[2].distanceFromSun * global.DistanceScale, 0 );
 	meshEarth.rotation.y = 0;
 	meshEarth.rotation.z = tilt;
 	scene.add( meshEarth );
-
-////////////////////////////////////////////////////////////////////////////////
-
-
 
 
   // atmosphere fog
@@ -392,7 +237,7 @@ var earthClouds = THREE.ImageUtils.loadTexture( 'textures/planets/earth_clouds_2
 	} );
 
 	meshMoon = new THREE.Mesh( geometryEarth, materialMoon );
-	meshMoon.position.set( 384400 * globalDistanceScale *10, 0 , 0 );
+	meshMoon.position.set( 384400 * global.DistanceScale *10, 0 , 0 );
 	//meshMoon.position.applyAxisAngle( axis_y, -90 * Math.PI / 180 );
 	meshMoon.scale.set( moonScale, moonScale, moonScale );
 	scene.add( meshMoon );
@@ -406,9 +251,6 @@ var earthClouds = THREE.ImageUtils.loadTexture( 'textures/planets/earth_clouds_2
 	//camera.lookAt( meshEarth.position );
 
 	SetLight();
-
-  if (drawLensFlare) initLensFlare();
-
 
 
 	console.log("Init solar system done");
@@ -437,107 +279,109 @@ function SetLight(){
 
 function initLensFlare(){
 
-        // lens flares
+  // lens flares
 
-				var textureFlare_star1 = THREE.ImageUtils.loadTexture( "textures/lensflare/lensflare0_m1.png" ); // star
+	var textureFlare_star1 = THREE.ImageUtils.loadTexture( "textures/lensflare/lensflare0_m1.png" ); // star
 
-				var textureFlare_line1 = THREE.ImageUtils.loadTexture( "textures/lensflare/lensflare2.png" );  // line
-        var textureFlare_line2 = THREE.ImageUtils.loadTexture( "textures/lensflare/lensflare_blue_line_hor.png" );
-        var textureFlare_line3 = THREE.ImageUtils.loadTexture( "textures/lensflare/lensflare_yellow_line_hor.png" );
+	var textureFlare_line1 = THREE.ImageUtils.loadTexture( "textures/lensflare/lensflare2.png" );  // line
+  var textureFlare_line2 = THREE.ImageUtils.loadTexture( "textures/lensflare/lensflare_blue_line_hor.png" );
+  var textureFlare_line3 = THREE.ImageUtils.loadTexture( "textures/lensflare/lensflare_yellow_line_hor.png" );
 
-				var textureFlare_ring1 = THREE.ImageUtils.loadTexture( "textures/lensflare/lensflare3.png" );  // ring
-        var textureFlare_ring2 = THREE.ImageUtils.loadTexture( "textures/lensflare/lensflare4.png" );  // ring
-        var textureFlare_ring3 = THREE.ImageUtils.loadTexture( "textures/lensflare/lensflare5.png" );  // ring
-        var textureFlare_ring4 = THREE.ImageUtils.loadTexture( "textures/lensflare/lensflare6.png" );  // ring
+	var textureFlare_ring1 = THREE.ImageUtils.loadTexture( "textures/lensflare/lensflare3.png" );  // ring
+  var textureFlare_ring2 = THREE.ImageUtils.loadTexture( "textures/lensflare/lensflare4.png" );  // ring
+  var textureFlare_ring3 = THREE.ImageUtils.loadTexture( "textures/lensflare/lensflare5.png" );  // ring
+  var textureFlare_ring4 = THREE.ImageUtils.loadTexture( "textures/lensflare/lensflare6.png" );  // ring
 
-        var pos = sunPos.clone();
+  var pos = sunPos.clone();
 
-				addLight( 0.55, 0.9, 0.5, pos.x, pos.y, pos.z + 60000  );
-				//addLight( 0.08, 0.8, 0.5,    pos.x, pos.y, pos.z + 60000);
-				//addLight( 0.995, 0.5, 0.9, pos.x, pos.y, pos.z + 60000 );
+	addLight( 0.55, 1.0, 0.5, pos.x, pos.y, pos.z + 60000  );
+	//addLight( 0.08, 0.8, 0.5,    pos.x, pos.y, pos.z + 60000);
+	//addLight( 0.995, 0.5, 0.9, pos.x, pos.y, pos.z + 60000 );
 
-				function addLight( h, s, l, x, y, z ) {
+	function addLight( h, s, l, x, y, z ) {
 
-					//var light = new THREE.PointLight( 0xffffff, 1.0, 4500 );
-					//light.color.setHSL( h, s, l );
-					//light.position.set( x, y, z );
-					//scene.add( light );
+		//var light = new THREE.PointLight( 0xffffff, 1.0, 4500 );
+		//light.color.setHSL( h, s, l );
+		//light.position.set( x, y, z );
+		//scene.add( light );
 
-					var flareColor = new THREE.Color( 0xffffff );
-					flareColor.setHSL( h, s, l + 0.5 );
+		var flareColor = new THREE.Color( 0xffffff );
+		flareColor.setHSL( h, s, l + 0.5 );
 
 
-          // LensFlare(texture, size, distance, blending, color)
-					var lensFlare = new THREE.LensFlare( textureFlare_star1, 1024, 0.0, THREE.AdditiveBlending, flareColor );
-					//lensFlare.add( textureFlare_line1, 512, 0.0, THREE.AdditiveBlending );
-          lensFlare.add( textureFlare_line2, 1024, 0.0, THREE.AdditiveBlending );
-          lensFlare.lensFlares[ 1 ].rotation = THREE.Math.degToRad( 0 );
-          lensFlare.add( textureFlare_line3, 1024, 0.0, THREE.AdditiveBlending );
-          lensFlare.lensFlares[ 2 ].rotation = THREE.Math.degToRad( 90 );
+    // LensFlare(texture, size, distance, blending, color)
+		var lensFlare = new THREE.LensFlare( textureFlare_star1, 1024, 0.0, THREE.AdditiveBlending, flareColor );
+		//lensFlare.add( textureFlare_line1, 512, 0.0, THREE.AdditiveBlending );
+    lensFlare.add( textureFlare_line2, 1024, 0.0, THREE.AdditiveBlending );
+    lensFlare.lensFlares[ 1 ].rotation = THREE.Math.degToRad( 0 );
+    lensFlare.add( textureFlare_line3, 1024, 0.0, THREE.AdditiveBlending );
+    lensFlare.lensFlares[ 2 ].rotation = THREE.Math.degToRad( 90 );
 
-					lensFlare.add( textureFlare_ring1, 60, 0.6, THREE.AdditiveBlending );
-					lensFlare.add( textureFlare_ring2, 40, 0.7, THREE.AdditiveBlending );
-					lensFlare.add( textureFlare_ring3, 120, 0.9, THREE.AdditiveBlending );
-					lensFlare.add( textureFlare_ring4, 70, 1.0, THREE.AdditiveBlending );
+		lensFlare.add( textureFlare_ring1, 60, 0.6, THREE.AdditiveBlending );
+		lensFlare.add( textureFlare_ring2, 40, 0.7, THREE.AdditiveBlending );
+		lensFlare.add( textureFlare_ring3, 120, 0.9, THREE.AdditiveBlending );
+		lensFlare.add( textureFlare_ring4, 70, 1.0, THREE.AdditiveBlending );
 
-					lensFlare.customUpdateCallback = lensFlareUpdateCallback;
-					//lensFlare.position.copy( light.position );
-          lensFlare.position.set( x, y, z );
+		lensFlare.customUpdateCallback = lensFlareUpdateCallback;
+		//lensFlare.position.copy( light.position );
+    lensFlare.position.set( x, y, z );
 
-					scene.add( lensFlare );
+		scene.add( lensFlare );
 
-				}
+	}
 
-        function addSpot( h, s, l, x, y, z ) {
-
-          // LensFlare(texture, size, distance, blending, color)
-          var lensFlare = new THREE.LensFlare( textureFlare_star1, 1024, 0.0, THREE.AdditiveBlending, flareColor );
-          lensFlare.add( textureFlare_line1, 512, 0.0, THREE.AdditiveBlending );
-          lensFlare.add( textureFlare_line2, 512, 0.0, THREE.AdditiveBlending );
-          lensFlare.add( textureFlare_line3, 512, 0.0, THREE.AdditiveBlending );
-
-          lensFlare.add( textureFlare_ring1, 60, 0.6, THREE.AdditiveBlending );
-          lensFlare.add( textureFlare_ring2, 40, 0.7, THREE.AdditiveBlending );
-          lensFlare.add( textureFlare_ring3, 120, 0.9, THREE.AdditiveBlending );
-          lensFlare.add( textureFlare_ring4, 70, 1.0, THREE.AdditiveBlending );
-
-          lensFlare.customUpdateCallback = lensFlareUpdateCallback;
-          lensFlare.position.copy( light.position );
-
-          scene.add( lensFlare );
-
-        }
+        // function addSpot( h, s, l, x, y, z ) {
+        //
+        //   // LensFlare(texture, size, distance, blending, color)
+        //   var lensFlare = new THREE.LensFlare( textureFlare_star1, 1024, 0.0, THREE.AdditiveBlending, flareColor );
+        //   lensFlare.add( textureFlare_line1, 512, 0.0, THREE.AdditiveBlending );
+        //   lensFlare.add( textureFlare_line2, 512, 0.0, THREE.AdditiveBlending );
+        //   lensFlare.add( textureFlare_line3, 512, 0.0, THREE.AdditiveBlending );
+        //
+        //   lensFlare.add( textureFlare_ring1, 60, 0.6, THREE.AdditiveBlending );
+        //   lensFlare.add( textureFlare_ring2, 40, 0.7, THREE.AdditiveBlending );
+        //   lensFlare.add( textureFlare_ring3, 120, 0.9, THREE.AdditiveBlending );
+        //   lensFlare.add( textureFlare_ring4, 70, 1.0, THREE.AdditiveBlending );
+        //
+        //   lensFlare.customUpdateCallback = lensFlareUpdateCallbackSpot;
+        //   lensFlare.position.copy( light.position );
+        //
+        //   scene.add( lensFlare );
+        //
+        // }
 }
+
 function lensFlareUpdateCallback( object ) {
 
-				var f, fl = object.lensFlares.length;
-				var flare;
-				var vecX = -object.positionScreen.x * 2;
-				var vecY = -object.positionScreen.y * 2;
+  var f, fl = object.lensFlares.length;
+	var flare;
+	var vecX = -object.positionScreen.x * 2;
+	var vecY = -object.positionScreen.y * 2;
 
-        var camDistance = camera.position.length();
+  var camDistance = camera.position.length();
 
+	for( f = 0; f < fl; f++ ) {
 
-				for( f = 0; f < fl; f++ ) {
+		   flare = object.lensFlares[ f ];
 
-					   flare = object.lensFlares[ f ];
+		   flare.x = object.positionScreen.x + vecX * flare.distance;
+		   flare.y = object.positionScreen.y + vecY * flare.distance;
 
-					   flare.x = object.positionScreen.x + vecX * flare.distance;
-					   flare.y = object.positionScreen.y + vecY * flare.distance;
+		   //flare.rotation = 0;
 
-					   //flare.rotation = 0;
+       //flare.wantedRotation = flare.x * Math.PI * 0.25;
+       //flare.rotation += ( flare.wantedRotation - flare.rotation ) * 0.25;
 
-             //flare.wantedRotation = flare.x * Math.PI * 0.25;
-             //flare.rotation += ( flare.wantedRotation - flare.rotation ) * 0.25;
+       //flare.scale = 1 / Math.sqrt(distance) * 300;
+       flare.scale = 1 / Math.pow(distance, 1/3) * 100;
+       //flare.scale = 0.0;
+       //console.log(flare.scale);
+	}
 
-             flare.scale = 1 / camDistance * initialCameraDistance;
+	//object.lensFlares[ 2 ].y += 0.025;
+	//object.lensFlares[ 3 ].rotation = object.positionScreen.x * 0.5 + THREE.Math.degToRad( 45 );
 
-				}
-
-				//object.lensFlares[ 2 ].y += 0.025;
-				//object.lensFlares[ 3 ].rotation = object.positionScreen.x * 0.5 + THREE.Math.degToRad( 45 );
-
-			}
+}
 
 
 
@@ -558,26 +402,29 @@ function initPlanets(){
 				//normalScale: new THREE.Vector2( 0.5, 0.5 )
 			} );
 
-			var geometry = new THREE.SphereGeometry( planet.radius * globalObjScale , 60, 30 );
+			var geometry = new THREE.SphereGeometry( planet.radius * global.ObjScale , 60, 30 );
 			//geometry.computeTangents();
 
-			var meshPlanet = new THREE.Mesh( geometry, material);
+      planet.mesh = new THREE.Mesh( geometry, material);
 
-			var relativePos = new THREE.Vector3( 0, 0 , planet.distanceFromSun * globalDistanceScale );
+			var relativePos = new THREE.Vector3( 0, 0 , planet.distanceFromSun * global.DistanceScale );
 			var posFromSun = sunMesh.position.clone().add(relativePos);
-			meshPlanet.position.set(posFromSun.x, posFromSun.y, posFromSun.z);
+      planet.mesh.position.set(posFromSun.x, posFromSun.y, posFromSun.z);
 
 			//meshMoon.position.applyAxisAngle( axis_y, -90 * Math.PI / 180 );
 			//meshMoon.scale.set( moonScale, moonScale, moonScale );
 
 			//meshPlanet.rotation.y = 0;
-			meshPlanet.rotation.z = planet.tilt;
-			scene.add( meshPlanet );
+      planet.mesh.rotation.z = planet.tilt;
+
+      planets[i] = planet;
+
+			scene.add( planets[i].mesh );
 
 		}
 
 		if (drawOrbitCircles){
-			OrbitCircle( planet.distanceFromSun * globalDistanceScale );
+			OrbitCircle( planet.distanceFromSun * global.DistanceScale );
 		}
 
 	}
@@ -642,6 +489,21 @@ function renderSolarSystem() {
 	meshClouds.rotation.y += 0.90 * rotationSpeed * delta;
   meshLights.rotation.y += rotationSpeed * delta;
 
+  for ( var i = 3; i < planets.length ; i ++ ) {
+
+    //if (i != 2){		// skip Earth
+
+      var deltaZ = planets[i].mesh.position.z - camera.position.z;
+      if (deltaZ < 60000) {
+
+        //planets[i].mesh.position.x += ((camera.position.x - planets[i].radius) - planets[i].mesh.position.x) * 0.03;
+        planets[i].mesh.position.x = camera.position.x - planets[i].radius + deltaZ/10;
+        planets[i].mesh.position.y = camera.position.y - planets[i].radius + deltaZ/10;
+      }
+
+
+    //}
+  }
 
 }
 

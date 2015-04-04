@@ -3,8 +3,8 @@
 var stars = [];
 var show_amount = 716;
 var isHideDwarfs = true;
-var DistanceScale = globalDistanceScale * LY;
-var maxFlareRange = globalDistanceScale * 149.5e6 * 30;  //30AU, Pluto orbit distance
+var DistanceScale = global.DistanceScale * LY;
+var maxFlareRange = global.DistanceScale * 149.5e6 * 30;  //30AU, Pluto orbit distance
 
 var textureFlare_star1 = THREE.ImageUtils.loadTexture( "textures/lensflare/lensflare_star1.png" ); // star
 
@@ -65,7 +65,7 @@ function initStarBody(star){
 	star.body.add( textureFlare_ring3, 120, 0.9, THREE.AdditiveBlending, color );
 	star.body.add( textureFlare_ring4, 70, 1.0, THREE.AdditiveBlending, color );
 
-	star.body.customUpdateCallback = lensFlareUpdateCallback;
+	star.body.customUpdateCallback = lensFlareUpdateCallbackStars;
 	star.body.position.copy( star.position );
 
 }
@@ -97,7 +97,7 @@ function initNamedStars() {
 
 }
 
-function lensFlareUpdateCallback( object ) {
+function lensFlareUpdateCallbackStars( object ) {
 
 	var f, fl = object.lensFlares.length;
 	var flare;

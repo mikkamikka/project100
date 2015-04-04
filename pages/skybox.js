@@ -82,7 +82,7 @@ function renderSkybox() {
 
 	//cameraCube.lookAt( meshEarth.position );
 
-  cameraCube.rotation.copy( new THREE.Euler(camera.rotation.x, camera.rotation.y + 1.5*PI, camera.rotation.z + 0.35 ));
+  cameraCube.rotation.copy( new THREE.Euler(camera.rotation.x, camera.rotation.y + 1.5*PI, camera.rotation.z + 0.35));
   //cameraCube.position.z += distance /1200;
 
 

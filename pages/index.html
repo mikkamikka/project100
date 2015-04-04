@@ -39,13 +39,13 @@
 			}
 			#button_reset {
 				position: absolute;
-				top: 20px;
-				right: 20px;
-				padding: 8px;
+				bottom:10px;
+				left: 10px;
+				padding: 4px;
 				color: #fff;
 				background-color: #555;
 				opacity: 0.5;
-				z-index: 10;
+				z-index: 100;
 			}
 			#button_reset:hover {
 				cursor: pointer;
@@ -74,6 +74,7 @@
 
 		<script src="js/Detector.js"></script>
 		<script src="js/libs/stats.min.js"></script>
+		<script src="js/libs/dat.gui.min.js"></script>
 		<script src="js/loaders/DDSLoader.js"></script>
 
 		<!---- LY scripts ---->
@@ -128,7 +129,7 @@
 
 			var OutDistance, ResetButton;					// UI
 
-
+			var gui = null;
 
 			init();
 			animate();
@@ -184,6 +185,8 @@
 				stats.domElement.style.top = '0px';
 				stats.domElement.style.zIndex = 100;
 				container.appendChild( stats.domElement );
+
+			//	if (debug) initGUI();
 
 				window.addEventListener( 'resize', onWindowResize, false );
 
@@ -277,12 +280,19 @@
 
 			function updateCamera(){
 
-				zoom(curZoomSpeed);
+				//if (distance - delta > minCameraDistance && distance + delta < maxCameraDistance){
+				if (distance + (distanceTarget - distance) * 0.3> minCameraDistance && distance  < maxCameraDistance){
+					zoom(curZoomSpeed);
 
-				rotation.x += (target.x - rotation.x) * 0.1;
-				rotation.y += (target.y - rotation.y) * 0.1;
+					rotation.x += (target.x - rotation.x) * 0.1;
+					rotation.y += (target.y - rotation.y) * 0.1;
 
-				distance += (distanceTarget - distance) * 0.3;
+
+					distance += (distanceTarget - distance) * 0.1;
+
+				}
+
+
 
 				camera.position.x = distance * Math.sin(rotation.x) * Math.cos(rotation.y);
 				camera.position.y = distance * Math.sin(rotation.y);
@@ -297,9 +307,21 @@
 				fastZoomSpeed += speedAccel;
 				//wheelZoomStep += speedAccel/10;
 
+
+
 				camera.lookAt(new THREE.Vector3(earthPos.x, earthPos.y, earthPos.z - 35000));
 
 			};
+
+
+			function initGUI(){
+
+				gui = new dat.GUI();
+				//var guiContainer = document.getElementById('gui');
+			  //guiContainer.appendChild(gui.domElement);
+				gui.add(global, 'DistanceScale').min(0.001).max(1.0).step(0.01);
+
+			}
 
 
 			//Event handlers
@@ -354,11 +376,11 @@
 
 				var zoomDamp = 0.6;
 
-				target.x = targetOnDown.x + (mouse.x - mouseOnDown.x) * 0.0005 * zoomDamp;
-				target.y = targetOnDown.y + (mouse.y - mouseOnDown.y) * 0.0005 * zoomDamp;
+				//target.x = targetOnDown.x + (mouse.x - mouseOnDown.x) * 0.0005 * zoomDamp;
+				//target.y = targetOnDown.y + (mouse.y - mouseOnDown.y) * 0.0005 * zoomDamp;
 
-				target.y = target.y > PI_HALF ? PI_HALF : target.y;
-				target.y = target.y < - PI_HALF ? - PI_HALF : target.y;
+				//target.y = target.y > PI_HALF ? PI_HALF : target.y;
+				//target.y = target.y < - PI_HALF ? - PI_HALF : target.y;
 			}
 
 			function onMouseUp(event) {
@@ -384,7 +406,10 @@
 			}
 
 			function zoom(delta) {
-				distanceTarget -= delta;
+
+			//	if (distance - delta > minCameraDistance && distance + delta < maxCameraDistance){
+					distanceTarget -= delta;
+			//	}
 				//distanceTarget = distanceTarget > 1000 ? 1000 : distanceTarget;
 				//distanceTarget = distanceTarget < 350 ? 350 : distanceTarget;
 			}
@@ -400,7 +425,7 @@
 						zoom(-100);
 						event.preventDefault();
 						break;
-					case 17:
+					case 17:                  // Ctrl key
 						fastZoom = true;
 						event.preventDefault();
 						break;
