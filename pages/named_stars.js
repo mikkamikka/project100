@@ -3,8 +3,11 @@
 var stars = [];
 var show_amount = 716;
 var isHideDwarfs = true;
-var DistanceScale = global.DistanceScale * LY;
-var maxFlareRange = global.DistanceScale * 149.5e6 * 30;  //30AU, Pluto orbit distance
+var DistanceScale = global.DistanceScale * LY /10;
+var maxFlareRange = global.DistanceScale * 149.5e6 * 3000;  //30AU, Pluto orbit distance
+var maxFlareRangeLY = kmToLY(maxFlareRange);
+if (debug) console.log('maxFlareRange, light years: ' + maxFlareRangeLY);
+//var maxFlareRange = 400000000;
 
 var textureFlare_star1 = THREE.ImageUtils.loadTexture( "textures/lensflare/lensflare_star1.png" ); // star
 
@@ -74,7 +77,7 @@ function initNamedStars() {
 
 	//init_object_points(100, false, true);
 
-	for ( var i = 0; i < show_amount; i ++ ) {
+	for ( var i = 1; i < show_amount; i ++ ) {
 
 		if (i >= star_init_list.length) break;
 		if (isHideDwarfs && (star_init_list[i].starName.charAt(0) == "M")) continue; //Hide M-type stars
@@ -95,6 +98,7 @@ function initNamedStars() {
 
 	}
 
+	console.log("Init stars done");
 }
 
 function lensFlareUpdateCallbackStars( object ) {

@@ -128,7 +128,7 @@ var axis_z = new THREE.Vector3( 0, 0, 1 );
 
 function initSolarSystem() {
 
-  var shader, uniforms, material;
+  var shader, uniforms;
 
 
 	//// Sun
@@ -144,7 +144,7 @@ function initSolarSystem() {
 	sunMesh = new THREE.Mesh( sunGeometry, sunMaterial );
 	sunMesh.position.set(sunPos.x, sunPos.y, sunPos.z);
 	//scene.add( sunMesh );
-  if (drawLensFlare) initLensFlare();    // instead of mesh
+  //if (drawLensFlare) initLensFlare();    // instead of mesh
 
 
   //// Earth
@@ -177,7 +177,7 @@ function initSolarSystem() {
 
     uniforms['texture'].value = THREE.ImageUtils.loadTexture("textures/planets/earth_clouds_2048_bright.jpg");
 
-    material = new THREE.ShaderMaterial({
+    var atmoMaterial = new THREE.ShaderMaterial({
 
       uniforms: uniforms,
       vertexShader: shader.vertexShader,
@@ -189,9 +189,9 @@ function initSolarSystem() {
     });
 
      var geometryAtmo = new THREE.SphereGeometry( planets[2].radius*1.04, 100, 50 );
-     var sphereAtmoMesh = new THREE.Mesh( geometryAtmo, material );
+     var sphereAtmoMesh = new THREE.Mesh( geometryAtmo, atmoMaterial );
      //sphereAtmoMesh.scale.set( 1.0, 1.0, 1.0 );
-     scene.add( sphereAtmoMesh );
+     //scene.add( sphereAtmoMesh );
 
 
      // night lights
@@ -204,7 +204,7 @@ function initSolarSystem() {
      } );
      meshLights = new THREE.Mesh( geometryEarth, materialLights );
      meshLights.rotation.z = tilt;
-     scene.add( meshLights );
+     //scene.add( meshLights );
 
 
      // clouds
@@ -224,7 +224,7 @@ function initSolarSystem() {
    	meshClouds.scale.set( cloudsScale, cloudsScale, cloudsScale );
    	//meshClouds.position.set( meshEarth.position );
    	meshClouds.rotation.z = tilt;
-   	scene.add( meshClouds );
+   	//scene.add( meshClouds );
 
 
 
@@ -261,19 +261,21 @@ function SetLight(){
 
 	dirLight = new THREE.DirectionalLight( 0xffffff , 0.5, 0);
 	dirLight.position.set( sunPos.x, sunPos.y, sunPos.z );
+  dirLight.castShadow = false;
 	scene.add( dirLight );
 
 	var pLight = new THREE.PointLight( 0xffffff , 1.1, 0);
 	pLight.position.set( sunPos.x, sunPos.y, sunPos.z );
+  pLight.castShadow = false;
 	scene.add( pLight );
 
-	hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.1 );
+	hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, ambientLightIntensity );
 	hemiLight.color.setHSL( 0.6, 1, 0.6 );
 	hemiLight.groundColor.setHSL( 0.095, 1, 0.75 );
-	hemiLight.position.set( 0, 5000, 0 );
-//	scene.add( hemiLight );
+	hemiLight.position.set( 0, 1000, 0 );
+	scene.add( hemiLight );
 
-  scene.add( new THREE.AmbientLight( 0x101010 ) );
+  //scene.add( new THREE.AmbientLight( 0x101010 ) );
 
 }
 
@@ -310,15 +312,15 @@ function initLensFlare(){
 
 
     // LensFlare(texture, size, distance, blending, color)
-		var lensFlare = new THREE.LensFlare( textureFlare_star1, 1024, 0.0, THREE.AdditiveBlending, flareColor );
+		var lensFlare = new THREE.LensFlare( textureFlare_star1, 512, 0.0, THREE.AdditiveBlending, flareColor );
 		//lensFlare.add( textureFlare_line1, 512, 0.0, THREE.AdditiveBlending );
-    lensFlare.add( textureFlare_line2, 1024, 0.0, THREE.AdditiveBlending );
+    lensFlare.add( textureFlare_line2, 512, 0.0, THREE.AdditiveBlending );
     lensFlare.lensFlares[ 1 ].rotation = THREE.Math.degToRad( 0 );
     lensFlare.add( textureFlare_line3, 1024, 0.0, THREE.AdditiveBlending );
     lensFlare.lensFlares[ 2 ].rotation = THREE.Math.degToRad( 90 );
 
-		lensFlare.add( textureFlare_ring1, 60, 0.6, THREE.AdditiveBlending );
-		lensFlare.add( textureFlare_ring2, 40, 0.7, THREE.AdditiveBlending );
+		lensFlare.add( textureFlare_ring1, 60, 0.8, THREE.AdditiveBlending );
+		lensFlare.add( textureFlare_ring2, 40, 0.85, THREE.AdditiveBlending );
 		lensFlare.add( textureFlare_ring3, 120, 0.9, THREE.AdditiveBlending );
 		lensFlare.add( textureFlare_ring4, 70, 1.0, THREE.AdditiveBlending );
 
@@ -493,13 +495,25 @@ function renderSolarSystem() {
 
     //if (i != 2){		// skip Earth
 
-      var deltaZ = planets[i].mesh.position.z - camera.position.z;
-      if (deltaZ < 60000) {
+      var deltaZ = planets[i].mesh.position.z - camera.position.z;    // planet's approximation to camera
 
-        //planets[i].mesh.position.x += ((camera.position.x - planets[i].radius) - planets[i].mesh.position.x) * 0.03;
-        planets[i].mesh.position.x = camera.position.x - planets[i].radius + deltaZ/10;
-        planets[i].mesh.position.y = camera.position.y - planets[i].radius + deltaZ/10;
+      if (Math.abs(deltaZ) < 60000) {  // is within approximation range
+
+        if ( deltaZ < 0 ){    // is in front of the camera
+          //planets[i].mesh.position.x =  planets[i].mesh.position.x - 1.0;
+        }
+        else {                // is behind of the camera
+
+          //planets[i].mesh.position.x += ((camera.position.x - planets[i].radius) - planets[i].mesh.position.x) * 0.03;
+          planets[i].mesh.position.x = camera.position.x - planets[i].radius; // - deltaZ;
+          planets[i].mesh.position.y = camera.position.y - planets[i].radius + deltaZ/10;
+
+        }
+
       }
+
+      planets[i].mesh.position.x += (0 - planets[i].mesh.position.x) * 0.0001;
+
 
 
     //}
