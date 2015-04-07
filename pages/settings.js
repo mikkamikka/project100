@@ -20,10 +20,10 @@ var zoomSpeed = 1000, fastZoomSpeed = zoomSpeed * 100,
 
 var cameraZoomDamp = 0.05;
 
-var allowCameraLookAround = true;
+var allowCameraLookAround = false;
 
 var drawSkyBox = true;
 
-var ambientLightIntensity = 0.4;
+var ambientLightIntensity = 0.2;
 
 var debug = true;

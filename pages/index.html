@@ -184,8 +184,9 @@
 				renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
 				//renderer.sortObjects = false;
 				//renderer.setFaceCulling( THREE.CullFaceNone );
-				//renderer.gammaInput = true;
-				//renderer.gammaOutput = true;
+
+				renderer.gammaInput = false;
+				renderer.gammaOutput = false;
 
 				renderer.autoClear = false;
 
@@ -345,6 +346,11 @@
 					ambientLightIntensity = value;
 					hemiLight.intensity = value;
 				});;
+
+				// gui.add(renderer, 'gammaInput').onChange(function(value) {
+				// 	alert(value);
+				// 	renderer.gammaInput = value;
+				// });
 			}
 
 

@@ -141,23 +141,25 @@ function initSolarSystem() {
         emissive: "rgb(100,100,100)"
 		//shininess: 30
 	} );
+
 	sunMesh = new THREE.Mesh( sunGeometry, sunMaterial );
 	sunMesh.position.set(sunPos.x, sunPos.y, sunPos.z);
+
 	//scene.add( sunMesh );
-  //if (drawLensFlare) initLensFlare();    // instead of mesh
+  if (drawLensFlare) initLensFlare();    // instead of mesh
 
 
   //// Earth
 
 	var materialNormalMap = new THREE.MeshPhongMaterial( {
 		specular: 0x555555,
-		shininess: 0,
+		shininess: 10,
 		map: THREE.ImageUtils.loadTexture( "textures/planets/earth_color_4096.jpg" ),
 		specularMap: THREE.ImageUtils.loadTexture( "textures/planets/earth_specular_2048.jpg" ),
 		normalMap: THREE.ImageUtils.loadTexture( "textures/planets/earth_normal_2048.jpg" ),
-		normalScale: new THREE.Vector2( 0.5, 0.5 ),
-    blending: THREE.AdditiveBlending,
-    transparent: false
+		normalScale: new THREE.Vector2( 0.5, 0.5 )
+    //blending: THREE.NormalBlending,
+
 	} );
 
 	geometryEarth = new THREE.SphereGeometry( planets[2].radius, 100, 50 );
@@ -191,7 +193,7 @@ function initSolarSystem() {
      var geometryAtmo = new THREE.SphereGeometry( planets[2].radius*1.04, 100, 50 );
      var sphereAtmoMesh = new THREE.Mesh( geometryAtmo, atmoMaterial );
      //sphereAtmoMesh.scale.set( 1.0, 1.0, 1.0 );
-     //scene.add( sphereAtmoMesh );
+     scene.add( sphereAtmoMesh );
 
 
      // night lights
@@ -204,7 +206,7 @@ function initSolarSystem() {
      } );
      meshLights = new THREE.Mesh( geometryEarth, materialLights );
      meshLights.rotation.z = tilt;
-     //scene.add( meshLights );
+     scene.add( meshLights );
 
 
      // clouds
@@ -224,7 +226,7 @@ function initSolarSystem() {
    	meshClouds.scale.set( cloudsScale, cloudsScale, cloudsScale );
    	//meshClouds.position.set( meshEarth.position );
    	meshClouds.rotation.z = tilt;
-   	//scene.add( meshClouds );
+   	scene.add( meshClouds );
 
 
 
@@ -272,7 +274,7 @@ function SetLight(){
 	hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, ambientLightIntensity );
 	hemiLight.color.setHSL( 0.6, 1, 0.6 );
 	hemiLight.groundColor.setHSL( 0.095, 1, 0.75 );
-	hemiLight.position.set( 0, 1000, 0 );
+	hemiLight.position.set( 0, 10000, 0 );
 	scene.add( hemiLight );
 
   //scene.add( new THREE.AmbientLight( 0x101010 ) );
@@ -487,10 +489,14 @@ function renderSolarSystem() {
 
 	//camera.lookAt( meshEarth.position );
 
+
+  // Earth update
 	meshEarth.rotation.y += rotationSpeed * delta;
 	meshClouds.rotation.y += 0.90 * rotationSpeed * delta;
   meshLights.rotation.y += rotationSpeed * delta;
 
+
+  // planets update
   for ( var i = 3; i < planets.length ; i ++ ) {
 
     //if (i != 2){		// skip Earth
@@ -502,18 +508,21 @@ function renderSolarSystem() {
         if ( deltaZ < 0 ){    // is in front of the camera
           //planets[i].mesh.position.x =  planets[i].mesh.position.x - 1.0;
         }
-        else {                // is behind of the camera
+        else {                // is behind the camera
 
           //planets[i].mesh.position.x += ((camera.position.x - planets[i].radius) - planets[i].mesh.position.x) * 0.03;
-          planets[i].mesh.position.x = camera.position.x - planets[i].radius; // - deltaZ;
-          planets[i].mesh.position.y = camera.position.y - planets[i].radius + deltaZ/10;
+          planets[i].mesh.position.x = camera.position.x - planets[i].radius/1.5; // - deltaZ;
+          planets[i].mesh.position.y = camera.position.y - planets[i].radius/1.5 + deltaZ/10;
 
         }
 
       }
 
-      planets[i].mesh.position.x += (0 - planets[i].mesh.position.x) * 0.0001;
+      // move planet along its orbit
+      planets[i].mesh.position.x += (0 - planets[i].mesh.position.x) * 0.000005;
 
+      //rotate planets around its poles axis
+      planets[i].mesh.rotation.y += planets[i].rotationSpeed * delta /2;
 
 
     //}
