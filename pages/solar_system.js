@@ -252,7 +252,7 @@ function initSolarSystem() {
 
 function SetLight(){
 
-	dirLight = new THREE.DirectionalLight( 0xffffff , 0.5, 0);
+	dirLight = new THREE.DirectionalLight( 0xffffff , 0.5, 0 );
 	dirLight.position.set( sunPos.x, sunPos.y, sunPos.z );
   dirLight.castShadow = false;
 	scene.add( dirLight );
@@ -269,6 +269,12 @@ function SetLight(){
 	scene.add( hemiLight );
 
   //scene.add( new THREE.AmbientLight( 0x101010 ) );
+
+  // makeup light
+  makeupLight = new THREE.DirectionalLight( 0xffffff, 1 );
+  makeupLight.position.set( 1, 0.25, -0.5 );
+	scene.add( makeupLight );
+
 
 }
 
