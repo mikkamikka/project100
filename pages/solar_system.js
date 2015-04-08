@@ -74,10 +74,6 @@ var Shaders = {
     }
 };
 
-
-
-
-
 // Planets
 var planets = [
 	{name:"mercury", radius:2435, rotationSpeed:0.02, tilt:0.0, distanceFromSun:58e6,
@@ -122,14 +118,9 @@ var cameraCube, sceneCube;
 
 var earthPos = new THREE.Vector3(); // center of coords
 
-var axis_x = new THREE.Vector3( 1, 0, 0 );
-var axis_y = new THREE.Vector3( 0, 1, 0 );
-var axis_z = new THREE.Vector3( 0, 0, 1 );
-
 function initSolarSystem() {
 
   var shader, uniforms;
-
 
 	//// Sun
 	sunPos = earthPos.clone().add(new THREE.Vector3(0, 0, - planets[2].distanceFromSun * global.DistanceScale));

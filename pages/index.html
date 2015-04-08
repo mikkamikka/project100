@@ -84,6 +84,7 @@
 		<script src="js/libs/stats.min.js"></script>
 		<script src="js/libs/dat.gui.min.js"></script>
 		<script src="js/loaders/DDSLoader.js"></script>
+		<script src="js/shaders/NormalDisplacementShader.js"></script>
 
 		<!---- LY scripts ---->
 		<script src="settings.js"></script>
@@ -94,6 +95,7 @@
 		<script src="named_stars.js"></script>
 		<script src="data/stars_named.json.js"></script>
 		<script src="data/stars_all.json.js"></script>
+		<script src="asteroids.js"></script>
 
 	</head>
 
@@ -164,7 +166,7 @@
 				//camera.position.z = 63000;
 
 				scene = new THREE.Scene();
-				scene.fog = new THREE.FogExp2( 0x000000, 0.00000025 );
+				//scene.fog = new THREE.FogExp2( 0x555555, 0.0000025 );
 
 
 				//controls = new THREE.FlyControls( camera );
@@ -227,6 +229,7 @@
 				initSolarSystem();
 				//initStars();
 				initNamedStars();
+				initAsteroids();
 
 
 				composer.addPass( scenePass );
@@ -285,6 +288,7 @@
 				renderSkybox();
 				renderSolarSystem();
 				starsUpdate();
+				asteroidsUpdate();
 
 				//controls.movementSpeed = 0.33 * d;
 				//controls.update( delta );
