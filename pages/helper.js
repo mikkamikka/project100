@@ -10,6 +10,32 @@ function lyToKM ( ly ) {
 
 }
 
+function auToKM ( au ) {
+
+  return au * 149597870.700;
+
+}
+
+function kmToAU ( km ) {
+
+  return km / 149597870.700;
+
+}
+
+function auToLY ( au ) {
+
+  return au * 15.812507e-6;
+
+}
+
+function lyToAU ( ly ) {
+
+  return ly / 15.812507e-6;
+
+}
+
+//// 100 light years is 6 323 911 AU (astronomical units)
+
 var PI = Math.PI;
 var PI_HALF = Math.PI / 2;
 

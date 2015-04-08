@@ -136,7 +136,8 @@
 			  	targetOnDown = { x: 0, y: 0 };
 
 		  var distance = initialCameraDistance,
-					distanceTarget = initialCameraDistance;
+					distanceTarget = initialCameraDistance,
+					realDistanceKM;
 
 			var curZoomSpeed = 0;
 
@@ -167,7 +168,6 @@
 
 				scene = new THREE.Scene();
 				//scene.fog = new THREE.FogExp2( 0x555555, 0.0000025 );
-
 
 				//controls = new THREE.FlyControls( camera );
 				//controls = new THREE.OrbitControls( camera );
@@ -271,9 +271,10 @@
 				render();
 				stats.update();
 
+				realDistanceKM = Math.round(distance) / global.DistanceScale;
 				//OutDistance.innerHTML = "Distance from Earth: " + camera.position.distanceTo(earthPos);
-				OutDistance.innerHTML = "Distance from Earth: " + Math.round(distance) + " km   /   "
-																+ kmToLY(distance).toPrecision(3) + " light years";
+				OutDistance.innerHTML = "Distance from Earth: " + realDistanceKM + " km   /   "
+																+ kmToLY(realDistanceKM).toPrecision(3) + " light years";
 
 			};
 

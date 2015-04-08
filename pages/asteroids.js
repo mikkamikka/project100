@@ -67,7 +67,7 @@ function createAsteroid ( x, y, z , scale, variation, deform_scale ){
   //uniforms[ "tAO" ].value = THREE.ImageUtils.loadTexture( "textures/asteroids/noise_ao.jpg" );
 
   uniforms[ "tDisplacement" ].value = THREE.ImageUtils.loadTexture( "textures/asteroids/roid_displ" + variation + ".jpg" );
-  uniforms[ "uDisplacementBias" ].value =  0.428408;
+  uniforms[ "uDisplacementBias" ].value = 0; // 0.428408;
   uniforms[ "uDisplacementScale" ].value = radius * deform_scale;
 
   uniforms[ "uNormalScale" ].value.y = 0.1;
