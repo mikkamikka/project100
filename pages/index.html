@@ -131,8 +131,10 @@
 			var delta;
 
 		  var mouse = { x: 0, y: 0 }, mouseOnDown = { x: 0, y: 0 };
-		  var rotation = { x: 0.0, y: 0 },
-			  	target = { x: 0.2, y: 0.1 },
+
+			// camera initial settings
+		  var rotation = { x: 0.0, y: 0.0 },
+			  	target = { x: 0.0, y: 0.0 },
 			  	targetOnDown = { x: 0, y: 0 };
 
 		  var distance = initialCameraDistance,
@@ -302,8 +304,9 @@
 
 			function updateCamera(){
 
-				//if (distance - delta > minCameraDistance && distance + delta < maxCameraDistance){
-				if (distance + (distanceTarget - distance) * 0.3> minCameraDistance && distance  < maxCameraDistance){
+				////if (distance - delta > minCameraDistance && distance + delta < maxCameraDistance){
+				//if (distance + (distanceTarget - distance) * 0.3> minCameraDistance && distance  < maxCameraDistance)
+				{
 					zoom(curZoomSpeed);
 
 					rotation.x += (target.x - rotation.x) * 0.1;
@@ -332,7 +335,7 @@
 
 
 
-				camera.lookAt(new THREE.Vector3(earthPos.x, earthPos.y, earthPos.z - 35000));
+				camera.lookAt(new THREE.Vector3( earthPos.x, earthPos.y, earthPos.z ));
 
 			};
 
