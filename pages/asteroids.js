@@ -214,9 +214,9 @@ function createPointClouds ( centerPos, distribution, numParticles, maxSize ){
 	var particles = [], geometries = [], materials = [], parameters, i, j, h, color, sprite = [], size;
 
 
-	sprite[0] = THREE.ImageUtils.loadTexture( "textures/asteroids/stone1.png" );
-	sprite[1] = THREE.ImageUtils.loadTexture( "textures/asteroids/stone2.png" );
-	sprite[2] = THREE.ImageUtils.loadTexture( "textures/asteroids/stone2.png" );
+	sprite[0] = THREE.ImageUtils.loadTexture( "textures/asteroids/stone3.png" );
+	sprite[1] = THREE.ImageUtils.loadTexture( "textures/asteroids/stone3.png" );
+	sprite[2] = THREE.ImageUtils.loadTexture( "textures/asteroids/stone3.png" );
 	sprite[3] = THREE.ImageUtils.loadTexture( "textures/asteroids/stone2.png" );
 	sprite[4] = THREE.ImageUtils.loadTexture( "textures/asteroids/stone2.png" );
 
@@ -249,13 +249,13 @@ function createPointClouds ( centerPos, distribution, numParticles, maxSize ){
 		materials[i] = new THREE.PointCloudMaterial( {
 															size: size,
 															map: sprite[i],
-															blending: THREE.AdditiveBlending,
-															depthTest: false,
+															blending: THREE.NormalBlending,
+															depthTest: true,
 															transparent : true
 														} );
 		//materials[i].color.setHSL( color[0], color[1], color[2] );
 
-		materials[i].color.setHex ( 0x666666 );
+		materials[i].color.setHex ( 0x888888 );
 
 
 		var point_cloud = new THREE.PointCloud( geometries[i], materials[i] );

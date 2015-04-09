@@ -61,8 +61,8 @@ function initSkyBoxEquirec(){
   	fragmentShader: equirectShader.fragmentShader,
   	vertexShader: equirectShader.vertexShader,
   	uniforms: equirectShader.uniforms,
-    blending: THREE.AdditiveBlending,
-    transparent: true,
+    //blending: THREE.AdditiveBlending,
+    //transparent: true,
     //color: 0x797979,
   	//depthWrite: false,
   	side: THREE.BackSide
