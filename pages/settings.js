@@ -10,15 +10,16 @@ var Global = function(){
 var global = new Global();
 
 
-var initialCameraDistance = 35000;// * global.DistanceScale,
+var initialCameraDistance = 45000;// * global.DistanceScale,
     minCameraDistance = 30000;// * global.DistanceScale,
-    maxCameraDistance = 9.460731e12 * 100 ;
+    maxCameraDistance = 9.460731e12 * 100,
+    initialCameraFOV = 45;
 
 var zoomSpeed = 1000, fastZoomSpeed = zoomSpeed * 100,
     wheelZoomStep = 30, fastWheelZoomStep = wheelZoomStep * 20;
     fastZoom = false;
 
-var cameraZoomDamp = 0.05;
+var cameraZoomDamp = 0.099;
 
 var allowCameraLookAround = false;
 

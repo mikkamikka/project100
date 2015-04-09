@@ -496,7 +496,7 @@ function renderSolarSystem() {
 
       var deltaZ = planets[i].mesh.position.z - camera.position.z;    // planet's approximation to camera
 
-      if (Math.abs(deltaZ) < 60000) {  // is within approximation range
+      if (Math.abs(deltaZ) < 100000) {  // is within approximation range
 
         if ( deltaZ < 0 ){    // is in front of the camera
           //planets[i].mesh.position.x =  planets[i].mesh.position.x - 1.0;
@@ -504,8 +504,8 @@ function renderSolarSystem() {
         else {                // is behind the camera
 
           //planets[i].mesh.position.x += ((camera.position.x - planets[i].radius) - planets[i].mesh.position.x) * 0.03;
-          planets[i].mesh.position.x = camera.position.x - planets[i].radius/1.5; // - deltaZ;
-          planets[i].mesh.position.y = camera.position.y - planets[i].radius/1.5 + deltaZ/10;
+          planets[i].mesh.position.x = camera.position.x - planets[i].radius * 2; // - deltaZ;
+          planets[i].mesh.position.y = camera.position.y - planets[i].radius * 2;
 
         }
 

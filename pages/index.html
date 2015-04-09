@@ -165,7 +165,7 @@
 					distanceTarget -= distance - initialCameraDistance;
 				}, false );
 
-				camera = new THREE.PerspectiveCamera( 25, SCREEN_WIDTH / SCREEN_HEIGHT, 50, 1e12 );
+				camera = new THREE.PerspectiveCamera( initialCameraFOV, SCREEN_WIDTH / SCREEN_HEIGHT, 50, 1e12 );
 				//camera.position.z = 63000;
 
 				scene = new THREE.Scene();

@@ -5,7 +5,7 @@ var asteroid;
 var asteroidsCloud1, asteroidsCloud2, asteroidsCloud3;
 
 var asteroidDistanceScale = global.DistanceScale * LY /10;
-var maxAsteroidRange = global.DistanceScale * 149.5e6 * 3000;  //30AU, Pluto orbit distance
+var maxAsteroidRange = global.DistanceScale * 149.5e6;
 
 function Asteroid(){
 
@@ -18,6 +18,8 @@ function Asteroid(){
 	this.distFromCamera =  0;
 	this.isInCameraRange = false;
 	this.rotationSpeed = new THREE.Vector3();
+	this.isInView = false;
+	this.distFromCamera = 0;
 
 }
 
@@ -27,8 +29,10 @@ function asteroidsCloud(){
   this.centerPos = new THREE.Vector3();
   this.asteroid_cloud = [];
 	this.distribution = 0;
-
 	this.pointCloud;
+	this.isInView = false;
+	this.distFromCamera = 0;
+
 }
 
 asteroidsCloud.prototype.initAsteroidsCloud = function() {
@@ -53,18 +57,21 @@ asteroidsCloud.prototype.initAsteroidsCloud = function() {
 
 		this.asteroid_cloud[i] = asteroid;
 
-		scene.add( this.asteroid_cloud[i].mesh );
+		//scene.add( this.asteroid_cloud[i].mesh );
 
 	}
 
 
-	createPointCloud (this.centerPos, this.distribution, 1000, 5000);
+	this.pointCloud = createPointCloud (this.centerPos, this.distribution, 1000, 50000);
 
 
 }
 
 
 asteroidsCloud.prototype.update = function() {
+
+	var deltaZ = this.centerPos.z - camera.position.z;    // cloud's center approximation to camera
+	this.distFromCamera = camera.position.distanceTo( this.centerPos );
 
 	for ( var i = 0; i < this.asteroid_cloud.length ; i++ ) {
 
@@ -76,32 +83,60 @@ asteroidsCloud.prototype.update = function() {
 			roid.mesh.rotation.y += roid.rotationSpeed.y;
 			roid.mesh.rotation.z += roid.rotationSpeed.z;
 
-			// var deltaZ = this.centerPos.z - camera.position.z;    // cloud's center approximation to camera
-			//
-			// if (Math.abs(deltaZ) < 60000000) {  // is within approximation range
-			//
-			// 	if ( deltaZ < 0 ){    // is in front of the camera
-			// 		//planets[i].mesh.position.x =  planets[i].mesh.position.x - 1.0;
-			// 	}
-			// 	else {                // is behind the camera
-			//
-			// 		roid.mesh.position.x += camera.position.x ;
-			// 		roid.mesh.position.y += camera.position.y ;
-			//
-			// 	}
-			// }
 
+
+			// add and remove asteroid
+			roid.distFromCamera = camera.position.distanceTo( roid.mesh.position );
+
+			if ( roid.distFromCamera < maxAsteroidRange & deltaZ > ){  // is within approximation range
+				if ( !roid.isInView ) {
+
+					scene.add( roid.mesh );
+					roid.isInView = true;
+					console.log("Asteroid added");
+				}
+			}
+			else {
+				if ( roid.isInView ) {
+
+					scene.remove( roid.mesh );
+					roid.isInView = false;
+					console.log("Asteroid removed");
+				}
+			}
 
 		}
 
 	}
+
+
+	// add and remove point cloud
+	if ( this.distFromCamera < maxAsteroidRange * 2 ){  // is within approximation range
+		if ( !this.pointCloud.isInView ){
+
+			scene.add( this.pointCloud );
+			this.pointCloud.isInView = true;
+			console.log("pc added");
+		}
+
+	}
+	else{
+		if ( this.pointCloud.isInView ){
+
+			scene.remove( this.pointCloud );
+			this.pointCloud.isInView = false;
+			console.log("pc removed");
+		}
+
+	}
+
 
 }
 
 
 function createAsteroid ( x, y, z , scale, variation, deform_scale ){
 
-	var radius = 1000 * scale;
+	var radius = 3000 * scale;
 	var details = Math.round( scale * 3 );
 
   //var geometryAsteroid = new THREE.SphereGeometry( radius, 10, 5 );
@@ -190,7 +225,7 @@ function createPointCloud( centerPos, distribution, numParticles, maxSize ){
 
 	}
 
-	parameters = [ [ [1, 0.0, 0.1], sprite2, maxSize * Math.random() ],
+	parameters = [ [ [1, 0, 0.1], sprite2, maxSize * Math.random() ],
 				   [ [1, 0, 0.2], sprite3, maxSize * Math.random() ],
 				   [ [1, 0, 0.1], sprite1, maxSize * Math.random() ],
 				   [ [1, 0, 0.2], sprite5, maxSize * Math.random() ],
@@ -206,13 +241,13 @@ function createPointCloud( centerPos, distribution, numParticles, maxSize ){
 		materials[i] = new THREE.PointCloudMaterial( {
 															size: size,
 															map: sprite,
-															blending: THREE.AdditiveBlending,
-															depthTest: false,
+															//blending: THREE.AdditiveBlending,
+															//depthTest: false,
 															transparent : true
 														} );
-		materials[i].color.setHSL( color[0], color[1], color[2] );
+		//materials[i].color.setHSL( color[0], color[1], color[2] );
 
-		//materials[i].color.setHex ( 0x544f4b );
+		materials[i].color.setHex ( 0x999999 );
 
 
 		particles = new THREE.PointCloud( geometry, materials[i] );
@@ -221,7 +256,7 @@ function createPointCloud( centerPos, distribution, numParticles, maxSize ){
 		// particles.rotation.y = Math.random() * 6;
 		// particles.rotation.z = Math.random() * 6;
 
-		scene.add( particles );
+		return particles;
 
 	}
 
@@ -238,10 +273,10 @@ function createPointCloud( centerPos, distribution, numParticles, maxSize ){
 function initAsteroids(){
 
 	asteroidsCloud1 = new asteroidsCloud();
-	asteroidsCloud1.numAsteroids = 200;
-	asteroidsCloud1.centerPos = new THREE.Vector3( 0, 0, auToKM(2.8) * global.DistanceScale );
+	asteroidsCloud1.numAsteroids = 1000;
+	asteroidsCloud1.centerPos = new THREE.Vector3( 0, 0, auToKM(1.8) * global.DistanceScale );
 	asteroidsCloud1.asteroid_cloud = [];
-	asteroidsCloud1.distribution = 5000000 * global.DistanceScale;
+	asteroidsCloud1.distribution = 40000000 * global.DistanceScale;
 
 	asteroidsCloud1.initAsteroidsCloud();
 
