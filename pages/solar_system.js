@@ -504,8 +504,8 @@ function renderSolarSystem() {
         else {                // is behind the camera
 
           //planets[i].mesh.position.x += ((camera.position.x - planets[i].radius) - planets[i].mesh.position.x) * 0.03;
-          planets[i].mesh.position.x = camera.position.x - planets[i].radius * 2; // - deltaZ;
-          planets[i].mesh.position.y = camera.position.y - planets[i].radius * 2;
+          planets[i].mesh.position.x = camera.position.x - planets[i].radius * 1.5; // - deltaZ;
+          planets[i].mesh.position.y = camera.position.y - planets[i].radius * 1;
 
         }
 

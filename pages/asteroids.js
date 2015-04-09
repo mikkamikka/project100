@@ -4,8 +4,9 @@ var asteroid;
 
 var asteroidsCloud1, asteroidsCloud2, asteroidsCloud3;
 
-var asteroidDistanceScale = global.DistanceScale * LY /10;
-var maxAsteroidRange = global.DistanceScale * 149.5e6;
+//var asteroidDistanceScale = global.DistanceScale * LY /10;
+var maxAsteroidRange = global.DistanceScale * 100e6;
+var maxAsteroidRadius = 2000;
 
 function Asteroid(){
 
@@ -29,7 +30,7 @@ function asteroidsCloud(){
   this.centerPos = new THREE.Vector3();
   this.asteroid_cloud = [];
 	this.distribution = 0;
-	this.pointCloud;
+	this.pointClouds = [];
 	this.isInView = false;
 	this.distFromCamera = 0;
 
@@ -39,8 +40,8 @@ asteroidsCloud.prototype.initAsteroidsCloud = function() {
 
 	for ( var i = 0; i <= this.numAsteroids; i ++ ) {
 
-		var x = 10 * this.distribution * (0.5-Math.random()) + this.centerPos.x;
-		var y = this.distribution * (0.5-Math.random()) + this.centerPos.y;
+		var x = 2 * this.distribution * (0.5-Math.random()) + this.centerPos.x;
+		var y = 1 * this.distribution * (0.5-Math.random()) + this.centerPos.y;
 		var z = 6 * this.distribution * (0.5-Math.random()) + this.centerPos.z;
 
 		var scale = Math.random();
@@ -62,7 +63,7 @@ asteroidsCloud.prototype.initAsteroidsCloud = function() {
 	}
 
 
-	this.pointCloud = createPointCloud (this.centerPos, this.distribution, 1000, 50000);
+	this.pointClouds = createPointClouds (this.centerPos, this.distribution, 300, 10000);
 
 
 }
@@ -70,8 +71,8 @@ asteroidsCloud.prototype.initAsteroidsCloud = function() {
 
 asteroidsCloud.prototype.update = function() {
 
-	var deltaZ = this.centerPos.z - camera.position.z;    // cloud's center approximation to camera
-	this.distFromCamera = camera.position.distanceTo( this.centerPos );
+
+	this.distFromCamera = camera.position.distanceTo( this.centerPos );			// cloud's center approximation to camera
 
 	for ( var i = 0; i < this.asteroid_cloud.length ; i++ ) {
 
@@ -87,9 +88,10 @@ asteroidsCloud.prototype.update = function() {
 
 			// add and remove asteroid
 			roid.distFromCamera = camera.position.distanceTo( roid.mesh.position );
+			var deltaZ = roid.mesh.position.z - camera.position.z;
 
-			if ( roid.distFromCamera < maxAsteroidRange & deltaZ > ){  // is within approximation range
-				if ( !roid.isInView ) {
+			if ( roid.distFromCamera < maxAsteroidRange ){  // is within approximation range
+				if ( !roid.isInView && deltaZ < 100) {
 
 					scene.add( roid.mesh );
 					roid.isInView = true;
@@ -110,22 +112,27 @@ asteroidsCloud.prototype.update = function() {
 	}
 
 
-	// add and remove point cloud
+	// add and remove point clouds
 	if ( this.distFromCamera < maxAsteroidRange * 2 ){  // is within approximation range
-		if ( !this.pointCloud.isInView ){
 
-			scene.add( this.pointCloud );
-			this.pointCloud.isInView = true;
-			console.log("pc added");
+
+		if ( !this.isInView ){
+
+			for (var i=0; i < this.pointClouds.length; i++){
+				scene.add( this.pointClouds[i] );
+			}
+			this.isInView = true;
+			console.log("point cloud added " + i);
 		}
 
 	}
 	else{
-		if ( this.pointCloud.isInView ){
-
-			scene.remove( this.pointCloud );
-			this.pointCloud.isInView = false;
-			console.log("pc removed");
+		if ( this.isInView ){
+			for (var i=0; i < this.pointClouds.length; i++){
+				scene.remove( this.pointClouds[i] );
+			}
+			this.isInView = false;
+			console.log("point cloud removed " + i);
 		}
 
 	}
@@ -136,7 +143,7 @@ asteroidsCloud.prototype.update = function() {
 
 function createAsteroid ( x, y, z , scale, variation, deform_scale ){
 
-	var radius = 3000 * scale;
+	var radius = maxAsteroidRadius * scale;
 	var details = Math.round( scale * 3 );
 
   //var geometryAsteroid = new THREE.SphereGeometry( radius, 10, 5 );
@@ -202,64 +209,66 @@ function createAsteroid ( x, y, z , scale, variation, deform_scale ){
 }
 
 
-function createPointCloud( centerPos, distribution, numParticles, maxSize ){
+function createPointClouds ( centerPos, distribution, numParticles, maxSize ){
 
-	var particles, geometry, materials = [], parameters, i, h, color, sprite, size;
+	var particles = [], geometries = [], materials = [], parameters, i, j, h, color, sprite = [], size;
 
-	var geometry = new THREE.Geometry();
 
-	sprite1 = THREE.ImageUtils.loadTexture( "textures/asteroids/stone1.png" );
-	sprite2 = THREE.ImageUtils.loadTexture( "textures/asteroids/stone1.png" );
-	sprite3 = THREE.ImageUtils.loadTexture( "textures/asteroids/stone1.png" );
-	sprite4 = THREE.ImageUtils.loadTexture( "textures/asteroids/stone1.png" );
-	sprite5 = THREE.ImageUtils.loadTexture( "textures/asteroids/stone1.png" );
+	sprite[0] = THREE.ImageUtils.loadTexture( "textures/asteroids/stone1.png" );
+	sprite[1] = THREE.ImageUtils.loadTexture( "textures/asteroids/stone2.png" );
+	sprite[2] = THREE.ImageUtils.loadTexture( "textures/asteroids/stone2.png" );
+	sprite[3] = THREE.ImageUtils.loadTexture( "textures/asteroids/stone2.png" );
+	sprite[4] = THREE.ImageUtils.loadTexture( "textures/asteroids/stone2.png" );
 
-	for ( i = 0; i < numParticles; i ++ ) {
 
-		var vertex = new THREE.Vector3();
-		vertex.x = 10 * distribution * (0.5-Math.random()) + centerPos.x;
-		vertex.y = 1 * distribution * (0.5-Math.random()) + centerPos.y;
-		vertex.z = 6 * distribution * (0.5-Math.random()) + centerPos.z;
-
-		geometry.vertices.push( vertex );
-
-	}
-
-	parameters = [ [ [1, 0, 0.1], sprite2, maxSize * Math.random() ],
-				   [ [1, 0, 0.2], sprite3, maxSize * Math.random() ],
-				   [ [1, 0, 0.1], sprite1, maxSize * Math.random() ],
-				   [ [1, 0, 0.2], sprite5, maxSize * Math.random() ],
-				   [ [1, 0, 0.2], sprite4, maxSize * Math.random() ],
+	parameters = [ [ [1, 0, 0.1], sprite[0], maxSize * Math.random() ],
+				   [ [1, 0, 0.2], sprite[1], maxSize * Math.random() ],
+				   [ [1, 0, 0.1], sprite[2], maxSize * Math.random() ],
+				   [ [1, 0, 0.2], sprite[3], maxSize * Math.random() ],
+				   [ [1, 0, 0.2], sprite[4], maxSize * Math.random() ],
 				   ];
 
 	for ( i = 0; i < parameters.length; i ++ ) {
 
 		color  = parameters[i][0];
-		sprite = parameters[i][1];
+		//sprite = parameters[i][1];
 		size   = parameters[i][2];
+
+		geometries[i] = new THREE.Geometry();
+
+		for ( j = 0; j < numParticles; j ++ ) {
+			var vertex = new THREE.Vector3();
+			vertex.x = 2 * distribution * (0.5-Math.random()) + centerPos.x;
+			vertex.y = 1 * distribution * (0.5-Math.random()) + centerPos.y;
+			vertex.z = 6 * distribution * (0.5-Math.random()) + centerPos.z;
+
+			geometries[i].vertices.push( vertex );
+
+		}
 
 		materials[i] = new THREE.PointCloudMaterial( {
 															size: size,
-															map: sprite,
-															//blending: THREE.AdditiveBlending,
-															//depthTest: false,
+															map: sprite[i],
+															blending: THREE.AdditiveBlending,
+															depthTest: false,
 															transparent : true
 														} );
 		//materials[i].color.setHSL( color[0], color[1], color[2] );
 
-		materials[i].color.setHex ( 0x999999 );
+		materials[i].color.setHex ( 0x666666 );
 
 
-		particles = new THREE.PointCloud( geometry, materials[i] );
+		var point_cloud = new THREE.PointCloud( geometries[i], materials[i] );
 
 		// particles.rotation.x = Math.random() * 6;
 		// particles.rotation.y = Math.random() * 6;
 		// particles.rotation.z = Math.random() * 6;
 
-		return particles;
+		particles.push(point_cloud);
 
 	}
 
+	return particles;
 
 }
 
@@ -273,10 +282,10 @@ function createPointCloud( centerPos, distribution, numParticles, maxSize ){
 function initAsteroids(){
 
 	asteroidsCloud1 = new asteroidsCloud();
-	asteroidsCloud1.numAsteroids = 1000;
+	asteroidsCloud1.numAsteroids = 150;
 	asteroidsCloud1.centerPos = new THREE.Vector3( 0, 0, auToKM(1.8) * global.DistanceScale );
 	asteroidsCloud1.asteroid_cloud = [];
-	asteroidsCloud1.distribution = 40000000 * global.DistanceScale;
+	asteroidsCloud1.distribution = 30e6 * global.DistanceScale;
 
 	asteroidsCloud1.initAsteroidsCloud();
 
