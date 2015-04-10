@@ -188,10 +188,13 @@
 				  dpr = window.devicePixelRatio;
 				}
 
+				console.log("dpr: " + dpr);
 
 				renderer = new THREE.WebGLRenderer( { antialias: false , alpha: true } );
-				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setPixelRatio( dpr );
 				renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+				//renderer.setViewport( 0, 0, SCREEN_WIDTH * 1, SCREEN_HEIGHT * 1 );
+
 				//renderer.sortObjects = false;
 				//renderer.setFaceCulling( THREE.CullFaceNone );
 
@@ -215,23 +218,26 @@
 				var scenePass = new THREE.RenderPass( scene, camera );
 				scenePass.clear = false;
 
-				//var effectFilm = new THREE.FilmPass( 0.0, 0.75, 2048, false );
+				var effectFilm = new THREE.FilmPass( 0.0, 0.75, 2048, false );
 				effectFXAA = new THREE.ShaderPass( THREE.FXAAShader );
 				//var effectBokeh = new THREE.ShaderPass( THREE.BokehPass );
 
-				effectFXAA.uniforms[ 'resolution' ].value.set( 1 / SCREEN_WIDTH * dpr, 1 / SCREEN_HEIGHT * dpr );
+				effectFXAA.uniforms[ 'resolution' ].value.set( 1 / SCREEN_WIDTH, 1 / SCREEN_HEIGHT);
+				//effectFXAA.uniforms[ 'resolution' ].value.set( 1 / SCREEN_WIDTH * dpr, 1 / SCREEN_HEIGHT * dpr);
 
-				//effectFilm.renderToScreen = true;
-				effectFXAA.renderToScreen = true;
+				effectFilm.renderToScreen = true;
+				//effectFXAA.renderToScreen = true;
 
 				var parameters = { minFilter: THREE.LinearFilter,
 					magFilter: THREE.LinearFilter,
 					format: THREE.RGBAFormat,
 					stencilBuffer: true };
 
-				var renderTarget = new THREE.WebGLRenderTarget( SCREEN_WIDTH * dpr, SCREEN_HEIGHT * dpr, parameters );
+				var renderTarget = new THREE.WebGLRenderTarget( SCREEN_WIDTH , SCREEN_HEIGHT , parameters );
 
 				composer = new THREE.EffectComposer( renderer, renderTarget );
+				//composer = new THREE.EffectComposer( renderer );
+				//composer.setSize(SCREEN_WIDTH *2, SCREEN_HEIGHT *2 );
 
 				initSkyBoxEquirec();
 				initSolarSystem();
@@ -241,9 +247,9 @@
 
 
 				composer.addPass( scenePass );
-				//composer.addPass( effectFilm );
-				composer.addPass( effectFXAA );  //final pass
 
+				composer.addPass( effectFXAA );  //final pass
+				composer.addPass( effectFilm );
 
 				//Events
 				container.addEventListener('mousedown', onMouseDown, false);
@@ -373,10 +379,11 @@
 				SCREEN_HEIGHT = window.innerHeight;
 				SCREEN_WIDTH  = window.innerWidth;
 
-				renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
-				effectFXAA.uniforms[ 'resolution' ].value.set( 1 / SCREEN_WIDTH * dpr, 1 / SCREEN_HEIGHT * dpr );
 
-				composer.setSize( SCREEN_WIDTH * dpr, SCREEN_HEIGHT * dpr);
+				effectFXAA.uniforms[ 'resolution' ].value.set( 1 / SCREEN_WIDTH , 1 / SCREEN_HEIGHT );
+
+				renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+				composer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
 
 				solarSystemResize();
 				skyboxResize();
