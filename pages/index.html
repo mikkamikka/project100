@@ -40,7 +40,7 @@
 			#button_reset {
 				position: absolute;
 				bottom:10px;
-				left: 10px;
+				left: 20px;
 				padding: 4px;
 				color: #fff;
 				background-color: #555;
@@ -53,14 +53,27 @@
 			}
 			#gui {
 				position: absolute;
-
 			  height:30px;
 			  top:0px;
 				right:0px;
 				z-index: 100;
 			}
+			#slider-vertical {
+				position: absolute;
+				height: 100%;
+				opacity: 0.5;
+				z-index: 100;
+
+			}
 
 		</style>
+
+		<!--link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css"-->
+		<link rel="stylesheet" href="styles/jquery-ui.css">
+
+		<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+  	<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+
 
 		<script src="../build/three.min.js"></script>
 
@@ -97,6 +110,23 @@
 		<script src="data/stars_all.json.js"></script>
 		<script src="asteroids.js"></script>
 
+		<script>
+		// slider for fast navigation
+		$(function() {
+				$( "#slider-vertical" ).slider({
+					orientation: "vertical",
+					range: "min",
+					min: 0,
+					max: 1000,
+					value: 0,
+					slide: function( event, ui ) {
+						setZoomLevel( ui.value );
+					}
+				});
+
+			});
+		</script>
+
 	</head>
 
 	<body oncontextmenu="return false;">
@@ -112,6 +142,7 @@
 
 		<div id="button_reset" >Reset camera</div>
   	<div id="distance"></div>
+		<div id="slider-vertical"></div>
 
 
 
@@ -208,6 +239,7 @@
 				stats = new Stats();
 				stats.domElement.style.position = 'absolute';
 				stats.domElement.style.top = '0px';
+				stats.domElement.style.left = '20px';
 				stats.domElement.style.zIndex = 5;
 				container.appendChild( stats.domElement );
 
@@ -349,7 +381,7 @@
 
 			};
 
-
+			// debug gui
 			function initGUI(){
 
 				gui = new dat.GUI( { autoPlace: false } );
@@ -370,6 +402,7 @@
 				// 	renderer.gammaInput = value;
 				// });
 			}
+
 
 
 			//Event handlers
@@ -471,6 +504,24 @@
 			//	}
 				//distanceTarget = distanceTarget > 1000 ? 1000 : distanceTarget;
 				//distanceTarget = distanceTarget < 350 ? 350 : distanceTarget;
+			}
+
+			function setZoomLevel( ui_value ){
+
+				var span = maxCameraDistance;
+
+
+				if ( ui_value < 250 ){
+
+					distanceTarget = ui_value * span / 10e6 + initialCameraDistance;
+
+				}
+				else{
+
+					distanceTarget = ui_value * span / 1000 + initialCameraDistance;
+
+				}
+
 			}
 
 			function onDocumentKeyDown(event) {

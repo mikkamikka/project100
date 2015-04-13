@@ -3,8 +3,8 @@
 var stars = [];
 var show_amount = 716;
 var isHideDwarfs = true;
-var DistanceScale = global.DistanceScale * LY /10;
-var maxFlareRange = global.DistanceScale * 149.5e6 * 3000;  //30AU, Pluto orbit distance
+var DistanceScale = global.DistanceScale * LY ;
+var maxFlareRange = global.DistanceScale * 149.5e6 * 30000;  //30AU, Pluto orbit distance
 var maxFlareRangeLY = kmToLY(maxFlareRange);
 if (debug) console.log('maxFlareRange, light years: ' + maxFlareRangeLY);
 //var maxFlareRange = 400000000;
@@ -63,10 +63,13 @@ function initStarBody(star){
 	star.body = new THREE.LensFlare();
 	star.body.add( textureFlare_star1, 256, 0.0, THREE.AdditiveBlending, color );
 	star.body.lensFlares[0].rotation = THREE.Math.degToRad( 0 );
-	star.body.add( textureFlare_ring1, 60, 0.75, THREE.AdditiveBlending, color );
-	star.body.add( textureFlare_ring2, 40, 0.8, THREE.AdditiveBlending, color );
-	star.body.add( textureFlare_ring3, 120, 0.9, THREE.AdditiveBlending, color );
-	star.body.add( textureFlare_ring4, 70, 1.0, THREE.AdditiveBlending, color );
+	star.body.add( textureFlare_star1, 256, 0.0, THREE.AdditiveBlending, color );
+	star.body.lensFlares[1].rotation = THREE.Math.degToRad( 0 );
+
+	star.body.add( textureFlare_ring1, 20, 0.75, THREE.AdditiveBlending, color );
+	//star.body.add( textureFlare_ring2, 40, 0.8, THREE.AdditiveBlending, color );
+	star.body.add( textureFlare_ring3, 30, 0.9, THREE.AdditiveBlending, color );
+	//star.body.add( textureFlare_ring4, 70, 1.0, THREE.AdditiveBlending, color );
 
 	star.body.customUpdateCallback = lensFlareUpdateCallbackStars;
 	star.body.position.copy( star.position );
@@ -88,8 +91,13 @@ function initNamedStars() {
 		stars[i].name = source.starName;
 		stars[i].id = source.id;
 		stars[i].distance = source.dist;
-		stars[i].position.set(source.galX, source.galY, source.galZ);
-		stars[i].position.setLength(stars[i].distance * DistanceScale);
+		stars[i].position.set(
+			source.galX * 1e7,
+			source.galY * 1e7,
+			Math.abs(source.galZ) * stars[i].distance * DistanceScale
+			);
+
+		//stars[i].position.setLength(stars[i].distance * DistanceScale);
 		stars[i].color = source.color;
 
 
@@ -159,8 +167,8 @@ function init_object_points(show_amount, isRedder, isHideDwarfs) {
 			if (isHideDwarfs && (obj.starName.charAt(0) == "M")) continue; //Hide M-type stars
 
 			vector = new THREE.Vector3(
-        obj.galX * DistanceScale,
-        obj.galY * DistanceScale,
+        obj.galX, //* DistanceScale,
+        obj.galY, //* DistanceScale,
         obj.galZ * DistanceScale
         );
 			//vector.name = obj.starName;
