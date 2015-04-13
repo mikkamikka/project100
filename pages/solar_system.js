@@ -299,10 +299,6 @@ function initLensFlare(){
   var textureFlare_ring3 = THREE.ImageUtils.loadTexture( "textures/lensflare/lensflare4.png" );  // ring
   var textureFlare_ring4 = THREE.ImageUtils.loadTexture( "textures/lensflare/lensflare6.png" );  // ring
 
-
-
-
-
 	var flareColor = new THREE.Color( 0xffffff );
   var flareColor2 = new THREE.Color( 0x888888 );
 
@@ -324,8 +320,6 @@ function initLensFlare(){
   lensFlare.position.set( sunPos.x, sunPos.y, sunPos.z );
 
 	scene.add( lensFlare );
-
-
 
         // function addSpot( h, s, l, x, y, z ) {
         //
@@ -379,7 +373,6 @@ function lensFlareUpdateCallback( object ) {
 	//object.lensFlares[ 3 ].rotation = object.positionScreen.x * 0.5 + THREE.Math.degToRad( 45 );
 
 }
-
 
 
 function initPlanets(){

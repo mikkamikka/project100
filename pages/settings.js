@@ -15,7 +15,7 @@ var initialCameraDistance = 4.5e6 * global.DistanceScale,
     maxCameraDistance = 9.460731e12 * 100 * global.DistanceScale,    // 100 light years in km
     initialCameraFOV = 45;
 
-var zoomSpeed = 1000, fastZoomSpeed = zoomSpeed * 100,
+var zoomSpeed = 1000, fastZoomSpeed = zoomSpeed * 50000,
     wheelZoomStep = 30, fastWheelZoomStep = wheelZoomStep * 20;
     fastZoom = false;
 
