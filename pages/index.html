@@ -107,7 +107,7 @@
 		<script src="stars.js"></script>
 		<script src="named_stars.js"></script>
 		<script src="data/stars_named.json.js"></script>
-		<script src="data/stars_all.json.js"></script>
+		<!--script src="data/stars_all.json.js"></script-->
 		<script src="asteroids.js"></script>
 
 		<script>
@@ -513,12 +513,12 @@
 
 				if ( ui_value < 250 ){
 
-					distanceTarget = ui_value * span / 10e6 + initialCameraDistance;
+					distanceTarget = ui_value * span / 1000 + initialCameraDistance;
 
 				}
 				else{
 
-					distanceTarget = ui_value * span / 10000 + initialCameraDistance;
+					distanceTarget = ui_value * span / 1000 + initialCameraDistance;
 
 				}
 
