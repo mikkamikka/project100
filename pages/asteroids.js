@@ -214,11 +214,11 @@ function createPointClouds ( centerPos, distribution, numParticles, maxSize ){
 	var particles = [], geometries = [], materials = [], parameters, i, j, h, color, sprite = [], size;
 
 
-	sprite[0] = THREE.ImageUtils.loadTexture( "textures/asteroids/stone3.png" );
-	sprite[1] = THREE.ImageUtils.loadTexture( "textures/asteroids/stone3.png" );
-	sprite[2] = THREE.ImageUtils.loadTexture( "textures/asteroids/stone3.png" );
-	sprite[3] = THREE.ImageUtils.loadTexture( "textures/asteroids/stone2.png" );
-	sprite[4] = THREE.ImageUtils.loadTexture( "textures/asteroids/stone2.png" );
+	sprite[0] = THREE.ImageUtils.loadTexture( "textures/asteroids/_stone1.png" );
+	sprite[1] = THREE.ImageUtils.loadTexture( "textures/asteroids/_stone2.png" );
+	sprite[2] = THREE.ImageUtils.loadTexture( "textures/asteroids/_stone3.png" );
+	sprite[3] = THREE.ImageUtils.loadTexture( "textures/asteroids/_stone4.png" );
+	sprite[4] = THREE.ImageUtils.loadTexture( "textures/asteroids/_stone5.png" );
 
 
 	parameters = [ [ [1, 0, 0.1], sprite[0], maxSize * Math.random() ],

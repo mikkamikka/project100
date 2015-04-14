@@ -172,21 +172,17 @@ function starsUpdate(){
 }
 
 
-var particles;
-var vertex, sprite, material, geometry;
+var vertex, sprite, material, geometry, particles;
 
 function initStarsPointCloud() {
 
 	geometry = new THREE.Geometry();
 
 		for ( var i = 0; i < stars.length; i++ ) {
-
 			if (stars[i] == undefined) continue;
 			vertex = stars[i].position.clone();
-
 			geometry.vertices.push( vertex );
 			geometry.colors.push( new THREE.Color( stars[i].color ) );
-
 		}
 
 		sprite = THREE.ImageUtils.loadTexture( "textures/lensflare/lensflare_star1.png" );
@@ -202,7 +198,6 @@ function initStarsPointCloud() {
 		particles = new THREE.PointCloud( geometry, material );
 
 		scene.add( particles );
-
 }
 
 
