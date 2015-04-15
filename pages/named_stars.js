@@ -106,7 +106,7 @@ function initNamedStars() {
 		if ( stars[i-1] != undefined )
 			if ( stars[i-1].distance == stars[i].distance ){
 
-				if (debug) console.log(stars[i].name + " double star");
+				//if (debug) console.log(stars[i].name + " double star");
 				stars[i].position.set( stars[i].position.x + 2e9, stars[i].position.y + 1e9, stars[i].position.z + 1e9 );
 
 			}

@@ -38,11 +38,18 @@ function asteroidsCloud(){
 
 asteroidsCloud.prototype.initAsteroidsCloud = function() {
 
+	var dist = new Random();
+
 	for ( var i = 0; i <= this.numAsteroids; i ++ ) {
 
-		var x = 2 * this.distribution * (0.5-Math.random()) + this.centerPos.x;
-		var y = 1 * this.distribution * (0.5-Math.random()) + this.centerPos.y;
-		var z = 6 * this.distribution * (0.5-Math.random()) + this.centerPos.z;
+		//var gaussian = require('gaussian');
+
+
+		//console.log( dist.normal(0, 1) );
+
+		var x = this.distribution * dist.normal(0, 0.2) + this.centerPos.x;
+		var y = this.distribution * dist.normal(0, 0.2) + this.centerPos.y;
+		var z = this.distribution * dist.normal(0, 0.5) + this.centerPos.z;
 
 		var scale = Math.random();
 		var variation = Math.round( 4 * Math.random() );
@@ -95,7 +102,7 @@ asteroidsCloud.prototype.update = function() {
 
 					scene.add( roid.mesh );
 					roid.isInView = true;
-					console.log("Asteroid added");
+					if (debug) console.log("Asteroid added");
 				}
 			}
 			else {
@@ -103,7 +110,7 @@ asteroidsCloud.prototype.update = function() {
 
 					scene.remove( roid.mesh );
 					roid.isInView = false;
-					console.log("Asteroid removed");
+					if (debug) console.log("Asteroid removed");
 				}
 			}
 
@@ -113,16 +120,15 @@ asteroidsCloud.prototype.update = function() {
 
 
 	// add and remove point clouds
-	if ( this.distFromCamera < maxAsteroidRange * 2 ){  // is within approximation range
+	if ( this.distFromCamera < maxAsteroidRange * 10 ){  // is within approximation range
 
 
 		if ( !this.isInView ){
-
 			for (var i=0; i < this.pointClouds.length; i++){
 				scene.add( this.pointClouds[i] );
 			}
 			this.isInView = true;
-			console.log("point cloud added " + i);
+			if (debug) console.log("point cloud added " + i);
 		}
 
 	}
@@ -132,7 +138,7 @@ asteroidsCloud.prototype.update = function() {
 				scene.remove( this.pointClouds[i] );
 			}
 			this.isInView = false;
-			console.log("point cloud removed " + i);
+			if (debug) console.log("point cloud removed " + i);
 		}
 
 	}
@@ -213,19 +219,20 @@ function createPointClouds ( centerPos, distribution, numParticles, maxSize ){
 
 	var particles = [], geometries = [], materials = [], parameters, i, j, h, color, sprite = [], size;
 
-
 	sprite[0] = THREE.ImageUtils.loadTexture( "textures/asteroids/_stone1.png" );
 	sprite[1] = THREE.ImageUtils.loadTexture( "textures/asteroids/_stone2.png" );
 	sprite[2] = THREE.ImageUtils.loadTexture( "textures/asteroids/_stone3.png" );
 	sprite[3] = THREE.ImageUtils.loadTexture( "textures/asteroids/_stone4.png" );
 	sprite[4] = THREE.ImageUtils.loadTexture( "textures/asteroids/_stone5.png" );
+	sprite[5] = THREE.ImageUtils.loadTexture( "textures/asteroids/_stone6.png" );
 
 
-	parameters = [ [ [1, 0, 0.1], sprite[0], maxSize * Math.random() ],
-				   [ [1, 0, 0.2], sprite[1], maxSize * Math.random() ],
-				   [ [1, 0, 0.1], sprite[2], maxSize * Math.random() ],
-				   [ [1, 0, 0.2], sprite[3], maxSize * Math.random() ],
-				   [ [1, 0, 0.2], sprite[4], maxSize * Math.random() ],
+	parameters = [ [ [1, 1, 0.1], sprite[0], maxSize * Math.random() ],
+				   [ [1, 1, 0.2], sprite[1], maxSize * Math.random() ],
+				   [ [1, 1, 0.1], sprite[2], maxSize * Math.random() ],
+				   [ [1, 1, 0.2], sprite[3], maxSize * Math.random() ],
+				   [ [1, 1, 0.2], sprite[4], maxSize * Math.random() ],
+				   [ [1, 1, 0.5], sprite[5], 2 * maxSize * Math.random() ],
 				   ];
 
 	for ( i = 0; i < parameters.length; i ++ ) {
@@ -236,11 +243,13 @@ function createPointClouds ( centerPos, distribution, numParticles, maxSize ){
 
 		geometries[i] = new THREE.Geometry();
 
+		var dist = new Random();
+
 		for ( j = 0; j < numParticles; j ++ ) {
 			var vertex = new THREE.Vector3();
-			vertex.x = 2 * distribution * (0.5-Math.random()) + centerPos.x;
-			vertex.y = 1 * distribution * (0.5-Math.random()) + centerPos.y;
-			vertex.z = 6 * distribution * (0.5-Math.random()) + centerPos.z;
+			vertex.x = distribution * dist.normal(0, 3) + centerPos.x;
+			vertex.y = ( distribution * dist.normal(0, 0.5) + centerPos.y ) + vertex.x / 10;
+			vertex.z = distribution * dist.normal(0, 2) + centerPos.z;
 
 			geometries[i].vertices.push( vertex );
 
@@ -253,7 +262,6 @@ function createPointClouds ( centerPos, distribution, numParticles, maxSize ){
 															depthTest: true,
 															transparent : true
 														} );
-		//materials[i].color.setHSL( color[0], color[1], color[2] );
 
 		materials[i].color.setHex ( 0x888888 );
 

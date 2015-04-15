@@ -98,6 +98,10 @@
 		<script src="js/libs/dat.gui.min.js"></script>
 		<script src="js/loaders/DDSLoader.js"></script>
 		<script src="js/shaders/NormalDisplacementShader.js"></script>
+		<!--script src="data/gaussian.js"></script-->
+		<script src="data/random-0.26.js"></script>
+		<script src="data/stars_named.json.js"></script>
+		<!--script src="data/stars_all.json.js"></script-->
 
 		<!---- LY scripts ---->
 		<script src="settings.js"></script>
@@ -106,8 +110,6 @@
 		<script src="solar_system.js"></script>
 		<script src="stars.js"></script>
 		<script src="named_stars.js"></script>
-		<script src="data/stars_named.json.js"></script>
-		<!--script src="data/stars_all.json.js"></script-->
 		<script src="asteroids.js"></script>
 
 		<script>
@@ -200,7 +202,7 @@
 				//camera.position.z = 63000;
 
 				scene = new THREE.Scene();
-				//scene.fog = new THREE.FogExp2( 0x555555, 0.0000025 );
+				//scene.fog = new THREE.FogExp2( 0x555555, 0.000000025 );
 
 				//controls = new THREE.FlyControls( camera );
 				//controls = new THREE.OrbitControls( camera );
