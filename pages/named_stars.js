@@ -155,7 +155,7 @@ function lensFlareUpdateCallbackStars( object ) {
 
 	     //flare.scale = 1 / Math.pow( kmToLY( distFromCamera / global.DistanceScale ), 1 / 4 );
 			 //flare.scale = 1 / kmToLY( maxFlareRange - distFromCamera / global.DistanceScale ) * 0.3;
-			 flare.scale = 3 * ( maxFlareRange - distFromCamera ) / maxFlareRange;
+			 flare.scale = 5 * ( maxFlareRange - distFromCamera ) / maxFlareRange;
 	}
 
 }

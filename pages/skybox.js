@@ -1,4 +1,4 @@
-var initialCameraFOV = 45;
+var cameraCubeFOV = 35;
 
 function initSkyBoxCube(){
 
@@ -41,11 +41,11 @@ function initSkyBoxEquirec(){
   //var textureEquirec = loader.load( 'textures/space/milkyway_eso0932argb_8bDXT5.dds' );
   //textureEquirec.anisotropy = 4;
 
-  cameraCube = new THREE.PerspectiveCamera( initialCameraFOV, window.innerWidth / window.innerHeight, 1, 1e12 );
+  cameraCube = new THREE.PerspectiveCamera( cameraCubeFOV, window.innerWidth / window.innerHeight, 1, 1e12 );
   sceneCube = new THREE.Scene();
 
   // jpg texture
-  var textureEquirec = THREE.ImageUtils.loadTexture( "textures/space/stars_skybox_4096.jpg" );
+  var textureEquirec = THREE.ImageUtils.loadTexture( "textures/space/stars_skybox_8192.png" );
 
   //textureEquirec.format = THREE.RGBAFormat;
   textureEquirec.mapping = THREE.EquirectangularReflectionMapping;
@@ -68,8 +68,8 @@ function initSkyBoxEquirec(){
   	side: THREE.BackSide
   } );
 
-  mesh = new THREE.Mesh( new THREE.BoxGeometry( 1e12, 1e12, 1e12 ), equirectMaterial );
-  mesh.rotation.set( 0, 0, 2.3, "XYZ" );
+  mesh = new THREE.Mesh( new THREE.BoxGeometry( 1e11, 1e11, 1e11 ), equirectMaterial );
+  //mesh.rotation.set( 0, 0, 2.3, "XYZ" );
   //mesh.rotation.z = 0.0;
   //mesh.position.applyAxisAngle( axis_z, -45 * Math.PI / 180 );
   sceneCube.add( mesh );
@@ -90,7 +90,7 @@ function renderSkybox() {
                                             )
                           );
 
-  cameraCube.fov = initialCameraFOV + (distance - initialCameraDistance)/1e12;
+  cameraCube.fov = cameraCubeFOV + (distance - initialCameraDistance)/1e12;
 
 
   //cameraCube.position.z += distance /1200;
