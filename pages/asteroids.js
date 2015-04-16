@@ -8,24 +8,50 @@ var asteroidsCloud1, asteroidsCloud2, asteroidsCloud3;
 var maxAsteroidRange = global.DistanceScale * 100e6;
 var maxAsteroidRadius = 2000;
 
-function Asteroid(){
+var cloudShader = {
+      uniforms: {
+        'texture': { type: 't', value: null },
+				'fogColor' : { type: "c", value: 0x525266 },
+				'fogNear' : { type: "f", value: -100 },
+				'fogFar' : { type: "f", value: 1e12 },
+      },
+      vertexShader: [
+        'varying vec2 vUv;',
+        'void main() {',
+          'gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );',
+          'vUv = uv;',
+        '}'
+      ].join('\n'),
+      fragmentShader: [
+        'uniform sampler2D texture;',
+				'uniform vec3 fogColor;',
+				'uniform float fogNear;',
+				'uniform float fogFar;',
+        'varying vec2 vUv;',
+        'void main() {',
 
-	//this.id = 0;
-	//this.position = new THREE.Vector3();
-  //this.scale = 1.0;
-	//this.distance = 0;
-	//this.color = 0x000000;
+					'float depth = gl_FragCoord.z / gl_FragCoord.w;',
+					'float fogFactor = smoothstep( fogNear, fogFar, depth );',
+
+					'gl_FragColor = texture2D( texture, vUv );',
+					'gl_FragColor.w *= pow( gl_FragCoord.z, 20.0 );',
+					'gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );',
+
+        '}'
+      ].join('\n')
+}
+
+
+function Asteroid(){
 	this.mesh = null;
 	this.distFromCamera =  0;
 	this.isInCameraRange = false;
 	this.rotationSpeed = new THREE.Vector3();
 	this.isInView = false;
 	this.distFromCamera = 0;
-
 }
 
 function asteroidsCloud(){
-
   this.numAsteroids = 0;
   this.centerPos = new THREE.Vector3();
   this.asteroid_cloud = [];
@@ -33,7 +59,7 @@ function asteroidsCloud(){
 	this.pointClouds = [];
 	this.isInView = false;
 	this.distFromCamera = 0;
-
+	this.dustCloud;
 }
 
 asteroidsCloud.prototype.initAsteroidsCloud = function() {
@@ -47,8 +73,8 @@ asteroidsCloud.prototype.initAsteroidsCloud = function() {
 
 		//console.log( dist.normal(0, 1) );
 
-		var x = this.distribution * dist.normal(0, 0.2) + this.centerPos.x;
-		var y = this.distribution * dist.normal(0, 0.2) + this.centerPos.y;
+		var x = this.distribution * dist.normal(0, 0.5) + this.centerPos.x;
+		var y = this.distribution * dist.normal(0, 0.3) + this.centerPos.y;
 		var z = this.distribution * dist.normal(0, 0.5) + this.centerPos.z;
 
 		var scale = Math.random();
@@ -71,7 +97,8 @@ asteroidsCloud.prototype.initAsteroidsCloud = function() {
 
 
 	this.pointClouds = createPointClouds (this.centerPos, this.distribution, 300, 10000);
-
+	this.dustCloud = createDustCloud (this.centerPos, this.distribution, 30, 1e6);
+	scene.add( this.dustCloud );
 
 }
 
@@ -143,9 +170,7 @@ asteroidsCloud.prototype.update = function() {
 
 	}
 
-
 }
-
 
 function createAsteroid ( x, y, z , scale, variation, deform_scale ){
 
@@ -214,7 +239,6 @@ function createAsteroid ( x, y, z , scale, variation, deform_scale ){
 
 }
 
-
 function createPointClouds ( centerPos, distribution, numParticles, maxSize ){
 
 	var particles = [], geometries = [], materials = [], parameters, i, j, h, color, sprite = [], size;
@@ -251,6 +275,7 @@ function createPointClouds ( centerPos, distribution, numParticles, maxSize ){
 			vertex.y = ( distribution * dist.normal(0, 0.5) + centerPos.y ) + vertex.x / 10;
 			vertex.z = distribution * dist.normal(0, 2) + centerPos.z;
 
+
 			geometries[i].vertices.push( vertex );
 
 		}
@@ -259,18 +284,14 @@ function createPointClouds ( centerPos, distribution, numParticles, maxSize ){
 															size: size,
 															map: sprite[i],
 															blending: THREE.NormalBlending,
+															depthWrite: false,
 															depthTest: true,
-															transparent : true
+															transparent: true
 														} );
 
 		materials[i].color.setHex ( 0x888888 );
 
-
 		var point_cloud = new THREE.PointCloud( geometries[i], materials[i] );
-
-		// particles.rotation.x = Math.random() * 6;
-		// particles.rotation.y = Math.random() * 6;
-		// particles.rotation.z = Math.random() * 6;
 
 		particles.push(point_cloud);
 
@@ -280,11 +301,83 @@ function createPointClouds ( centerPos, distribution, numParticles, maxSize ){
 
 }
 
+function createDustCloud ( centerPos, distribution, numParticles, maxSize ){
+
+	var cloud, geometry, material, i, j, h, color, sprite, size, uniforms;
+
+	var dist = new Random();
+
+	uniforms = THREE.UniformsUtils.clone(cloudShader.uniforms);
+	uniforms['texture'].value = THREE.ImageUtils.loadTexture("textures/asteroids/dust1.png");
+
+	material = new THREE.ShaderMaterial( {
+
+						uniforms: uniforms,
+						vertexShader: cloudShader.vertexShader,
+						fragmentShader: cloudShader.fragmentShader,
+						depthWrite: false,
+						depthTest: true,
+						transparent: true
+
+					} );
 
 
+//new THREE.PlaneBufferGeometry( width, height, widthSegments, heightSegments )
+//-=====================
+//geometry = new THREE.BufferGeometry();
 
+// // create a simple square shape. We duplicate the top left and bottom right
+// // vertices because each vertex needs to appear once per triangle.
+// var vertexPositions = [
+// 	[-1.0, -1.0,  1.0],
+// 	[ 1.0, -1.0,  1.0],
+// 	[ 1.0,  1.0,  1.0],
+//
+// 	[ 1.0,  1.0,  1.0],
+// 	[-1.0,  1.0,  1.0],
+// 	[-1.0, -1.0,  1.0]
+// ];
+// var vertices = new Float32Array( vertexPositions.length * 3 ); // three components per vertex
+//
+// // components of the position vector for each vertex are stored
+// // contiguously in the buffer.
+// for ( var i = 0; i < vertexPositions.length; i++ )
+// {
+// 	vertices[ i*3 + 0 ] = vertexPositions[i][0];
+// 	vertices[ i*3 + 1 ] = vertexPositions[i][1];
+// 	vertices[ i*3 + 2 ] = vertexPositions[i][2];
+// }
+//
+// // itemSize = 3 because there are 3 values (components) per vertex
+// geometry.addAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
+//
+// //===================================
+//var plane = new THREE.Mesh( geometry );
 
+geometry = new THREE.Geometry();
 
+	for ( var i = 0; i < 30; i++ ) {
+		var plane = new THREE.Mesh( new THREE.PlaneGeometry( 6e5, 6e5 ) );
+		var x = distribution * dist.normal(0, 3) + centerPos.x;
+		var y = distribution * dist.normal(0, 0.5) + centerPos.y ;
+		var z = distribution * dist.normal(0, 2) + centerPos.z;
+		//plane.rotation.z = Math.random() * Math.PI;
+		//plane.scale.x = plane.scale.y = Math.random() * Math.random() * 1.5 + 0.5;
+
+		var matrix = new THREE.Matrix4();
+
+		matrix.makeTranslation( x, y, z );
+		//matrix.makeRotationZ( Math.random() * PI );
+
+		geometry.merge( plane.geometry, matrix );
+
+	}
+
+	mesh = new THREE.Mesh( geometry, material );
+
+	return mesh;
+
+}
 
 
 function initAsteroids(){
