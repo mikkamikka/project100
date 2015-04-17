@@ -104,8 +104,9 @@
 		<!--script src="data/stars_all.json.js"></script-->
 
 		<!---- LY scripts ---->
-		<script src="settings.js"></script>
 		<script src="helper.js"></script>
+		<script src="settings.js"></script>
+
 		<script src="skybox.js"></script>
 		<script src="solar_system.js"></script>
 		<script src="stars.js"></script>
@@ -174,7 +175,7 @@
 					distanceTarget = initialCameraDistance,
 					realDistanceKM;
 
-			var curZoomSpeed = 0;
+			var curZoomSpeed = 0, curZoomStep = zoomSteps[0];
 
 			var OutDistance, ResetButton;					// UI
 
@@ -182,8 +183,6 @@
 
 			init();
 			animate();
-
-
 
 			function init() {
 
@@ -221,7 +220,7 @@
 				  dpr = window.devicePixelRatio;
 				}
 
-				console.log("dpr: " + dpr);
+				if (debug) console.log("dpr: " + dpr);
 
 				renderer = new THREE.WebGLRenderer( { antialias: false , alpha: true } );
 				renderer.setPixelRatio( dpr );
@@ -304,6 +303,7 @@
 				if (debug) {
 
 					cam = new camDebug();
+					debug_zoom  = new debug_curZoomStep();
 					initGUI();
 
 				}
@@ -329,8 +329,6 @@
 			function render() {
 
 				updateCamera();
-
-
 
 				delta = clock.getDelta();
 
@@ -379,7 +377,17 @@
 				//fastZoomSpeed += speedAccel;
 				//wheelZoomStep += speedAccel/10;
 
-				camera.lookAt(new THREE.Vector3( earthPos.x, earthPos.y, earthPos.z ));
+				for (var i=1; i < zoomSteps.length; i++){
+					if ( distance < zoomSteps[i].border * global.DistanceScale
+							 && distance > zoomSteps[i-1].border * global.DistanceScale ) {
+
+						curZoomStep = zoomSteps[i];
+						debug_zoom.zoom_factor = curZoomStep.zoom_factor;
+						//wheelZoomStep = 300 * , fastWheelZoomStep = wheelZoomStep * 20;
+					}
+				}
+
+				camera.lookAt( new THREE.Vector3( earthPos.x, earthPos.y, earthPos.z ));
 
 			};
 
@@ -393,6 +401,8 @@
 				gui.add(cam, 'x').listen();
 				gui.add(cam, 'y').listen();
 				gui.add(cam, 'z').listen();
+
+				gui.add(debug_zoom, 'zoom_factor').listen();
 
 				gui.add(this, 'ambientLightIntensity', 0, 1.0).onFinishChange(function(value) {
 					ambientLightIntensity = value;
@@ -447,9 +457,9 @@
 
 				switch ( event.button ) {
 
-					case 0: fastZoom ? curZoomSpeed = fastZoomSpeed : curZoomSpeed = zoomSpeed;
+					case 0: fastZoom ? curZoomSpeed = fastZoomSpeed * curZoomStep.zoom_factor : curZoomSpeed = zoomSpeed * curZoomStep.zoom_factor;
 						break;
-					case 2: fastZoom ? curZoomSpeed = -fastZoomSpeed : curZoomSpeed = -zoomSpeed;
+					case 2: fastZoom ? curZoomSpeed = -fastZoomSpeed * curZoomStep.zoom_factor: curZoomSpeed = -zoomSpeed * curZoomStep.zoom_factor;
 						break;
 
 				}
@@ -493,8 +503,10 @@
 
 				var zoomStep = wheelZoomStep;
 
-				fastZoom ? zoomStep = fastWheelZoomStep : zoomStep = wheelZoomStep;
-				  zoom(event.wheelDeltaY * zoomStep);
+				fastZoom ? zoomStep = fastWheelZoomStep * curZoomStep.zoom_factor : zoomStep = wheelZoomStep * curZoomStep.zoom_factor;
+				zoom( event.wheelDeltaY * zoomStep );
+
+				//curZoomSpeed = event.wheelDeltaY * curZoomStep.zoom_factor;
 
 				return false;
 			}
@@ -508,7 +520,7 @@
 				//distanceTarget = distanceTarget < 350 ? 350 : distanceTarget;
 			}
 
-			function setZoomLevel( ui_value ){
+			function setZoomLevel( ui_value ){  // handler for slider zoom
 
 				var span = maxCameraDistance;
 

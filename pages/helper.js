@@ -49,3 +49,12 @@ var camDebug = function(){
   this.y = 0;
   this.z = 0;
 }
+var debug_curZoomStep = function() { this.zoom_factor = 0; }
+
+var clamp = function ( x, min, max ) {
+    return Math.min( max, Math.max( min, x ) );};
+
+var smoothStep = function ( edge0, edge1, x ) {
+    var t = clamp( ( x - edge0 ) / ( edge1 - edge0 ), 0.0, 1.0 );
+    return t * t * ( 3.0 - 2.0 * t );
+};

@@ -17,7 +17,7 @@ var initialCameraDistance = 4.5e6 * global.DistanceScale,
     initialCameraFOV = 45;
 
 var zoomSpeed = 1000, fastZoomSpeed = zoomSpeed * 50000,
-    wheelZoomStep = 30, fastWheelZoomStep = wheelZoomStep * 20;
+    wheelZoomStep = 300, fastWheelZoomStep = wheelZoomStep * 20;
     fastZoom = false;
 
 var cameraZoomDamp = 0.099;
@@ -29,3 +29,12 @@ var drawSkyBox = true;
 var ambientLightIntensity = 0.2;
 
 var debug = true;
+
+var zoomSteps = [
+  { id: 0, border: 0,             zoom_factor: 0 },
+  { id: 1, border: 778e6,         zoom_factor: 1 },          // from Earth to Jupiter
+  { id: 2, border: 6e9 + 20e6/global.DistanceScale,           zoom_factor: 3 },          // from Jupiter to Pluto
+  { id: 3, border: lyToKM(4.22),  zoom_factor: 10000 },         // from Pluto to first star (Proxima Centauri)
+  { id: 4, border: lyToKM(99.71), zoom_factor: 10000 }          // from first star to last star (Beta Reticuli)
+
+];

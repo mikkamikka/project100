@@ -101,6 +101,8 @@ var planets = [
 		distanceFromSunAU:42.0, period:80000},
 ];
 
+
+
 //Settings
 var drawOrbitCircles = false;
 var drawLensFlare = true;
