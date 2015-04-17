@@ -3,6 +3,7 @@ var asteroid;
 //var asteroid_cloud = [];
 
 var asteroidsCloud1, asteroidsCloud2, asteroidsCloud3;
+var KuiperBelt;
 
 //var asteroidDistanceScale = global.DistanceScale * LY /10;
 var maxAsteroidRange = global.DistanceScale * 100e6;
@@ -10,12 +11,13 @@ var maxAsteroidRadius = 2000;
 
 var fog = new THREE.Fog( 0x4584b4, - 100, 3000 );
 
+// shader modified from clouds shader by mr.doob (http://mrdoob.com/lab/javascript/webgl/clouds/)
 var cloudShader = {
       uniforms: {
         'texture': { type: 't', value: null },
 				'fogColor' : { type: "c", value: fog.color },
 				'fogNear' : { type: "f", value: 0 },
-				'fogFar' : { type: "f", value: 3e7 },
+				'fogFar' : { type: "f", value: 2e7 },
       },
       vertexShader: [
         'varying vec2 vUv;',
@@ -45,10 +47,11 @@ var cloudShader = {
 					'//gl_FragColor = mix( gl_FragColor, vec4( gl_FragColor.xyz, gl_FragColor.w ), fogFactor );',
 
 					'//if ( alpha > 0.5 ) alpha = 1.0 - alpha;',
-					'alpha = smoothstep( 0.0, 0.05, alpha ) * ( 1.0 - smoothstep( 0.8, 1.0, alpha ));',
+					'alpha = smoothstep( 0.0, 0.5, alpha ) * ( 1.0 - smoothstep( 0.8, 1.0, alpha ));',
 
 					'gl_FragColor.w = gl_FragColor.w * alpha;',
 					'gl_FragColor = vec4( gl_FragColor.xyz, gl_FragColor.w );',
+					'gl_FragColor = mix( vec4( fogColor, gl_FragColor.w ), gl_FragColor , fogFactor );',
 
         '}'
       ].join('\n')
@@ -79,12 +82,7 @@ asteroidsCloud.prototype.initAsteroidsCloud = function() {
 
 	var dist = new Random();
 
-	for ( var i = 0; i <= this.numAsteroids; i ++ ) {
-
-		//var gaussian = require('gaussian');
-
-
-		//console.log( dist.normal(0, 1) );
+	for ( var i = 0; i <= this.numAsteroids; i ++ ) {															// added and removed dynamically
 
 		var x = this.distribution * dist.normal(0, 0.5) + this.centerPos.x;
 		var y = this.distribution * dist.normal(0, 0.3) + this.centerPos.y;
@@ -105,13 +103,15 @@ asteroidsCloud.prototype.initAsteroidsCloud = function() {
 		this.asteroid_cloud[i] = asteroid;
 
 		//scene.add( this.asteroid_cloud[i].mesh );
+		console.log(asteroid);
 
 	}
 
 
-	this.pointClouds = createPointClouds (this.centerPos, this.distribution, 300, 10000);
-	this.dustCloud = createDustCloud (this.centerPos, this.distribution, 30, 1e6);
+	this.pointClouds = createPointClouds (this.centerPos, this.distribution, 300, 10000); // added and removed dynamically
+	this.dustCloud = createDustCloud (this.centerPos, this.distribution, 100, 5e5);
 	scene.add( this.dustCloud );
+
 
 }
 
@@ -131,7 +131,10 @@ asteroidsCloud.prototype.update = function() {
 			roid.mesh.rotation.y += roid.rotationSpeed.y;
 			roid.mesh.rotation.z += roid.rotationSpeed.z;
 
-
+			if ( roid.isInView ){
+				roid.mesh.material.opacity = 0;
+				roid.mesh.material.needsUpdate = true;
+			}
 
 			// add and remove asteroid
 			roid.distFromCamera = camera.position.distanceTo( roid.mesh.position );
@@ -153,6 +156,8 @@ asteroidsCloud.prototype.update = function() {
 					if (debug) console.log("Asteroid removed");
 				}
 			}
+
+
 
 		}
 
@@ -288,9 +293,7 @@ function createPointClouds ( centerPos, distribution, numParticles, maxSize ){
 			vertex.y = ( distribution * dist.normal(0, 0.5) + centerPos.y ) + vertex.x / 10;
 			vertex.z = distribution * dist.normal(0, 2) + centerPos.z;
 
-
 			geometries[i].vertices.push( vertex );
-
 		}
 
 		materials[i] = new THREE.PointCloudMaterial( {
@@ -321,7 +324,7 @@ function createDustCloud ( centerPos, distribution, numParticles, maxSize ){
 	var dist = new Random();
 
 	uniforms = THREE.UniformsUtils.clone(cloudShader.uniforms);
-	uniforms['texture'].value = THREE.ImageUtils.loadTexture("textures/asteroids/dust1.png");
+	uniforms['texture'].value = THREE.ImageUtils.loadTexture("textures/asteroids/dust2.png");
 
 	material = new THREE.ShaderMaterial( {
 
@@ -334,55 +337,31 @@ function createDustCloud ( centerPos, distribution, numParticles, maxSize ){
 
 					} );
 
+	geometry = new THREE.Geometry();
 
-//new THREE.PlaneBufferGeometry( width, height, widthSegments, heightSegments )
-//-=====================
-//geometry = new THREE.BufferGeometry();
+	for ( var i = 0; i < numParticles; i++ ) {
+		var plane = new THREE.Mesh( new THREE.PlaneGeometry( maxSize, maxSize ) );
+		//var x = distribution * dist.normal(0, 3) + centerPos.x;
+		//var y = distribution * dist.normal(0, 0.5) + centerPos.y ;
+		//var z = distribution * dist.normal(0, 2) + centerPos.z;
 
-// // create a simple square shape. We duplicate the top left and bottom right
-// // vertices because each vertex needs to appear once per triangle.
-// var vertexPositions = [
-// 	[-1.0, -1.0,  1.0],
-// 	[ 1.0, -1.0,  1.0],
-// 	[ 1.0,  1.0,  1.0],
-//
-// 	[ 1.0,  1.0,  1.0],
-// 	[-1.0,  1.0,  1.0],
-// 	[-1.0, -1.0,  1.0]
-// ];
-// var vertices = new Float32Array( vertexPositions.length * 3 ); // three components per vertex
-//
-// // components of the position vector for each vertex are stored
-// // contiguously in the buffer.
-// for ( var i = 0; i < vertexPositions.length; i++ )
-// {
-// 	vertices[ i*3 + 0 ] = vertexPositions[i][0];
-// 	vertices[ i*3 + 1 ] = vertexPositions[i][1];
-// 	vertices[ i*3 + 2 ] = vertexPositions[i][2];
-// }
-//
-// // itemSize = 3 because there are 3 values (components) per vertex
-// geometry.addAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
-//
-// //===================================
-//var plane = new THREE.Mesh( geometry );
+		plane.position.x = distribution * dist.uniform(-3, 3) * dist.normal(-3, 3) + centerPos.x;
+		//plane.position.y = distribution * dist.normal(0, 0.5) + centerPos.y  + plane.position.x / 10;
+		plane.position.y = distribution * dist.normal(0, 0.5) + centerPos.y  + plane.position.x / 10;
+		plane.position.z = distribution * dist.normal(0, 3) + centerPos.z;
 
-geometry = new THREE.Geometry();
+		plane.rotation.z = Math.random() * Math.PI;
+		plane.scale.x = plane.scale.y = Math.random() * Math.random() * 1.5 + 0.5;
 
-	for ( var i = 0; i < 30; i++ ) {
-		var plane = new THREE.Mesh( new THREE.PlaneGeometry( 6e5, 6e5 ) );
-		var x = distribution * dist.normal(0, 3) + centerPos.x;
-		var y = distribution * dist.normal(0, 0.5) + centerPos.y ;
-		var z = distribution * dist.normal(0, 2) + centerPos.z;
-		//plane.rotation.z = Math.random() * Math.PI;
-		//plane.scale.x = plane.scale.y = Math.random() * Math.random() * 1.5 + 0.5;
+		//matrix.makeTranslation( 100, 1000, 1000 );
+		//plane.matrix.makeRotationZ( dist.normal(0, 3) );
 
-		var matrix = new THREE.Matrix4();
+		//plane.matrix.makeTranslation( plane.position.x, plane.position.y, plane.position.z );
+		//matrix.makeRotationZ( dist.normal(0, 3) );
 
-		matrix.makeTranslation( x, y, z );
-		//matrix.makeRotationZ( Math.random() * PI );
+		plane.updateMatrix();
 
-		geometry.merge( plane.geometry, matrix );
+		geometry.merge( plane.geometry, plane.matrix );
 
 	}
 
@@ -400,8 +379,15 @@ function initAsteroids(){
 	asteroidsCloud1.centerPos = new THREE.Vector3( 0, 0, auToKM(1.8) * global.DistanceScale );
 	asteroidsCloud1.asteroid_cloud = [];
 	asteroidsCloud1.distribution = 30e6 * global.DistanceScale;
-
 	asteroidsCloud1.initAsteroidsCloud();
+
+	KuiperBelt = new asteroidsCloud();
+	KuiperBelt.numAsteroids = 250;
+	KuiperBelt.centerPos = new THREE.Vector3( 0, 0, auToKM(42) * global.DistanceScale );
+	KuiperBelt.asteroid_cloud = [];
+	KuiperBelt.distribution = 60e6 * global.DistanceScale;
+	KuiperBelt.initAsteroidsCloud();
+
 
 	console.log("Init asteroids done");
 
@@ -410,5 +396,6 @@ function initAsteroids(){
 function asteroidsUpdate(){
 
 	asteroidsCloud1.update();
+	KuiperBelt.update();
 
 }

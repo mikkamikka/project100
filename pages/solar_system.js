@@ -66,8 +66,13 @@ var Shaders = {
           "float viewDot = abs(dot( vNormal, vec3(viewPosition.xy, 1.0) ));",
           "viewDot = clamp( pow( viewDot + 0.9, 10.0 ), 0.0, 1.0);",
 
+          'float depth = gl_FragCoord.z / gl_FragCoord.w;',
+          'float alpha = ( 150000.0 - depth ) / 150000.0;',
+          '//alpha = ( 1.0 - smoothstep( 0.5, 1.0, alpha ));',
+          'gl_FragColor.w = viewDot * alpha;',
+
           //'gl_FragColor = vec4( diffuse , 1.0 );',
-          'gl_FragColor = vec4( outer_fog , viewDot );',
+          'gl_FragColor = vec4( outer_fog , gl_FragColor.w );',
 
         '}'
       ].join('\n')
@@ -184,7 +189,7 @@ function initSolarSystem() {
 
     });
 
-     var geometryAtmo = new THREE.SphereGeometry( planets[2].radius*1.04, 100, 50 );
+     var geometryAtmo = new THREE.SphereGeometry( planets[2].radius*1.05, 100, 50 );
      var sphereAtmoMesh = new THREE.Mesh( geometryAtmo, atmoMaterial );
      //sphereAtmoMesh.scale.set( 1.0, 1.0, 1.0 );
      scene.add( sphereAtmoMesh );
