@@ -8,12 +8,14 @@ var asteroidsCloud1, asteroidsCloud2, asteroidsCloud3;
 var maxAsteroidRange = global.DistanceScale * 100e6;
 var maxAsteroidRadius = 2000;
 
+var fog = new THREE.Fog( 0x4584b4, - 100, 3000 );
+
 var cloudShader = {
       uniforms: {
         'texture': { type: 't', value: null },
-				'fogColor' : { type: "c", value: 0x525266 },
-				'fogNear' : { type: "f", value: -100 },
-				'fogFar' : { type: "f", value: 1e12 },
+				'fogColor' : { type: "c", value: fog.color },
+				'fogNear' : { type: "f", value: 0 },
+				'fogFar' : { type: "f", value: 3e7 },
       },
       vertexShader: [
         'varying vec2 vUv;',
@@ -34,8 +36,19 @@ var cloudShader = {
 					'float fogFactor = smoothstep( fogNear, fogFar, depth );',
 
 					'gl_FragColor = texture2D( texture, vUv );',
-					'gl_FragColor.w *= pow( gl_FragCoord.z, 20.0 );',
-					'gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );',
+					'//gl_FragColor.w *= pow( gl_FragCoord.z, 20.0 );',
+					'//gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );',
+
+
+					'float alpha = ( fogFar - depth ) / ( fogFar - fogNear );',
+
+					'//gl_FragColor = mix( gl_FragColor, vec4( gl_FragColor.xyz, gl_FragColor.w ), fogFactor );',
+
+					'//if ( alpha > 0.5 ) alpha = 1.0 - alpha;',
+					'alpha = smoothstep( 0.0, 0.05, alpha ) * ( 1.0 - smoothstep( 0.8, 1.0, alpha ));',
+
+					'gl_FragColor.w = gl_FragColor.w * alpha;',
+					'gl_FragColor = vec4( gl_FragColor.xyz, gl_FragColor.w );',
 
         '}'
       ].join('\n')
