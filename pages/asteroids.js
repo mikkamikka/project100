@@ -64,7 +64,7 @@ function Asteroid(){
 	this.isInCameraRange = false;
 	this.rotationSpeed = new THREE.Vector3();
 	this.isInView = false;
-	this.distFromCamera = 0;
+
 }
 
 function asteroidsCloud(){

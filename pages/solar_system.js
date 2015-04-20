@@ -53,14 +53,15 @@ var Shaders = {
           "vec3 normal = normalize( -vNormal );",
           "vec3 viewPosition = normalize( vViewPosition );",
 
-          'vec3 diffuse = texture2D( texture, vUv ).xyz;',
+          //'vec4 diffuse = texture2D( texture, vUv );',
 
-          'float outer_intensity = pow(abs( 0.8 - dot( vNormal, vec3( 0, 0, 1.0 ) ) ), 12.0 );',
+          //'float outer_intensity = pow(abs( 0.8 - dot( vNormal, vec3( 0, 0, 1.0 ) ) ), 12.0 );',
+          'float intensity	= pow( 0.8 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 1.9 );',
 
-          'vec3 outer_fog = vec3( 0.8, 0.8, 1.0 ) * outer_intensity;',
+          'vec3 outer_fog = vec3( 0.0, 0.6, 0.88 ) * intensity;',
 
-          'float inner_intensity = abs(1.05 - dot( vNormal, vec3( 0.0, 0.0, 1.0 ) ) );',
-          'vec3 atmosphere = vec3( 1.0, 1.0, 1.0 ) * pow( inner_intensity, 3.0 );',
+          //'float inner_intensity = abs(1.05 - dot( vNormal, vec3( 0.0, 0.0, 1.0 ) ) );',
+          //'vec3 atmosphere = vec3( 1.0, 1.0, 1.0 ) * pow( inner_intensity, 3.0 );',
 
           //Fade out atmosphere at edge
           "float viewDot = abs(dot( vNormal, vec3(viewPosition.xy, 1.0) ));",
@@ -68,11 +69,14 @@ var Shaders = {
 
           'float depth = gl_FragCoord.z / gl_FragCoord.w;',
           'float alpha = ( 150000.0 - depth ) / 150000.0;',
-          '//alpha = ( 1.0 - smoothstep( 0.5, 1.0, alpha ));',
-          'gl_FragColor.w = viewDot * alpha;',
+          //'//alpha = ( 1.0 - smoothstep( 0.5, 1.0, alpha ));',
+          'gl_FragColor.w = viewDot * alpha;',  // fix to fade out atmo at distance
 
-          //'gl_FragColor = vec4( diffuse , 1.0 );',
-          'gl_FragColor = vec4( outer_fog , gl_FragColor.w );',
+          //'gl_FragColor.w = 1.0;',
+
+          //'gl_FragColor = diffuse;',
+          //'gl_FragColor = vec4( outer_fog , gl_FragColor.w );',
+          'gl_FragColor.xyz = outer_fog;',
 
         '}'
       ].join('\n')
@@ -91,9 +95,9 @@ var planets = [
 		distanceFromSunAU:1.524, period:687},
 	{name:"jupiter", radius:71880, rotationSpeed:0.05, tilt:0.2, distanceFromSun:778e6,
 		distanceFromSunAU:5.203, period:4380},
-	{name:"saturn", radius:60210, rotationSpeed:0.05, tilt:0.5, distanceFromSun:1427e6,
+	{name:"saturn", radius:60210, rotationSpeed:0.05, tilt:0.25, distanceFromSun:1427e6,
 		distanceFromSunAU:9.54, period:10753},
-	{name:"uranus", radius:25650, rotationSpeed:0.03, tilt:0.41, distanceFromSun:2.86e9,
+	{name:"uranus", radius:25650, rotationSpeed:0.03, tilt:-0.41, distanceFromSun:2.86e9,
 		distanceFromSunAU:19.2, period:30660},
 	{name:"neptune", radius:24750, rotationSpeed:0.02, tilt:0.41, distanceFromSun:4.5e9,
 		distanceFromSunAU:30.0, period:60225},
@@ -172,7 +176,6 @@ function initSolarSystem() {
 	meshEarth.rotation.z = tilt;
 	scene.add( meshEarth );
 
-
   // atmosphere fog
 
     shader = Shaders['atmosphere'];
@@ -185,13 +188,14 @@ function initSolarSystem() {
       uniforms: uniforms,
       vertexShader: shader.vertexShader,
       fragmentShader: shader.fragmentShader,
-      side: THREE.BackSide,
+      side: THREE.FrontSide,
       blending: THREE.AdditiveBlending,
-      transparent: true
+      transparent: true,
+      depthWrite	: false
 
     });
 
-     var geometryAtmo = new THREE.SphereGeometry( planets[2].radius*1.05, 100, 50 );
+     var geometryAtmo = new THREE.SphereGeometry( planets[2].radius*1.02, 100, 50 );
      var sphereAtmoMesh = new THREE.Mesh( geometryAtmo, atmoMaterial );
      //sphereAtmoMesh.scale.set( 1.0, 1.0, 1.0 );
      scene.add( sphereAtmoMesh );
@@ -227,11 +231,7 @@ function initSolarSystem() {
    	meshClouds.scale.set( cloudsScale, cloudsScale, cloudsScale );
    	//meshClouds.position.set( meshEarth.position );
    	meshClouds.rotation.z = tilt;
-   	scene.add( meshClouds );
-
-
-
-
+   scene.add( meshClouds );
 
 
 	// moon
@@ -257,7 +257,6 @@ function initSolarSystem() {
 	//camera.lookAt( meshEarth.position );
 
 	SetLight();
-
 
 	console.log("Init solar system done");
 
@@ -388,7 +387,7 @@ function initPlanets(){
 
 		var planet = planets[i];
 
-		if (i != 2){		// skip Earth
+		if ( i != 2 ) {		// skip Earth
 
 			var material = new THREE.MeshPhongMaterial( {
 				//specular: 0x555555,
@@ -406,18 +405,92 @@ function initPlanets(){
 
 			var relativePos = new THREE.Vector3( 0, 0 , planet.distanceFromSun * global.DistanceScale );
 			var posFromSun = sunPos.clone().add(relativePos);
-      planet.mesh.position.set(posFromSun.x, posFromSun.y, posFromSun.z);
+
+      var deltaX = 0, deltaY = 0;
+      switch (i) {
+        case 0:   //mercury
+          deltaX = + 20000; deltaY = 1000;
+          break;
+        case 1:   //venus
+          deltaX = + 300000; deltaY = 200000;
+          break;
+        case 3:   //mars
+          deltaX = 12000; deltaY = 4000;
+          break;
+        case 4:   //jupiter
+          deltaX = -80000; deltaY = -40000;
+          break;
+        case 5:   //saturn
+         deltaX = 90000; deltaY = 30000;
+          break;
+        case 6:   //uranus
+          deltaX = -80000; deltaY = -50000;
+          break;
+        case 7:   //neptune
+          deltaX = 90000; deltaY = 2000;
+          break;
+        case 8:   //pluto
+          deltaX = -20000; deltaY = 1500;
+          break;
+
+      }
+
+      planet.mesh.position.set( deltaX, deltaY, posFromSun.z);
 
 			//meshMoon.position.applyAxisAngle( axis_y, -90 * Math.PI / 180 );
 			//meshMoon.scale.set( moonScale, moonScale, moonScale );
 
 			//meshPlanet.rotation.y = 0;
-      planet.mesh.rotation.z = planet.tilt;
+//      planet.mesh.rotation.z = planet.tilt;
+var rotation_matrix = new THREE.Matrix4().makeRotationX(0);
+planet.mesh.rotation.set( planet.tilt, 0, planet.tilt / 2 ); // Set initial rotation
+planet.mesh.matrix.makeRotationFromEuler(planet.mesh.rotation); // Apply rotation to the object's matrix
+
 
       planets[i] = planet;
 
 			scene.add( planets[i].mesh );
 
+      if ( i == 5 ) {         // Saturn rings
+
+        var material = new THREE.MeshPhongMaterial( {
+  				map: THREE.ImageUtils.loadTexture( "textures/planets/saturn_rings.png" ),
+          side: THREE.DoubleSide,
+          //blending: THREE.AdditiveBlending,
+          transparent: true,
+          opacity		: 0.99
+
+  			} );
+
+  			var geometry = new THREE.PlaneBufferGeometry( 4.6 * planet.radius * global.ObjScale, 4.6 * planet.radius * global.ObjScale );
+
+        var saturn_rings = new THREE.Mesh( geometry, material );
+
+  			var ringsPos = planet.mesh.position.clone();
+        saturn_rings.position.set( ringsPos.x, ringsPos.y, ringsPos.z );
+
+        var rotation_matrix = new THREE.Matrix4().makeRotationX(0);
+        saturn_rings.rotation.set( PI + PI_HALF + planet.tilt/2,  -planet.tilt /2 , 0 ); // Set initial rotation
+        saturn_rings.matrix.makeRotationFromEuler( saturn_rings.rotation ); // Apply rotation to the object's matrix
+
+        scene.add( saturn_rings );
+
+      }
+
+      if ( i == 6 ) {         // Uranus rings
+
+        var uranus_rings = createUranusRing();
+        uranus_rings.scale.multiplyScalar( planet.radius * 3 );
+        var ringsPos = planet.mesh.position.clone();
+        uranus_rings.position.set( ringsPos.x, ringsPos.y, ringsPos.z );
+
+        var rotation_matrix = new THREE.Matrix4().makeRotationX(0);
+        uranus_rings.rotation.set( PI + PI_HALF + planet.tilt/2,  -planet.tilt /2 , 0 ); // Set initial rotation
+        uranus_rings.matrix.makeRotationFromEuler( uranus_rings.rotation ); // Apply rotation to the object's matrix
+
+        scene.add( uranus_rings );
+
+      }
 		}
 
 		if (drawOrbitCircles){
@@ -427,6 +500,133 @@ function initPlanets(){
 	}
 
 }
+
+//=== modified from https://github.com/jeromeetienne/threex.planets/;   author
+var createUranusRing	= function(){
+	// create destination canvas
+	var canvasResult	= document.createElement('canvas');
+	canvasResult.width	= 1024;
+	canvasResult.height	= 72;
+	var contextResult	= canvasResult.getContext('2d');
+  //var material;
+
+	var imageMap	= new Image();
+	imageMap.addEventListener("load", function() {
+
+		// create dataMap ImageData
+		var canvasMap	= document.createElement('canvas')
+		canvasMap.width	= imageMap.width
+		canvasMap.height= imageMap.height
+		var contextMap	= canvasMap.getContext('2d')
+		contextMap.drawImage(imageMap, 0, 0)
+		var dataMap	= contextMap.getImageData(0, 0, canvasMap.width, canvasMap.height)
+
+		// load maps
+		var imageTrans	= new Image();
+		imageTrans.addEventListener("load", function(){
+			// create dataTrans ImageData for earthcloudmaptrans
+			var canvasTrans		= document.createElement('canvas')
+			canvasTrans.width	= imageTrans.width
+			canvasTrans.height	= imageTrans.height
+			var contextTrans	= canvasTrans.getContext('2d')
+			contextTrans.drawImage(imageTrans, 0, 0)
+			var dataTrans		= contextTrans.getImageData(0, 0, canvasTrans.width, canvasTrans.height)
+			// merge dataMap + dataTrans into dataResult
+			var dataResult		= contextMap.createImageData(canvasResult.width, canvasResult.height)
+			for(var y = 0, offset = 0; y < imageMap.height; y++){
+				for(var x = 0; x < imageMap.width; x++, offset += 4){
+					dataResult.data[offset+0]	= dataMap.data[offset+0]
+					dataResult.data[offset+1]	= dataMap.data[offset+1]
+					dataResult.data[offset+2]	= dataMap.data[offset+2]
+					dataResult.data[offset+3]	= 255 - dataTrans.data[offset+0]/2
+				}
+			}
+			// update texture with result
+			contextResult.putImageData(dataResult,0,0)
+			material.map.needsUpdate = true;
+		})
+		imageTrans.src	= 'textures/planets/uranusringtrans.gif';
+	}, false);
+	imageMap.src	= 'textures/planets/uranusringcolour.jpg';
+
+	var geometry	= new _RingGeometry(0.55, 0.75, 64);
+	var material	= new THREE.MeshPhongMaterial({
+		map		: new THREE.Texture( canvasResult ),
+		// map		: THREE.ImageUtils.loadTexture(THREEx.Planets.baseURL+'images/ash_uvgrid01.jpg'),
+		side		: THREE.DoubleSide,
+		transparent	: true,
+		opacity		: 0.8
+	});
+
+  var mesh	= new THREE.Mesh( geometry, material );
+	//mesh.lookAt( new THREE.Vector3(0.5,-4,1) );
+	return mesh;
+}
+
+function _RingGeometry ( innerRadius, outerRadius, thetaSegments ) {
+
+	THREE.Geometry.call( this );
+
+	innerRadius	= innerRadius || 0;
+	outerRadius	= outerRadius || 50;
+	thetaSegments	= thetaSegments	|| 8;
+
+	var normal	= new THREE.Vector3( 0, 0, 1 );
+
+	for(var i = 0; i < thetaSegments; i++ ){
+		var angleLo	= (i / thetaSegments) *Math.PI*2
+		var angleHi	= ((i+1) / thetaSegments) *Math.PI*2
+
+		var vertex1	= new THREE.Vector3(innerRadius * Math.cos(angleLo), innerRadius * Math.sin(angleLo), 0);
+		var vertex2	= new THREE.Vector3(outerRadius * Math.cos(angleLo), outerRadius * Math.sin(angleLo), 0);
+		var vertex3	= new THREE.Vector3(innerRadius * Math.cos(angleHi), innerRadius * Math.sin(angleHi), 0);
+		var vertex4	= new THREE.Vector3(outerRadius * Math.cos(angleHi), outerRadius * Math.sin(angleHi), 0);
+
+		this.vertices.push( vertex1 );
+		this.vertices.push( vertex2 );
+		this.vertices.push( vertex3 );
+		this.vertices.push( vertex4 );
+
+		var vertexIdx	= i * 4;
+
+		// Create the first triangle
+		var face = new THREE.Face3(vertexIdx + 0, vertexIdx + 1, vertexIdx + 2, normal);
+		var uvs = [];
+
+		var uv = new THREE.Vector2(0, 0);
+		uvs.push(uv);
+		var uv = new THREE.Vector2(1, 0);
+		uvs.push(uv);
+		var uv = new THREE.Vector2(0, 1);
+		uvs.push(uv);
+
+		this.faces.push(face);
+		this.faceVertexUvs[0].push(uvs);
+
+		// Create the second triangle
+		var face = new THREE.Face3(vertexIdx + 2, vertexIdx + 1, vertexIdx + 3, normal);
+		var uvs = [];
+
+		var uv = new THREE.Vector2(0, 1);
+		uvs.push(uv);
+		var uv = new THREE.Vector2(1, 0);
+		uvs.push(uv);
+		var uv = new THREE.Vector2(1, 1);
+		uvs.push(uv);
+
+		this.faces.push(face);
+		this.faceVertexUvs[0].push(uvs);
+	}
+
+	//this.computeCentroids();
+	this.computeFaceNormals();
+
+	this.boundingSphere = new THREE.Sphere( new THREE.Vector3(), outerRadius );
+
+};
+_RingGeometry.prototype = Object.create( THREE.Geometry.prototype );
+//==============================================================================
+
 
 function OrbitCircle(radius){
 
@@ -475,13 +675,9 @@ function OrbitCircle(radius){
 }
 
 
-
-
-
 function renderSolarSystem() {
 
 	//camera.lookAt( meshEarth.position );
-
 
   // Earth update
 	meshEarth.rotation.y += rotationSpeed * delta;
@@ -504,18 +700,18 @@ function renderSolarSystem() {
         else {                // is behind the camera
 
           //planets[i].mesh.position.x += ((camera.position.x - planets[i].radius) - planets[i].mesh.position.x) * 0.03;
-          planets[i].mesh.position.x = camera.position.x - planets[i].radius * 1.5; // - deltaZ;
-          planets[i].mesh.position.y = camera.position.y - planets[i].radius * 1;
+          //planets[i].mesh.position.x = camera.position.x - planets[i].radius * 1.5; // - deltaZ;
+          //planets[i].mesh.position.y = camera.position.y - planets[i].radius * 1;
 
         }
 
       }
 
       // move planet along its orbit
-      planets[i].mesh.position.x += (0 - planets[i].mesh.position.x) * 0.000005;
+      //planets[i].mesh.position.x += (0 - planets[i].mesh.position.x) * 0.000005;
 
       //rotate planets around its poles axis
-      planets[i].mesh.rotation.y += planets[i].rotationSpeed * delta /2;
+  //    planets[i].mesh.rotation.y += planets[i].rotationSpeed * delta /2;
 
 
     }

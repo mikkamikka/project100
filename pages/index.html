@@ -320,6 +320,9 @@
 				stats.update();
 
 				realDistanceKM = Math.round(distance) / global.DistanceScale;
+
+				if (curZoomStep.id > 3) realDistanceKM /= global.starsDistanceScale;
+
 				//OutDistance.innerHTML = "Distance from Earth: " + camera.position.distanceTo(earthPos);
 				OutDistance.innerHTML = "Distance from Earth: " + realDistanceKM + " km   /   "
 																+ kmToLY(realDistanceKM).toPrecision(3) + " light years";
@@ -356,12 +359,9 @@
 					rotation.x += (target.x - rotation.x) * 0.1;
 					rotation.y += (target.y - rotation.y) * 0.1;
 
-
 					distance += (distanceTarget - distance) * cameraZoomDamp;
 
 				}
-
-
 
 				camera.position.x = distance * Math.sin(rotation.x) * Math.cos(rotation.y);
 				camera.position.y = distance * Math.sin(rotation.y);
@@ -414,7 +414,6 @@
 				// 	renderer.gammaInput = value;
 				// });
 			}
-
 
 
 			//Event handlers

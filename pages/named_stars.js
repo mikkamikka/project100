@@ -3,8 +3,9 @@
 var stars = [];
 var show_amount = 716;
 var isHideDwarfs = true;
-var DistanceScale = global.DistanceScale * LY ;
-var maxFlareRange = global.DistanceScale * LY * 1;
+var DistanceScale = global.DistanceScale * LY * global.starsDistanceScale;
+var maxFlareRange = global.DistanceScale * LY * global.starsDistanceScale * 2;
+//var maxFlareRange = DistanceScale;
 var maxFlareRangeLY = kmToLY(maxFlareRange);
 
 if (debug) console.log('stars maxFlareRange, light years: ' + maxFlareRangeLY);
@@ -98,12 +99,12 @@ function initNamedStars() {
 		stars[i].distance = source.dist;
 
 		stars[i].position.set(
-			source.galX * 1e9,
-			source.galY * 1e9,
+			source.galX * 5e6,
+			source.galY * 5e6,
 			Math.abs( stars[i].distance * DistanceScale )
 			);
 
-		if ( stars[i-1] != undefined )
+		if ( stars[i-1] != undefined )			// trick to show double stars with gap
 			if ( stars[i-1].distance == stars[i].distance ){
 
 				//if (debug) console.log(stars[i].name + " double star");
@@ -155,7 +156,9 @@ function lensFlareUpdateCallbackStars( object ) {
 
 	     //flare.scale = 1 / Math.pow( kmToLY( distFromCamera / global.DistanceScale ), 1 / 4 );
 			 //flare.scale = 1 / kmToLY( maxFlareRange - distFromCamera / global.DistanceScale ) * 0.3;
-			 flare.scale = 5 * ( maxFlareRange - distFromCamera ) / maxFlareRange;
+			//'float alpha = ( fogFar - depth ) / ( fogFar - fogNear );',
+			 var descending = ( maxFlareRange - distFromCamera ) / maxFlareRange;
+			 flare.scale = 5 *	smoothstep( 0.0, 1.0, descending );
 	}
 
 }
@@ -181,29 +184,27 @@ function initStarsPointCloud() {
 		for ( var i = 0; i < stars.length; i++ ) {
 			if (stars[i] == undefined) continue;
 			vertex = stars[i].position.clone();
-			geometry.vertices.push( vertex );
+			geometry.vertices.push( new THREE.Vector3( vertex.x, vertex.y, vertex.z - 1e6 ) );
 			geometry.colors.push( new THREE.Color( stars[i].color ) );
+
 		}
 
-		sprite = THREE.ImageUtils.loadTexture( "textures/lensflare/lensflare_star1.png" );
+		sprite = THREE.ImageUtils.loadTexture( "textures/lensflare/star2_alpha.png" );
 		material = new THREE.PointCloudMaterial( {
-      size: 10e9,
+      size: 1e7,
       sizeAttenuation: true,
       map: sprite,
       transparent: true,
-      blending: THREE.AdditiveBlending,
+      //blending: THREE.AdditiveBlending,
+			depthWrite: false,
+			depthTest: true,
       vertexColors: true
     } );
 
 		particles = new THREE.PointCloud( geometry, material );
-
+		particles.geometry.colorsNeedUpdate = true;
 		scene.add( particles );
 }
-
-
-
-
-
 
 
 function init_renderer() {
