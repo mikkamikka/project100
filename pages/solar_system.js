@@ -151,6 +151,7 @@ function initSolarSystem() {
 	//scene.add( sunMesh );
   if (drawLensFlare) initLensFlare();    // draw lensflares instead of mesh
 
+  initStarFX( sunPos, 0 );
 
   //// Earth
 
@@ -309,12 +310,13 @@ function initLensFlare(){
   var flareColor2 = new THREE.Color( 0x888888 );
 
   // LensFlare(texture, size, distance, blending, color)
-	var lensFlare = new THREE.LensFlare( textureFlare_star1, 512, 0.0, THREE.AdditiveBlending, flareColor );
+	//var lensFlare = new THREE.LensFlare( textureFlare_star1, 512, 0.0, THREE.AdditiveBlending, flareColor );
+  var lensFlare = new THREE.LensFlare( textureFlare_line2, 256, 0.0, THREE.AdditiveBlending, flareColor2 );
 
-   lensFlare.add( textureFlare_line2, 256, 0.0, THREE.AdditiveBlending, flareColor2 );
-   lensFlare.lensFlares[ 1 ].rotation = THREE.Math.degToRad( 0 );
+   //lensFlare.add( textureFlare_line2, 256, 0.0, THREE.AdditiveBlending, flareColor2 );
+   lensFlare.lensFlares[ 0 ].rotation = THREE.Math.degToRad( 0 );
    lensFlare.add( textureFlare_line3, 512, 0.0, THREE.AdditiveBlending, flareColor2 );
-   lensFlare.lensFlares[ 2 ].rotation = THREE.Math.degToRad( 90 );
+   lensFlare.lensFlares[ 1 ].rotation = THREE.Math.degToRad( 90 );
 
 	lensFlare.add( textureFlare_ring2, 20, 0.8, THREE.AdditiveBlending, flareColor );
 	lensFlare.add( textureFlare_ring2, 30, 0.85, THREE.AdditiveBlending, flareColor );
@@ -370,7 +372,7 @@ function lensFlareUpdateCallback( object ) {
        //flare.rotation += ( flare.wantedRotation - flare.rotation ) * 0.25;
 
        //flare.scale = 1 / Math.sqrt(distance) * 300;
-       flare.scale = 1 / Math.pow(distance, 1/3) * 100;
+       flare.scale = 1 / Math.pow( distance, 1/3 ) * 100;
        //flare.scale = 0.0;
        //console.log(flare.scale);
 	}
@@ -389,22 +391,24 @@ function initPlanets(){
 
 		if ( i != 2 ) {		// skip Earth
 
+      var texture = THREE.ImageUtils.loadTexture( "textures/planets/" + planet.name + ".jpg" );
+      texture.minFilter = THREE.LinearFilter;
 			var material = new THREE.MeshPhongMaterial( {
 				//specular: 0x555555,
 				//shininess: 30,
-				map: THREE.ImageUtils.loadTexture( "textures/planets/" + planet.name + ".jpg" )
+				map: texture
 				//specularMap: THREE.ImageUtils.loadTexture( "textures/planets/earth_specular_2048.jpg" ),
 				//normalMap: THREE.ImageUtils.loadTexture( "textures/planets/earth_normal_2048.jpg" ),
 				//normalScale: new THREE.Vector2( 0.5, 0.5 )
 			} );
 
-			var geometry = new THREE.SphereGeometry( planet.radius * global.ObjScale , 60, 30 );
-			//geometry.computeTangents();
+			var geometry = new THREE.SphereGeometry( planet.radius * global.ObjScale , 120, 60 );
+			geometry.computeTangents();
 
-      planet.mesh = new THREE.Mesh( geometry, material);
+      planet.mesh = new THREE.Mesh( geometry, material );
 
 			var relativePos = new THREE.Vector3( 0, 0 , planet.distanceFromSun * global.DistanceScale );
-			var posFromSun = sunPos.clone().add(relativePos);
+			var posFromSun = sunPos.clone().add( relativePos );
 
       var deltaX = 0, deltaY = 0;
       switch (i) {
@@ -421,7 +425,7 @@ function initPlanets(){
           deltaX = -80000; deltaY = -40000;
           break;
         case 5:   //saturn
-         deltaX = 90000; deltaY = 30000;
+         deltaX = 90000; deltaY = -30000;
           break;
         case 6:   //uranus
           deltaX = -80000; deltaY = -50000;
@@ -435,17 +439,12 @@ function initPlanets(){
 
       }
 
-      planet.mesh.position.set( deltaX, deltaY, posFromSun.z);
+      planet.mesh.position.set( deltaX, deltaY, posFromSun.z );
 
-			//meshMoon.position.applyAxisAngle( axis_y, -90 * Math.PI / 180 );
-			//meshMoon.scale.set( moonScale, moonScale, moonScale );
+      planet.rotation_matrix = new THREE.Matrix4().makeRotationY( 0.001 );
 
-			//meshPlanet.rotation.y = 0;
-//      planet.mesh.rotation.z = planet.tilt;
-var rotation_matrix = new THREE.Matrix4().makeRotationX(0);
-planet.mesh.rotation.set( planet.tilt, 0, planet.tilt / 2 ); // Set initial rotation
-planet.mesh.matrix.makeRotationFromEuler(planet.mesh.rotation); // Apply rotation to the object's matrix
-
+      planet.mesh.rotation.set( planet.tilt, 0, planet.tilt / 2 ); // Set initial rotation
+      planet.mesh.matrix.makeRotationFromEuler( planet.mesh.rotation ); // Apply rotation to the object's matrix
 
       planets[i] = planet;
 
@@ -453,8 +452,13 @@ planet.mesh.matrix.makeRotationFromEuler(planet.mesh.rotation); // Apply rotatio
 
       if ( i == 5 ) {         // Saturn rings
 
+        planet.mesh.rotation.set( 0, 0, planet.tilt );
+        planet.mesh.matrix.makeRotationFromEuler( planet.mesh.rotation );
+
+        var texture = THREE.ImageUtils.loadTexture( "textures/planets/saturn_rings.png" );
+        texture.minFilter = THREE.LinearFilter;
         var material = new THREE.MeshPhongMaterial( {
-  				map: THREE.ImageUtils.loadTexture( "textures/planets/saturn_rings.png" ),
+  				map: texture,
           side: THREE.DoubleSide,
           //blending: THREE.AdditiveBlending,
           transparent: true,
@@ -469,8 +473,8 @@ planet.mesh.matrix.makeRotationFromEuler(planet.mesh.rotation); // Apply rotatio
   			var ringsPos = planet.mesh.position.clone();
         saturn_rings.position.set( ringsPos.x, ringsPos.y, ringsPos.z );
 
-        var rotation_matrix = new THREE.Matrix4().makeRotationX(0);
-        saturn_rings.rotation.set( PI + PI_HALF + planet.tilt/2,  -planet.tilt /2 , 0 ); // Set initial rotation
+        //var rotation_matrix = new THREE.Matrix4().makeRotationX(0);
+        saturn_rings.rotation.set( PI_HALF, planet.tilt - planet.tilt/4 , 0 ); // Set initial rotation
         saturn_rings.matrix.makeRotationFromEuler( saturn_rings.rotation ); // Apply rotation to the object's matrix
 
         scene.add( saturn_rings );
@@ -493,7 +497,7 @@ planet.mesh.matrix.makeRotationFromEuler(planet.mesh.rotation); // Apply rotatio
       }
 		}
 
-		if (drawOrbitCircles){
+		if ( drawOrbitCircles ){
 			OrbitCircle( planet.distanceFromSun * global.DistanceScale );
 		}
 
@@ -501,7 +505,7 @@ planet.mesh.matrix.makeRotationFromEuler(planet.mesh.rotation); // Apply rotatio
 
 }
 
-//=== modified from https://github.com/jeromeetienne/threex.planets/;   author
+//=== modified from https://github.com/jeromeetienne/threex.planets/;
 var createUranusRing	= function(){
 	// create destination canvas
 	var canvasResult	= document.createElement('canvas');
@@ -550,8 +554,10 @@ var createUranusRing	= function(){
 	imageMap.src	= 'textures/planets/uranusringcolour.jpg';
 
 	var geometry	= new _RingGeometry(0.55, 0.75, 64);
+  var texture = new THREE.Texture( canvasResult );
+  texture.minFilter = THREE.LinearFilter;
 	var material	= new THREE.MeshPhongMaterial({
-		map		: new THREE.Texture( canvasResult ),
+		map		: texture,
 		// map		: THREE.ImageUtils.loadTexture(THREEx.Planets.baseURL+'images/ash_uvgrid01.jpg'),
 		side		: THREE.DoubleSide,
 		transparent	: true,
@@ -711,8 +717,10 @@ function renderSolarSystem() {
       //planets[i].mesh.position.x += (0 - planets[i].mesh.position.x) * 0.000005;
 
       //rotate planets around its poles axis
-  //    planets[i].mesh.rotation.y += planets[i].rotationSpeed * delta /2;
+      //    planets[i].mesh.rotation.y += planets[i].rotationSpeed * delta /2;
 
+      planets[i].mesh.matrix.multiply( planets[i].rotation_matrix );
+      planets[i].mesh.rotation.setFromRotationMatrix( planets[i].mesh.matrix );
 
     }
   }

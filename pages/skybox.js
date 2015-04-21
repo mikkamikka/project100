@@ -90,7 +90,7 @@ function renderSkybox() {
                                             )
                           );
 
-  cameraCube.fov = cameraCubeFOV + (distance - initialCameraDistance)/1e12;
+  cameraCube.fov = cameraCubeFOV + (distance - initialCameraDistance)/4e8;
 
 
   //cameraCube.position.z += distance /1200;

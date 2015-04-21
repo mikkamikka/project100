@@ -72,6 +72,7 @@ function asteroidsCloud(){
   this.centerPos = new THREE.Vector3();
   this.asteroid_cloud = [];
 	this.distribution = 0;
+	this.distribution3Droids = 0;
 	this.pointClouds = [];
 	this.isInView = false;
 	this.distFromCamera = 0;
@@ -89,13 +90,13 @@ asteroidsCloud.prototype.initAsteroidsCloud = function() {
 
 	for ( var i = 0; i <= this.numAsteroids; i ++ ) {															// added and removed dynamically
 
-		var x = this.distribution * dist.normal(0, 0.5) + this.centerPos.x;
-		var y = this.distribution * dist.normal(0, 0.3) + this.centerPos.y;
-		var z = this.distribution * dist.normal(0, 0.5) + this.centerPos.z;
+		var x = this.distribution3Droids * dist.normal(0, 0.5) + this.centerPos.x;
+		var y = this.distribution3Droids * dist.normal(0, 0.3) + this.centerPos.y;
+		var z = this.distribution3Droids * dist.normal(0, 1.0) + this.centerPos.z;
 
 		var scale = Math.random();
 		var variation = Math.round( 4 * Math.random() );
-		var deform_scale = 0.5 + Math.random() * 2;
+		var deform_scale = 0.2 + Math.random() * 1;
 
 		var asteroid = new Asteroid();
 
@@ -139,9 +140,11 @@ asteroidsCloud.prototype.update = function() {
 			roid.distFromCamera = camera.position.distanceTo( roid.mesh.position );
 			var deltaZ = roid.mesh.position.z - camera.position.z;
 
-			if ( roid.isInView ){																								// change opacity on recession
+			if ( roid.isInView ){																								// change opacity on getting far
 
-				roid.mesh.material.uniforms.opacity.value = ( maxAsteroidRange - roid.distFromCamera ) / maxAsteroidRange;
+				//roid.mesh.material.uniforms.opacity.value = ( maxAsteroidRange - roid.distFromCamera ) / maxAsteroidRange;
+				var depth = 1 - ( maxAsteroidRange - roid.distFromCamera ) / maxAsteroidRange;   // from 0 to 1
+				roid.mesh.material.uniforms.opacity.value = 1 - smoothstep( 0.5, 1.0, depth );
 				roid.mesh.material.needsUpdate = true;
 			}
 
@@ -320,7 +323,7 @@ function createPointClouds ( centerPos, distribution, numParticles, maxSize ){
 		materials[i] = new THREE.PointCloudMaterial( {
 															size: size,
 															map: sprite[i],
-															//blending: THREE.NormalBlending,
+															blending: THREE.NormalBlending,
 															depthWrite: false,
 															depthTest: true,
 															transparent: true
@@ -401,6 +404,7 @@ function initAsteroids(){
 	asteroidsCloud1.centerPos = new THREE.Vector3( 0, 0, auToKM(1.8) * global.DistanceScale );
 	asteroidsCloud1.asteroid_cloud = [];
 	asteroidsCloud1.distribution = 30e6 * global.DistanceScale;
+	asteroidsCloud1.distribution3Droids = 20e6 * global.DistanceScale;
 	asteroidsCloud1.pointCloudPatriclesAmount = 300;
 	asteroidsCloud1.pointCloudMaxSize = 10000;
 	asteroidsCloud1.dustCloudTexturesAmount = 100;
@@ -408,10 +412,11 @@ function initAsteroids(){
 	asteroidsCloud1.initAsteroidsCloud();
 
 	KuiperBelt = new asteroidsCloud();
-	KuiperBelt.numAsteroids = 250;
+	KuiperBelt.numAsteroids = 150;
 	KuiperBelt.centerPos = new THREE.Vector3( 0, 0, auToKM(40) * global.DistanceScale );
 	KuiperBelt.asteroid_cloud = [];
 	KuiperBelt.distribution = 60e6 * global.DistanceScale;
+	KuiperBelt.distribution3Droids = 20e6 * global.DistanceScale;
 	KuiperBelt.pointCloudPatriclesAmount = 500;
 	KuiperBelt.pointCloudMaxSize = 10000;
 	KuiperBelt.dustCloudTexturesAmount = 200;

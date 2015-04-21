@@ -184,7 +184,7 @@ function initStarsPointCloud() {
 		for ( var i = 0; i < stars.length; i++ ) {
 			if (stars[i] == undefined) continue;
 			vertex = stars[i].position.clone();
-			geometry.vertices.push( new THREE.Vector3( vertex.x, vertex.y, vertex.z - 1e6 ) );
+			geometry.vertices.push( new THREE.Vector3( vertex.x, vertex.y, vertex.z - 1e2 ) );
 			geometry.colors.push( new THREE.Color( stars[i].color ) );
 
 		}
