@@ -151,7 +151,7 @@ function initSolarSystem() {
 	//scene.add( sunMesh );
   if (drawLensFlare) initLensFlare();    // draw lensflares instead of mesh
 
-  initStarFX( sunPos, 0 );
+  initStarFX( sunPos, 0 );   // godrays fx for the Sun
 
   //// Earth
 
@@ -385,7 +385,7 @@ function lensFlareUpdateCallback( object ) {
 
 function initPlanets(){
 
-	for ( var i = 0; i < planets.length ; i ++ ) {
+	for ( var i = 3; i < planets.length ; i ++ ) {
 
 		var planet = planets[i];
 
@@ -692,7 +692,7 @@ function renderSolarSystem() {
 
 
   // planets update
-  for ( var i = 0; i < planets.length ; i ++ ) {
+  for ( var i = 3; i < planets.length ; i ++ ) {
 
     if (i != 2){		// skip Earth
 

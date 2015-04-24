@@ -1,4 +1,117 @@
-var cameraCubeFOV = 35;
+/* -------------------------------------------------------------------------
+//	Cube map shader
+------------------------------------------------------------------------- */
+
+var equirect_starfield = {
+
+	uniforms: {
+		"tEquirect": { type: "t", value: null },
+		"tFlip": { type: "f", value: - 1 },
+		"resolution": { type: "v2", value: new THREE.Vector2() }
+	},
+
+	vertexShader: [
+
+		"varying vec3 vWorldPosition;",
+		'varying vec2 vUv;',
+
+		THREE.ShaderChunk[ "common" ],
+		THREE.ShaderChunk[ "logdepthbuf_pars_vertex" ],
+
+		"void main() {",
+
+		"	vWorldPosition = transformDirection( position, modelMatrix );",
+
+		"	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+
+			THREE.ShaderChunk[ "logdepthbuf_vertex" ],
+
+		"}"
+
+	].join("\n"),
+
+	fragmentShader: [
+		'varying vec2 vUv;',
+		"uniform sampler2D tEquirect;",
+		"uniform float tFlip;",
+
+		'uniform vec2 resolution;',
+
+		"varying vec3 vWorldPosition;",
+
+		THREE.ShaderChunk[ "common" ],
+		THREE.ShaderChunk[ "logdepthbuf_pars_fragment" ],
+
+		"void main() {",
+
+			// "	gl_FragColor = textureCube( tCube, vec3( tFlip * vWorldPosition.x, vWorldPosition.yz ) );",
+			"vec3 direction = normalize( vWorldPosition );",
+			"vec2 sampleUV;",
+			"sampleUV.y = saturate( tFlip * direction.y * -0.5 + 0.5 );",
+			"sampleUV.x = atan( direction.z, direction.x ) * RECIPROCAL_PI2 + 0.5;",
+			//"gl_FragColor = texture2D( tEquirect, sampleUV );",
+
+
+			'vec4 v0 = texture2D( tEquirect, sampleUV );',
+			'float aspect = resolution.x / resolution.y;',
+    	'float dx = 0.25 / resolution.x;',
+		  'float dy = dx * aspect;',
+
+    	'vec4 v1 = texture2D( tEquirect, sampleUV + vec2( 0.0, dy ) );',
+		  'vec4 v2 = texture2D( tEquirect, sampleUV + vec2( dx, 0.0 ) );',
+		  'vec4 v3 = texture2D( tEquirect, sampleUV + vec2( 0.0, -dy ) );',
+		  'vec4 v4 = texture2D( tEquirect, sampleUV + vec2( -dx, 0.0 ) );',
+		  'vec4 v5 = texture2D( tEquirect, sampleUV + vec2( dx, dy ) );',
+		  'vec4 v6 = texture2D( tEquirect, sampleUV + vec2( -dx, -dy ) );',
+		  'vec4 v7 = texture2D( tEquirect, sampleUV + vec2( dx, -dy ) );',
+		  'vec4 v8 = texture2D( tEquirect, sampleUV + vec2( -dx, dy ) );',
+
+			'dx *= 2.0;',
+			'dy *= 2.0;',
+			'vec4 v11 = texture2D( tEquirect, sampleUV + vec2( 0.0, dy ) );',
+		  'vec4 v12 = texture2D( tEquirect, sampleUV + vec2( dx, 0.0 ) );',
+		  'vec4 v13 = texture2D( tEquirect, sampleUV + vec2( 0.0, -dy ) );',
+		  'vec4 v14 = texture2D( tEquirect, sampleUV + vec2( -dx, 0.0 ) );',
+		  'vec4 v15 = texture2D( tEquirect, sampleUV + vec2( dx, dy ) );',
+		  'vec4 v16 = texture2D( tEquirect, sampleUV + vec2( -dx, -dy ) );',
+		  'vec4 v17 = texture2D( tEquirect, sampleUV + vec2( dx, -dy ) );',
+		  'vec4 v18 = texture2D( tEquirect, sampleUV + vec2( -dx, dy ) );',
+
+			'v0 *= 0.5;',
+			'v1 *= 0.15;',
+			'v2 *= 0.15;',
+			'v3 *= 0.15;',
+			'v4 *= 0.15;',
+			'v5 *= 0.1;',
+			'v6 *= 0.1;',
+			'v7 *= 0.1;',
+			'v8 *= 0.1;',
+
+			'v11 *= 0.07;',
+			'v12 *= 0.07;',
+			'v13 *= 0.07;',
+			'v14 *= 0.07;',
+			'v15 *= 0.1;',
+			'v16 *= 0.1;',
+			'v17 *= 0.1;',
+			'v18 *= 0.1;',
+
+    	'vec4 surround = v0 + v1 + v2 + v3 + v4 + v5 + v6 + v7 + v8;',
+			//'surround += v11 + v12 + v13 + v14 + v15 + v16 + v17 + v18;',
+
+			"gl_FragColor = surround;",
+
+			THREE.ShaderChunk[ "logdepthbuf_fragment" ],
+
+		"}"
+
+	].join("\n")
+
+}
+
+
+
+var cameraCubeFOV = 45;
 
 function initSkyBoxCube(){
 
@@ -41,21 +154,25 @@ function initSkyBoxEquirec(){
   //var textureEquirec = loader.load( 'textures/space/milkyway_eso0932argb_8bDXT5.dds' );
   //textureEquirec.anisotropy = 4;
 
-  cameraCube = new THREE.PerspectiveCamera( cameraCubeFOV, window.innerWidth / window.innerHeight, 1, 1e12 );
+  cameraCube = new THREE.PerspectiveCamera( cameraCubeFOV, window.innerWidth / window.innerHeight, 1, 1e9 );
+	cameraCube.position.set (0,0, - 1e9 );
+	console.log(cameraCube.position);
   sceneCube = new THREE.Scene();
 
   // jpg texture
   var textureEquirec = THREE.ImageUtils.loadTexture( "textures/space/stars_skybox_8192.png" );
 
-  //textureEquirec.format = THREE.RGBAFormat;
+  textureEquirec.format = THREE.RGBFormat;
   textureEquirec.mapping = THREE.EquirectangularReflectionMapping;
-  //textureEquirec.magFilter = THREE.LinearFilter;
-  //textureEquirec.minFilter = THREE.LinearMipMapLinearFilter;
+  textureEquirec.magFilter = THREE.LinearFilter;
+  textureEquirec.minFilter = THREE.LinearFilter;
 
   //var reflect_material = new THREE.MeshBasicMaterial( { color: 0xffffff, envMap: textureEquirec } );
 
-  var equirectShader = THREE.ShaderLib[ "equirect" ];
+  //var equirectShader = THREE.ShaderLib[ "equirect" ];
+	var equirectShader = equirect_starfield;
   equirectShader.uniforms[ "tEquirect" ].value = textureEquirec;
+	equirectShader.uniforms[ "resolution" ].value = new THREE.Vector2( SCREEN_WIDTH, SCREEN_HEIGHT );
 
   var equirectMaterial = new THREE.ShaderMaterial( {
   	fragmentShader: equirectShader.fragmentShader,
@@ -64,11 +181,11 @@ function initSkyBoxEquirec(){
     //blending: THREE.AdditiveBlending,
     //transparent: true,
     //color: 0x797979,
-  	//depthWrite: false,
+  	depthWrite: false,
   	side: THREE.BackSide
   } );
 
-  mesh = new THREE.Mesh( new THREE.BoxGeometry( 1e11, 1e11, 1e11 ), equirectMaterial );
+  mesh = new THREE.Mesh( new THREE.BoxGeometry( 1e10, 1e10, 1e10 ), equirectMaterial );
   //mesh.rotation.set( 0, 0, 2.3, "XYZ" );
   //mesh.rotation.z = 0.0;
   //mesh.position.applyAxisAngle( axis_z, -45 * Math.PI / 180 );
@@ -77,6 +194,158 @@ function initSkyBoxEquirec(){
   var skyboxPass = new THREE.RenderPass( sceneCube, cameraCube );
   composer.addPass( skyboxPass );
 
+}
+
+// procedural skybox with custom point cloud
+
+var sb_material, sb_geometry, sb_pointcloud;
+var pSize = [];
+var pOpacity = [];
+
+
+
+var skyboxShader = {
+
+  uniforms: {
+    //'texture': { type: 't', value: null }
+		//'size':  { type: "f", value: 1.0 },
+		//'scale':  { type: "f", value: 1.0 },
+
+    //'texture_color': { type: 't', value: null },
+    //'noise_texture': { type: 't', value: null },
+    //'time': { type: "f", value: 1.0 },
+    //'resolution': { type: "v2", value: new THREE.Vector2() },
+
+		//'fogColor' : { type: "c", value: null },
+		//'fogNear' : { type: "f", value: 0 },
+		//'fogFar' : { type: "f", value: 2e7 },
+  },
+  vertexShader: [
+
+		//'attribute vec3 color;',
+		//'attribute float pSize;',
+		'attribute float pOpacity;',
+
+		//'uniform float size;',
+		//'uniform float scale;',
+
+		//'varying vec3 vColor;',
+		'varying float vOpacity;',
+
+    'varying vec2 vUv;',
+    'void main() {',
+
+			//'vColor = color;',
+			'vOpacity = pOpacity;',
+			'vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );',
+			//'gl_PointSize = 2.0 * pSize * size * ( scale / length( mvPosition.xyz ) );',
+			'gl_PointSize = 2000.0;',
+
+      'gl_Position = projectionMatrix * mvPosition;',
+      'vUv = uv;',
+    '}'
+  ].join('\n'),
+  fragmentShader: [
+    //'uniform sampler2D texture;',
+		'uniform vec3 color;',
+		//'varying vec3 vColor;',
+		'varying float vOpacity;',
+
+    //'uniform sampler2D texture_color;',
+    //'uniform sampler2D noise_texture;',
+    //'uniform float time;',
+    //'uniform vec2 resolution;',
+
+		//'uniform vec3 fogColor;',
+		//'uniform float fogNear;',
+		//'uniform float fogFar;',
+    //'varying vec2 vUv;',
+
+    'void main() {',
+
+      'gl_FragColor = vec4( color, vOpacity );',
+
+    '}'
+  ].join('\n')
+}
+
+function initSkyBoxProcedural(){
+
+	var dist = new Random();
+
+	//sb_geometry = new THREE.BufferGeometry();
+
+	var z_plane = 0;
+
+	//for ( var i=0; i < 100; i++ ){
+		// for (var j=0; j < 100; j++ ){
+		//
+		// 	var vertex = new THREE.Vector3();
+		// 	vertex.x = SCREEN_WIDTH * dist.normal(0, 3) * 100;
+		// 	vertex.y = SCREEN_HEIGHT * dist.normal(0, 2) * 100;
+		// 	vertex.z = z_plane;
+		//
+		// 	sb_geometry.vertices.push( vertex );
+		//
+		// 	//sb_geometry.colors.push( new THREE.Color( dist.normal(128, 64), dist.normal(128, 64), dist.normal(128, 64) ) );
+		// 	//sb_geometry.colors.push( new THREE.Color( 0xffffff ) );
+		//
+		// 	pSize.push( Math.random() );
+		// 	pOpacity.push( Math.random() / 4 + 0.5 );
+		//
+		// }
+//	}
+	var attributes =  {
+		//'color': { type: 'c', value: new THREE.Color(0xffffff) },
+		//pSize: { type: 'f', value: pSize },
+		pOpacity: { type: 'f', value: pOpacity },
+
+	};
+	var uniforms = {
+
+		color: { type: "c", value: new THREE.Color( 0x00ff00 ) },
+
+};
+
+	// attributes.pSize.value = pSize;
+	// attributes.pOpacity.value = pOpacity;
+
+	sb_material = new THREE.ShaderMaterial({
+
+		attributes: attributes,
+    uniforms: uniforms,
+    vertexShader: skyboxShader.vertexShader,
+    fragmentShader: skyboxShader.fragmentShader,
+		//vertexColors: THREE.VertexColors,
+    //side: THREE.FrontSide,
+    //blending: THREE.AdditiveBlending,
+    transparent: true
+    //depthWrite	: false
+
+  });
+
+	console.log(sb_material);
+
+	//sb_pointcloud = new THREE.PointCloud( sb_geometry, sb_material );
+	//attributes.pSize.needsUpdate = true;
+	//attributes.pOpacity.needsUpdate = true;
+
+	// point cloud geometry
+var geometry = new THREE.SphereGeometry( 100, 16, 8 );
+
+// point cloud
+cloud = new THREE.PointCloud( geometry, sb_material );
+
+for( var i = 0; i < cloud.geometry.vertices.length; i ++ ) {
+
+		// set alpha randomly
+		//attributes.pSize.value[ i ] = Math.random();
+		attributes.pOpacity.value[ i ] = Math.random();
+}
+//attributes.pSize.needsUpdate = true;
+//attributes.pOpacity.needsUpdate = true;
+scene.add( cloud );
+	//scene.add( sb_pointcloud );
 
 }
 
@@ -90,7 +359,7 @@ function renderSkybox() {
                                             )
                           );
 
-  cameraCube.fov = cameraCubeFOV + (distance - initialCameraDistance)/4e8;
+  cameraCube.fov = cameraCubeFOV + (distance - initialCameraDistance)/3e8;
 
 
   //cameraCube.position.z += distance /1200;

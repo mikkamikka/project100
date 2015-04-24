@@ -30,38 +30,34 @@ var starShader = {
 				'uniform float fogFar;',
         'varying vec2 vUv;',
 
-        'mat2 makem2(in float theta){float c = cos(theta);float s = sin(theta);return mat2(c,-s,s,c);}',
-        'float noise( in vec2 x ){ return texture2D( noise_texture, x * 0.01 ).x; }',
-        'float rand(vec2 co){ return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453); }',
+        //'mat2 makem2(in float theta){float c = cos(theta);float s = sin(theta);return mat2(c,-s,s,c);}',
+        //'float noise( in vec2 x ){ return texture2D( noise_texture, x * 0.01 ).x; }',
+        //'float rand(vec2 co){ return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453); }',
 
-        'float fbm(in vec2 p) {',
-        	'float z=2.;',
-        	'float rz = 0.;',
-        	'vec2 bp = p;',
-        	'for (float i= 1.;i < 6.;i++)	{',
-        		'rz+= abs((noise(p)-0.5)*2.)/z;',
-        		'z = z*2.;',
-        		'p = p*2.;  	}',
-        	'return rz;   }',
-
-        'float dualfbm(in vec2 p)  {',
-            //get two rotated fbm calls and displace the domain
-        	'vec2 p2 = p*.7;',
-        	'vec2 basis = vec2(fbm(p2-time*1.6),fbm(p2+time*1.7));',
-        	'basis = (basis-.5)*.2;',
-        	'p += basis;',
-
-        	//coloring
-        	'return fbm(p*makem2(time*0.2));   }',
+        // 'float fbm(in vec2 p) {',
+        // 	'float z=2.;',
+        // 	'float rz = 0.;',
+        // 	'vec2 bp = p;',
+        // 	'for (float i= 1.;i < 6.;i++)	{',
+        // 		'rz+= abs((noise(p)-0.5)*2.)/z;',
+        // 		'z = z*2.;',
+        // 		'p = p*2.;  	}',
+        // 	'return rz;   }',
+        //
+        // 'float dualfbm(in vec2 p)  {',
+        //     //get two rotated fbm calls and displace the domain
+        // 	'vec2 p2 = p*.7;',
+        // 	'vec2 basis = vec2(fbm(p2-time*1.6),fbm(p2+time*1.7));',
+        // 	'basis = (basis-.5)*.2;',
+        // 	'p += basis;',
+        // 	//coloring
+        // 	'return fbm(p*makem2(time*0.2));   }',
 
         'void main() {',
 
-					'float depth = gl_FragCoord.z / gl_FragCoord.w;',
-					'float fogFactor = smoothstep( fogNear, fogFar, depth );',
-
-					'//gl_FragColor = texture2D( texture, vUv );',
-
-
+					//'float depth = gl_FragCoord.z / gl_FragCoord.w;',
+					//'float fogFactor = smoothstep( fogNear, fogFar, depth );',
+					//'gl_FragColor = texture2D( texture, vUv );',
 
           'const int Samples = 42;',
           'float Intensity = 0.12;',
@@ -79,11 +75,12 @@ var starShader = {
 	        //'p *= 4.0;',
           //'vec3 shift = vec3( 0.9, 0.9, 0.9 ) / dualfbm( p );',
 
-          //'vec2 d = ( p  - vec2(0.5) ) + Direction ;',
+          // radial shift from https://www.shadertoy.com/view/llfGD4 - sketch by @pheeelicks
+
           'vec2 d = vUv  - vec2(0.5)  ;',
 
-          'vec4 f1 = texture2D( noise_texture, vec2( atan( d.x, d.y ) / 15.0, 0.3 ) + 0.005 * time );',
-          'vec4 f2 = texture2D( noise_texture, vec2( atan( d.y, d.x ) / 10.0, 0.3 ) + 0.01 * time );',
+          'vec4 f1 = texture2D( noise_texture, vec2( atan( d.x, d.y ) / 15.0, 0.3 ) + 0.001 * time );',
+          'vec4 f2 = texture2D( noise_texture, vec2( atan( d.y, d.x ) / 10.0, 0.3 ) + 0.005 * time );',
 
           //'vec4 color_tex = texture2D( texture_color, TexCoord );',
 
@@ -113,6 +110,8 @@ function StarFX(){
 
 }
 
+var FXmesh;
+
 function initStarFX( pos,  size ){
 
   starShader.uniforms['texture'].value = THREE.ImageUtils.loadTexture("textures/lensflare/star2.png");
@@ -138,10 +137,10 @@ function initStarFX( pos,  size ){
   });
 
    var geometry = new THREE.PlaneBufferGeometry( 1.5e6, 1.5e6 );
-   var mesh = new THREE.Mesh( geometry, material );
+   FXmesh = new THREE.Mesh( geometry, material );
    //mesh.scale.set( 1.0, 1.0, 1.0 );
-   mesh.position.set( pos.x, pos.y, pos.z );
-   scene.add( mesh );
+   FXmesh.position.set( pos.x, pos.y, pos.z );
+   scene.add( FXmesh );
 
 }
 
@@ -149,5 +148,8 @@ function starFXupdate( delta ){
 
   var newTime = Date.now();
   starShader.uniforms.time.value = clock.getElapsedTime();
+
+  //var distFromCamera = camera.position.distanceTo( object.position );
+  FXmesh.scale.set = 1 / Math.pow( distance, 1/3 ) * 10;
 
 }

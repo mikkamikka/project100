@@ -323,16 +323,18 @@ function createPointClouds ( centerPos, distribution, numParticles, maxSize ){
 		materials[i] = new THREE.PointCloudMaterial( {
 															size: size,
 															map: sprite[i],
-															blending: THREE.NormalBlending,
-															depthWrite: false,
-															depthTest: true,
+															//blending: THREE.AdditiveBlending,
+															//depthWrite: false,
+															//depthTest: true,
 															transparent: true
+
 
 														} );
 
 		materials[i].color.setHex ( 0x888888 );
 
 		var point_cloud = new THREE.PointCloud( geometries[i], materials[i] );
+		point_cloud.sortPoints = true;
 
 		particles.push(point_cloud);
 
