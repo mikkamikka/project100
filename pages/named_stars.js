@@ -31,6 +31,7 @@ function Star(){
 	this.body = null; //= new THREE.LensFlare();
 	this.distFromCamera =  0;
 	this.isInCameraRange = false;
+	this.starFX = null;
 }
 
 Star.prototype.update = function(){
@@ -56,6 +57,13 @@ Star.prototype.update = function(){
 		}
 	}
 
+	if ( this.starFX != null ){
+
+		this.starFX.update();
+
+	}
+
+
 }
 
 function initStarBody(star){
@@ -67,10 +75,10 @@ function initStarBody(star){
 	//console.log(color.getHSL());
 
 	star.body = new THREE.LensFlare();
-	star.body.add( textureFlare_star1, 256, 0.0, THREE.AdditiveBlending, color.offsetHSL( 0, 0, -0.1 ) );
+	star.body.add( textureFlare_star1, 96, 0.0, THREE.AdditiveBlending, color.offsetHSL( 0, 0, -0.1 ) );
 	star.body.lensFlares[0].rotation = THREE.Math.degToRad( 0 );
-	star.body.add( textureFlare_star1, 96, 0.0, THREE.AdditiveBlending, color.offsetHSL( 0, 0, 0 ) );
-	star.body.lensFlares[1].rotation = THREE.Math.degToRad( 0 );
+	//star.body.add( textureFlare_star1, 96, 0.0, THREE.AdditiveBlending, color.offsetHSL( 0, 0, 0 ) );
+	//star.body.lensFlares[1].rotation = THREE.Math.degToRad( 0 );
 
 	// star.body.add( textureFlare_ring1, 20, 0.75, THREE.AdditiveBlending, color );
 	// //star.body.add( textureFlare_ring2, 40, 0.8, THREE.AdditiveBlending, color );
@@ -79,6 +87,14 @@ function initStarBody(star){
 
 	star.body.customUpdateCallback = lensFlareUpdateCallbackStars;
 	star.body.position.copy( star.position );
+
+	if (star.starFX == null){
+
+		star.starFX = new StarFX();
+		star.starFX.init( new THREE.Vector3().copy( star.position ), 1.5e7, color );
+
+	}
+
 
 }
 
@@ -99,8 +115,8 @@ function initNamedStars() {
 		stars[i].distance = source.dist;
 
 		stars[i].position.set(
-			source.galX * 5e6,
-			source.galY * 5e6,
+			source.galX * 5e6 / 3.0,
+			source.galY * 5e6 / 3.0,
 			Math.abs( stars[i].distance * DistanceScale )
 			);
 
@@ -108,7 +124,7 @@ function initNamedStars() {
 			if ( stars[i-1].distance == stars[i].distance ){
 
 				//if (debug) console.log(stars[i].name + " double star");
-				stars[i].position.set( stars[i].position.x + 2e9, stars[i].position.y + 1e9, stars[i].position.z + 1e9 );
+				stars[i].position.set( stars[i].position.x + 2e6, stars[i].position.y + 1e6, stars[i].position.z + 1e6 );
 
 			}
 
@@ -126,7 +142,7 @@ function initNamedStars() {
 
 	}
 
-	initStarsPointCloud();
+	//initStarsPointCloud();
 
 	console.log("Init stars done " + stars.length);
 }
@@ -197,7 +213,7 @@ function initStarsPointCloud() {
       transparent: true,
       //blending: THREE.AdditiveBlending,
 			depthWrite: false,
-			depthTest: true,
+			//depthTest: true,
       vertexColors: true
     } );
 

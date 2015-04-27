@@ -118,7 +118,7 @@ var rotationSpeed = 0.02;
 var cloudsScale = 1.005;
 var moonScale = 0.273;
 
-var sunMesh;
+var sunMesh, sunFX;
 var geometryEarth, meshEarth, meshClouds, meshLights, meshMoon, atmosphere;
 var sunPos, earthPos;
 
@@ -151,7 +151,9 @@ function initSolarSystem() {
 	//scene.add( sunMesh );
   if (drawLensFlare) initLensFlare();    // draw lensflares instead of mesh
 
-  initStarFX( sunPos, 0 );   // godrays fx for the Sun
+  //initStarFX( sunPos, 0 );   // godrays fx for the Sun
+  sunFX = new StarFX();
+  sunFX.init( sunPos, 1.5e6, new THREE.Color( 1.0, 0.8, 0.6 ) );
 
   //// Earth
 
@@ -690,6 +692,7 @@ function renderSolarSystem() {
 	meshClouds.rotation.y += 0.90 * rotationSpeed * delta;
   meshLights.rotation.y += rotationSpeed * delta;
 
+  sunFX.update();
 
   // planets update
   for ( var i = 3; i < planets.length ; i ++ ) {
