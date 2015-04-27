@@ -6,7 +6,7 @@ var equirect_starfield = {
 
 	uniforms: {
 		"tEquirect": { type: "t", value: null },
-		"tFlip": { type: "f", value: - 1 },
+		"tFlip": { type: "f", value: 1 },
 		"resolution": { type: "v2", value: new THREE.Vector2() }
 	},
 
@@ -54,7 +54,7 @@ var equirect_starfield = {
 
 			'vec4 v0 = texture2D( tEquirect, sampleUV );',
 			'float aspect = resolution.x / resolution.y;',
-    	'float dx = 0.25 / resolution.x;',
+    	'float dx = 0.5 / resolution.x;',
 		  'float dy = dx * aspect;',
 
     	'vec4 v1 = texture2D( tEquirect, sampleUV + vec2( 0.0, dy ) );',
@@ -87,19 +87,27 @@ var equirect_starfield = {
 			'v7 *= 0.1;',
 			'v8 *= 0.1;',
 
-			'v11 *= 0.07;',
-			'v12 *= 0.07;',
-			'v13 *= 0.07;',
-			'v14 *= 0.07;',
+			'v11 *= 0.25;',
+			'v12 *= 0.25;',
+			'v13 *= 0.25;',
+			'v14 *= 0.25;',
 			'v15 *= 0.1;',
 			'v16 *= 0.1;',
 			'v17 *= 0.1;',
 			'v18 *= 0.1;',
 
     	'vec4 surround = v0 + v1 + v2 + v3 + v4 + v5 + v6 + v7 + v8;',
-			//'surround += v11 + v12 + v13 + v14 + v15 + v16 + v17 + v18;',
+			'vec4 blur = v11 + v12 + v13 + v14 ;',
 
-			"gl_FragColor = surround;",
+			'float threshold = 0.25;',
+
+			// 'if (v0.x < threshold) {',
+			// 	'surround.x -= threshold * 0.8;',
+			// 	'surround.y -= threshold * 0.8;',
+			// 	'surround.z -= threshold * 0.8;',
+			// '}',
+
+			"gl_FragColor = surround + blur;",
 
 			THREE.ShaderChunk[ "logdepthbuf_fragment" ],
 
@@ -112,6 +120,23 @@ var equirect_starfield = {
 
 
 var cameraCubeFOV = 45;
+var cameraCubeActive = false;
+
+
+function initSkyBoxSimple(){
+
+	var geometry = new THREE.SphereGeometry( 1e10, 60, 40 );
+	geometry.applyMatrix( new THREE.Matrix4().makeScale( -1, 1, 1 ) );
+
+	var material = new THREE.MeshBasicMaterial( {
+			map: THREE.ImageUtils.loadTexture( 'textures/space/stars_skybox_4096.jpg' )
+	} );
+
+ 	mesh = new THREE.Mesh( geometry, material );
+	scene.add( mesh );
+
+}
+
 
 function initSkyBoxCube(){
 
@@ -149,13 +174,14 @@ function initSkyBoxCube(){
 
 function initSkyBoxEquirec(){
 
+	cameraCubeActive = true;
   //var loader = new THREE.DDSLoader();
   //var textureEquirec = loader.load( 'textures/space/milkyway_eso0932argb.dds' );
   //var textureEquirec = loader.load( 'textures/space/milkyway_eso0932argb_8bDXT5.dds' );
   //textureEquirec.anisotropy = 4;
 
   cameraCube = new THREE.PerspectiveCamera( cameraCubeFOV, window.innerWidth / window.innerHeight, 1, 1e9 );
-	cameraCube.position.set (0,0, - 1e9 );
+	//cameraCube.position.set (0,0, 0 );
 	console.log(cameraCube.position);
   sceneCube = new THREE.Scene();
 
@@ -352,24 +378,26 @@ scene.add( cloud );
 function renderSkybox() {
 
 	//cameraCube.lookAt( new THREE.Vector3( meshEarth.position.x, meshEarth.position.y + distance/10, meshEarth.position.z ) );
+	if (cameraCubeActive){
+	  cameraCube.rotation.copy( new THREE.Euler(camera.rotation.x,
+	                                            camera.rotation.y + 1.5*PI,
+	                                            camera.rotation.z + 0.35
+	                                            )
+	                          );
 
-  cameraCube.rotation.copy( new THREE.Euler(camera.rotation.x,
-                                            camera.rotation.y + 1.5*PI,
-                                            camera.rotation.z + 0.35
-                                            )
-                          );
-
-  cameraCube.fov = cameraCubeFOV + (distance - initialCameraDistance)/3e8;
+	  cameraCube.fov = cameraCubeFOV + (distance - initialCameraDistance)/3e8;
 
 
-  //cameraCube.position.z += distance /1200;
-  cameraCube.updateProjectionMatrix();
+	  cameraCube.position.z = distance /120;
+	  cameraCube.updateProjectionMatrix();
+	}
 
 }
 
 function skyboxResize(){
-
-  cameraCube.aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
-  cameraCube.updateProjectionMatrix();
+	if (cameraCubeActive){
+	  cameraCube.aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
+	  cameraCube.updateProjectionMatrix();
+	}
 
 }

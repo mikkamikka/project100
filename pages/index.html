@@ -114,6 +114,9 @@
 		<script src="named_stars.js"></script>
 		<script src="asteroids.js"></script>
 
+		<script src="http://:www.projects.mikelacher.com/lightyear/audioplayer/tracks.js"></script>
+		<script src="http://:www.projects.mikelacher.com/lightyear/audioplayer/audio.js"></script>
+
 		<script>
 		// slider for fast navigation
 		$(function() {
@@ -160,6 +163,8 @@
 			var container, stats;
 			var camera, controls, scene, sceneCube, renderer, composer, dpr;
 
+			var usePostprocessing = true;
+
 			var effectFXAA;
 
 			var clock = new THREE.Clock();
@@ -182,8 +187,10 @@
 
 			var gui, cam;
 
-			init();
-			animate();
+			var audioPlayer, distanceMonitor;
+
+			//init();
+			//animate();
 
 			function init() {
 
@@ -223,7 +230,12 @@
 
 				if (debug) console.log("dpr: " + dpr);
 
-				renderer = new THREE.WebGLRenderer( { antialias: false , alpha: true } );
+				if (usePostprocessing){
+								renderer = new THREE.WebGLRenderer( { antialias: false , alpha: true } );
+				}else{
+								renderer = new THREE.WebGLRenderer( { antialias: true , alpha: true } );
+				}
+
 				renderer.setPixelRatio( dpr );
 				renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
 				//renderer.setViewport( 0, 0, SCREEN_WIDTH * 1, SCREEN_HEIGHT * 1 );
@@ -231,11 +243,12 @@
 				//renderer.sortObjects = false;
 				//renderer.setFaceCulling( THREE.CullFaceNone );
 
-				renderer.gammaInput = false;
-				renderer.gammaOutput = false;
+				if (usePostprocessing){
 
-				renderer.autoClear = false;
-
+								renderer.gammaInput = false;
+								renderer.gammaOutput = false;
+								renderer.autoClear = false;
+				}
 				container.appendChild( renderer.domElement );
 
 				stats = new Stats();
@@ -245,50 +258,58 @@
 				stats.domElement.style.zIndex = 5;
 				container.appendChild( stats.domElement );
 
-				window.addEventListener( 'resize', onWindowResize, false );
 
 				// postprocessing
 
-				var scenePass = new THREE.RenderPass( scene, camera );
-				scenePass.clear = false;
+				if (usePostprocessing){
 
-				var effectFilm = new THREE.FilmPass( 0.0, 0.75, 2048, false );
-				effectFXAA = new THREE.ShaderPass( THREE.FXAAShader );
-				//var effectBokeh = new THREE.ShaderPass( THREE.BokehPass );
+								var scenePass = new THREE.RenderPass( scene, camera );
+								scenePass.clear = true;
 
-				effectFXAA.uniforms[ 'resolution' ].value.set( 1 / SCREEN_WIDTH, 1 / SCREEN_HEIGHT);
-				//effectFXAA.uniforms[ 'resolution' ].value.set( 1 / SCREEN_WIDTH * dpr, 1 / SCREEN_HEIGHT * dpr);
+								var effectFilm = new THREE.FilmPass( 0.1, 0.1, 2048, false );
+								effectFXAA = new THREE.ShaderPass( THREE.FXAAShader );
 
-				effectFilm.renderToScreen = true;
-				//effectFXAA.renderToScreen = true;
+								//var effectBokeh = new THREE.ShaderPass( THREE.BokehPass );
 
-				var parameters = { minFilter: THREE.LinearFilter,
-					magFilter: THREE.LinearFilter,
-					format: THREE.RGBAFormat,
-					stencilBuffer: true };
+								effectFXAA.uniforms[ 'resolution' ].value.set( 1 / SCREEN_WIDTH, 1 / SCREEN_HEIGHT);
+								//effectFXAA.uniforms[ 'resolution' ].value.set( 1 / SCREEN_WIDTH * dpr, 1 / SCREEN_HEIGHT * dpr);
 
-				var renderTarget = new THREE.WebGLRenderTarget( SCREEN_WIDTH , SCREEN_HEIGHT , parameters );
+								effectFilm.renderToScreen = true;
+								//effectFXAA.renderToScreen = true;
 
-				composer = new THREE.EffectComposer( renderer, renderTarget );
-				//composer = new THREE.EffectComposer( renderer );
-				//composer.setSize(SCREEN_WIDTH *2, SCREEN_HEIGHT *2 );
+								var parameters = { minFilter: THREE.LinearFilter,
+									magFilter: THREE.LinearFilter,
+									format: THREE.RGBAFormat,
+									stencilBuffer: true };
+
+								var renderTarget = new THREE.WebGLRenderTarget( SCREEN_WIDTH , SCREEN_HEIGHT , parameters );
+
+								composer = new THREE.EffectComposer( renderer, renderTarget );
+								//composer = new THREE.EffectComposer( renderer );
+								//composer.setSize(SCREEN_WIDTH *2, SCREEN_HEIGHT *2 );
+
+
+								composer.addPass( scenePass );
+
+								composer.addPass( effectFXAA );  //final pass
+								composer.addPass( effectFilm );
+				}
 
 				//initSkyBoxCube();
-				initSkyBoxEquirec();
+				//initSkyBoxEquirec();
 				//initSkyBoxProcedural();
 
 				initSolarSystem();
 				//initStars();
 				initNamedStars();
 				initAsteroids();
+				initSkyBoxSimple();
 
-
-				composer.addPass( scenePass );
-
-				composer.addPass( effectFXAA );  //final pass
-				composer.addPass( effectFilm );
 
 				//Events
+
+				window.addEventListener( 'resize', onWindowResize, false );
+
 				container.addEventListener('mousedown', onMouseDown, false);
 				container.addEventListener('mousewheel', onMouseWheel, false);
 
@@ -349,8 +370,12 @@
 				//controls.movementSpeed = 0.33 * d;
 				//controls.update( delta );
 
-				renderer.clear();
-				composer.render( delta );
+				if (usePostprocessing){
+								renderer.clear();
+								composer.render( delta );
+				}else{
+								renderer.render( scene, camera );
+				}
 
 			};
 
@@ -397,6 +422,21 @@
 
 			};
 
+
+			function initAudio(){
+
+				//audioPlayer = new AudioPlayer(tracks, remainingTimeToBuffer, remainingTimeToCrossfade);
+				//distanceMonitor = new DistanceMonitor(audioPlayer.playYear);
+
+			}
+
+			function updateAudio(){
+
+				//then whenever the distance from earth changes, call this:
+				//distanceMonitor.setDistance( kmToLY( distance ) );
+
+			}
+
 			// debug gui
 			function initGUI(){
 
@@ -423,6 +463,16 @@
 
 
 			//Event handlers
+
+			window.onload = function(){
+
+					if ( GET.use_pp === 'true' ) usePostprocessing = true
+					else usePostprocessing = false;
+
+					init();
+					animate();
+
+			}
 
 			function onWindowResize( event ) {
 
@@ -568,6 +618,17 @@
 						event.preventDefault();
 						break;
 				}
+			}
+
+			//fetch url params
+			var GET = {};
+			var query = window.location.search.substring(1).split("&");
+			for (var i = 0;  i < 3; i++)	{
+    		if (query[i] === "" || query[i] == undefined) // check for trailing & with no param
+        	continue;
+
+    		var param = query[i].split("=");
+    		GET[decodeURIComponent(param[0])] = decodeURIComponent(param[1] || "");
 			}
 
 
