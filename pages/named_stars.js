@@ -75,7 +75,7 @@ function initStarBody(star){
 	//console.log(color.getHSL());
 
 	star.body = new THREE.LensFlare();
-	star.body.add( textureFlare_star1, 96, 0.0, THREE.AdditiveBlending, color.offsetHSL( 0, 0, -0.1 ) );
+	star.body.add( textureFlare_star1, 512, 0.0, THREE.AdditiveBlending, color.offsetHSL( 0, 0, -0.1 ) );
 	star.body.lensFlares[0].rotation = THREE.Math.degToRad( 0 );
 	//star.body.add( textureFlare_star1, 96, 0.0, THREE.AdditiveBlending, color.offsetHSL( 0, 0, 0 ) );
 	//star.body.lensFlares[1].rotation = THREE.Math.degToRad( 0 );
@@ -91,7 +91,7 @@ function initStarBody(star){
 	if (star.starFX == null){
 
 		star.starFX = new StarFX();
-		star.starFX.init( new THREE.Vector3().copy( star.position ), 1.5e7, color );
+		star.starFX.init( new THREE.Vector3().copy( star.position ), 1.5e7, new THREE.Color(1.0,1.0,1.0) );
 
 	}
 
@@ -174,7 +174,7 @@ function lensFlareUpdateCallbackStars( object ) {
 			 //flare.scale = 1 / kmToLY( maxFlareRange - distFromCamera / global.DistanceScale ) * 0.3;
 			//'float alpha = ( fogFar - depth ) / ( fogFar - fogNear );',
 			 var descending = ( maxFlareRange - distFromCamera ) / maxFlareRange;
-			 flare.scale = 5 *	smoothstep( 0.0, 1.0, descending );
+			 flare.scale = 1 *	smoothstep( 0.0, 1.0, descending );
 	}
 
 }

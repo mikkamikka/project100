@@ -142,7 +142,7 @@ StarFX.prototype.init = function( pos,  size, color_shift ){
 
    var geometry = new THREE.PlaneBufferGeometry( size, size );
    this.mesh = new THREE.Mesh( geometry, material );
-   //mesh.scale.set( 1.0, 1.0, 1.0 );
+   this.mesh.scale.set( 1.0, 1.0, 1.0 );
    this.mesh.position.set( pos.x, pos.y, pos.z );
    //scene.add( this.mesh );
 }
@@ -178,10 +178,10 @@ StarFX.prototype.update = function(){
     //var distFromCamera = camera.position.distanceTo( object.position );
     //this.mesh.scale = 1 / Math.pow( distance, 1/3 ) * 10;
     var descending = ( maxStarFXRange - this.distFromCamera ) / maxStarFXRange;
-    //this.mesh.scale.set( 1.5e7 *	smoothstep( 0.0, 1.0, descending ) );
+    this.mesh.scale.set( 1 *	smoothstep( 0.0, 1.0, descending ), 1 *	smoothstep( 0.0, 1.0, descending ), 1.0 );
+    //console.log(this.mesh.scale);
 
   }
-
 
 
 }

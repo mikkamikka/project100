@@ -285,12 +285,12 @@ function createPointClouds ( centerPos, distribution, numParticles, maxSize ){
 
 	var particles = [], geometries = [], materials = [], parameters, i, j, h, color, sprite = [], size;
 
-	sprite[0] = THREE.ImageUtils.loadTexture( "textures/asteroids/_stone1.png" );
-	sprite[1] = THREE.ImageUtils.loadTexture( "textures/asteroids/_stone2.png" );
-	sprite[2] = THREE.ImageUtils.loadTexture( "textures/asteroids/_stone3.png" );
-	sprite[3] = THREE.ImageUtils.loadTexture( "textures/asteroids/_stone4.png" );
-	sprite[4] = THREE.ImageUtils.loadTexture( "textures/asteroids/_stone5.png" );
-	sprite[5] = THREE.ImageUtils.loadTexture( "textures/asteroids/_stone4.png" );
+	sprite[0] = THREE.ImageUtils.loadTexture( "textures/asteroids/stone1.png" );
+	sprite[1] = THREE.ImageUtils.loadTexture( "textures/asteroids/stone2.png" );
+	sprite[2] = THREE.ImageUtils.loadTexture( "textures/asteroids/stone3.png" );
+	sprite[3] = THREE.ImageUtils.loadTexture( "textures/asteroids/stone4.png" );
+	sprite[4] = THREE.ImageUtils.loadTexture( "textures/asteroids/stone5.png" );
+//	sprite[5] = THREE.ImageUtils.loadTexture( "textures/asteroids/stone4.png" );
 
 
 	parameters = [ [ [1, 1, 0.1], sprite[0], maxSize * Math.random() ],
@@ -298,7 +298,7 @@ function createPointClouds ( centerPos, distribution, numParticles, maxSize ){
 				   [ [1, 1, 0.1], sprite[2], maxSize * Math.random() ],
 				   [ [1, 1, 0.2], sprite[3], maxSize * Math.random() ],
 				   [ [1, 1, 0.2], sprite[4], maxSize * Math.random() ],
-				   [ [1, 1, 0.5], sprite[5], 2 * maxSize * Math.random() ],
+//				   [ [1, 1, 0.5], sprite[5], 2 * maxSize * Math.random() ],
 				   ];
 
 	for ( i = 0; i < parameters.length; i ++ ) {
@@ -326,6 +326,7 @@ function createPointClouds ( centerPos, distribution, numParticles, maxSize ){
 															//blending: THREE.AdditiveBlending,
 															//depthWrite: false,
 															//depthTest: true,
+                              alphaTest : 0.2,
 															transparent: true
 
 
