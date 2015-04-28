@@ -35,7 +35,7 @@ var zoomSteps = [
   { id: 0, border: 0,             zoom_factor: 0 },
   { id: 1, border: 778e6,         zoom_factor: 1 },          // from Earth to Jupiter
   { id: 2, border: 6e9 + 20e6/global.DistanceScale,           zoom_factor: 3 },          // from Jupiter to Pluto
-  { id: 3, border: lyToKM(4.22) * global.starsDistanceScale,  zoom_factor: 100 },         // from Pluto to first star (Proxima Centauri)
+  { id: 3, border: lyToKM(4.22) * global.starsDistanceScale,  zoom_factor: 30 },         // from Pluto to first star (Proxima Centauri)
   { id: 4, border: lyToKM(99.71) * global.starsDistanceScale, zoom_factor: 30 }          // from first star to last star (Beta Reticuli)
 
 ];

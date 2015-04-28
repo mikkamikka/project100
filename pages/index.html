@@ -243,6 +243,8 @@
 				//renderer.sortObjects = false;
 				//renderer.setFaceCulling( THREE.CullFaceNone );
 
+				if (debug) console.log( "renderer MaxAnisotropy: " + renderer.getMaxAnisotropy() );
+
 				if (usePostprocessing){
 
 								renderer.gammaInput = false;
@@ -487,6 +489,14 @@
 
 					if ( GET.use_pp === 'true' ) usePostprocessing = true
 					else usePostprocessing = false;
+console.log(GET.dist);
+					if ( GET.dist != undefined ) {
+
+						distanceTarget = lyToKM(GET.dist) * global.DistanceScale * global.starsDistanceScale;
+						console.log(distanceTarget);
+
+					}
+
 
 					init();
 					animate();

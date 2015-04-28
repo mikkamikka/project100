@@ -121,6 +121,7 @@ var equirect_starfield = {
 
 var cameraCubeFOV = 45;
 var cameraCubeActive = false;
+var simple_skybox_mesh;
 
 
 function initSkyBoxSimple( texture_src ){
@@ -146,8 +147,8 @@ function initSkyBoxSimple( texture_src ){
 
 	} );
 
- 	mesh = new THREE.Mesh( geometry, material );
-	scene.add( mesh );
+	simple_skybox_mesh = new THREE.Mesh( geometry, material );
+	scene.add( simple_skybox_mesh );
 
 }
 
@@ -405,6 +406,10 @@ function renderSkybox() {
 	  cameraCube.position.z = distance /120;
 	  cameraCube.updateProjectionMatrix();
 	}
+
+	simple_skybox_mesh.rotation.z = distance / lyToKM(0.001);
+	//simple_skybox_mesh.geometry.
+
 
 }
 

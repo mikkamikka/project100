@@ -2,7 +2,8 @@
 var asteroid;
 //var asteroid_cloud = [];
 
-var asteroidsCloud1, asteroidsCloud2, asteroidsCloud3;
+var asteroidsCloud1, asteroidsCloud2, asteroidsCloud3,
+    dustCloud1, dustCloud2, dustCloud3;
 var KuiperBelt;
 
 //var asteroidDistanceScale = global.DistanceScale * LY /10;
@@ -67,7 +68,7 @@ function Asteroid(){
 
 }
 
-function asteroidsCloud(){
+function asteroidsCloud(type){
   this.numAsteroids = 0;
   this.centerPos = new THREE.Vector3();
   this.asteroid_cloud = [];
@@ -77,10 +78,11 @@ function asteroidsCloud(){
 	this.isInView = false;
 	this.distFromCamera = 0;
 	this.dustCloud;
-	this.pointCloudPatriclesAmount = 300;
-	this.pointCloudMaxSize = 10000;
+	this.pointCloudPatriclesAmount = 0;
+	this.pointCloudMaxSize = 0;
 	this.dustCloudTexturesAmount = 100;
 	this.dustCloudMaxSize = 5e5;
+  this.type = type;
 
 }
 
@@ -114,7 +116,7 @@ asteroidsCloud.prototype.initAsteroidsCloud = function() {
 
 
 	this.pointClouds = createPointClouds (this.centerPos, this.distribution, this.pointCloudPatriclesAmount, this.pointCloudMaxSize); // added and removed dynamically
-	this.dustCloud = createDustCloud (this.centerPos, this.distribution, this.dustCloudTexturesAmount, this.dustCloudMaxSize);
+	this.dustCloud = createDustCloud (this.centerPos, this.distribution, this.dustCloudTexturesAmount, this.dustCloudMaxSize, this.type);
 	scene.add( this.dustCloud );
 
 
@@ -290,15 +292,15 @@ function createPointClouds ( centerPos, distribution, numParticles, maxSize ){
 	sprite[2] = THREE.ImageUtils.loadTexture( "textures/asteroids/stone3.png" );
 	sprite[3] = THREE.ImageUtils.loadTexture( "textures/asteroids/stone4.png" );
 	sprite[4] = THREE.ImageUtils.loadTexture( "textures/asteroids/stone5.png" );
-//	sprite[5] = THREE.ImageUtils.loadTexture( "textures/asteroids/stone4.png" );
+  //	sprite[5] = THREE.ImageUtils.loadTexture( "textures/asteroids/stone4.png" );
 
 
 	parameters = [ [ [1, 1, 0.1], sprite[0], maxSize * Math.random() ],
 				   [ [1, 1, 0.2], sprite[1], maxSize * Math.random() ],
 				   [ [1, 1, 0.1], sprite[2], maxSize * Math.random() ],
 				   [ [1, 1, 0.2], sprite[3], maxSize * Math.random() ],
-				   [ [1, 1, 0.2], sprite[4], maxSize * Math.random() ],
-//				   [ [1, 1, 0.5], sprite[5], 2 * maxSize * Math.random() ],
+				   [ [1, 1, 0.2], sprite[4], maxSize * Math.random() ]
+           //				   [ [1, 1, 0.5], sprite[5], 2 * maxSize * Math.random() ],
 				   ];
 
 	for ( i = 0; i < parameters.length; i ++ ) {
@@ -320,22 +322,30 @@ function createPointClouds ( centerPos, distribution, numParticles, maxSize ){
 			geometries[i].vertices.push( vertex );
 		}
 
+
 		materials[i] = new THREE.PointCloudMaterial( {
 															size: size,
 															map: sprite[i],
-															//blending: THREE.AdditiveBlending,
+															//blending: THREE.CustomBlending,
+                              //blending: THREE.AdditiveAlphaBlending,
 															//depthWrite: false,
-															//depthTest: true,
-                              alphaTest : 0.2,
+															//depthTest: false,
+                              //alphaTest : 0.8,
 															transparent: true
-
-
 														} );
 
-		materials[i].color.setHex ( 0x888888 );
+                            //materials[i] = new THREE.MeshBasicMaterial( { map: sprite[i] } );
+                            //material.transparent = true;
+
+    //materials[i].blendSrc = THREE.SrcAlphaFactor;
+    //materials[i].blendDst = THREE.SrcColorFactor;
+    //materials[i].blendEquation = THREE.AddEquation;
+
+
+		materials[i].color.setHex ( 0x555555 );
 
 		var point_cloud = new THREE.PointCloud( geometries[i], materials[i] );
-		point_cloud.sortPoints = true;
+		//point_cloud.sortPoints = true;
 
 		particles.push(point_cloud);
 
@@ -345,14 +355,35 @@ function createPointClouds ( centerPos, distribution, numParticles, maxSize ){
 
 }
 
-function createDustCloud ( centerPos, distribution, numParticles, maxSize ){
+function createDustCloud ( centerPos, distribution, numParticles, maxSize, type ){
 
-	var cloud, geometry, material, i, j, h, color, sprite, size, uniforms;
+	var cloud, geometry, material, i, j, h, color, sprite, size, uniforms, texture;
 
 	var dist = new Random();
 
-	uniforms = THREE.UniformsUtils.clone(cloudShader.uniforms);
-	uniforms['texture'].value = THREE.ImageUtils.loadTexture("textures/asteroids/dust2.png");
+  if ( type == undefined ){
+    type = 1;
+  }
+
+  uniforms = THREE.UniformsUtils.clone(cloudShader.uniforms);
+
+  switch (type) {
+    case 1:
+      texture = THREE.ImageUtils.loadTexture("textures/asteroids/dust1.png")
+      break
+    case 2:
+      texture = THREE.ImageUtils.loadTexture("textures/asteroids/cloud01.png");
+      uniforms['fogFar'].value = 2e8;
+      break
+    case 3:
+      texture = THREE.ImageUtils.loadTexture("textures/asteroids/cloud04.png");
+      uniforms['fogFar'].value = 2e8;
+      break
+  }
+
+
+
+	uniforms['texture'].value = texture;
 
 	material = new THREE.ShaderMaterial( {
 
@@ -425,6 +456,20 @@ function initAsteroids(){
 	KuiperBelt.dustCloudTexturesAmount = 200;
 	KuiperBelt.dustCloudMaxSize = 5e5;
 	KuiperBelt.initAsteroidsCloud();
+
+  dustCloud1 = new asteroidsCloud(2);
+  dustCloud1.centerPos = new THREE.Vector3( 0, 0, lyToKM(0.009) * global.DistanceScale );
+  dustCloud1.distribution = 660e6 * global.DistanceScale;
+  dustCloud1.dustCloudTexturesAmount = 10;
+  dustCloud1.dustCloudMaxSize = 160e6;
+  dustCloud1.initAsteroidsCloud();
+
+  dustCloud2 = new asteroidsCloud(3);
+  dustCloud2.centerPos = new THREE.Vector3( 0, 0, lyToKM(0.009 ) * global.DistanceScale );
+  dustCloud2.distribution = 360e6 * global.DistanceScale;
+  dustCloud2.dustCloudTexturesAmount = 10;
+  dustCloud2.dustCloudMaxSize = 80e6;
+  dustCloud2.initAsteroidsCloud();
 
 
 	console.log("Init asteroids done");

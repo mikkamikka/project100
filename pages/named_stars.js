@@ -47,6 +47,17 @@ Star.prototype.update = function(){
 			this.isInCameraRange = true;
 			if (debug) console.log("Star body added");
 		}
+		else{
+
+			//var distFromCamera = camera.position.distanceTo( this.body.position );
+			var descending = ( maxFlareRange - this.distFromCamera ) / maxFlareRange;
+			this.body.scale.set( 1 *	smoothstep( 0.0, 1.0, descending),
+				1 *	smoothstep( 0.0, 1.0, descending),
+				1.0);
+
+		}
+
+
 	}
 	else {
 		if (this.body != null) {
@@ -74,18 +85,30 @@ function initStarBody(star){
 	//color.setHSL( hsl.h, hsl.s, 0.8);
 	//console.log(color.getHSL());
 
-	star.body = new THREE.LensFlare();
-	star.body.add( textureFlare_star1, 512, 0.0, THREE.AdditiveBlending, color.offsetHSL( 0, 0, -0.1 ) );
-	star.body.lensFlares[0].rotation = THREE.Math.degToRad( 0 );
-	//star.body.add( textureFlare_star1, 96, 0.0, THREE.AdditiveBlending, color.offsetHSL( 0, 0, 0 ) );
-	//star.body.lensFlares[1].rotation = THREE.Math.degToRad( 0 );
+	// star.body = new THREE.LensFlare();
+	// star.body.add( textureFlare_star1, 512, 0.0, THREE.AdditiveBlending, color.offsetHSL( 0, 0, -0.1 ) );
+	// star.body.lensFlares[0].rotation = THREE.Math.degToRad( 0 );
+	// //star.body.add( textureFlare_star1, 96, 0.0, THREE.AdditiveBlending, color.offsetHSL( 0, 0, 0 ) );
+	// //star.body.lensFlares[1].rotation = THREE.Math.degToRad( 0 );
+	//
+	// // star.body.add( textureFlare_ring1, 20, 0.75, THREE.AdditiveBlending, color );
+	// // //star.body.add( textureFlare_ring2, 40, 0.8, THREE.AdditiveBlending, color );
+	// // star.body.add( textureFlare_ring3, 30, 0.9, THREE.AdditiveBlending, color );
+	// // //star.body.add( textureFlare_ring4, 70, 1.0, THREE.AdditiveBlending, color );
+	//
+	// star.body.customUpdateCallback = lensFlareUpdateCallbackStars;
+	// star.body.position.copy( star.position );
 
-	// star.body.add( textureFlare_ring1, 20, 0.75, THREE.AdditiveBlending, color );
-	// //star.body.add( textureFlare_ring2, 40, 0.8, THREE.AdditiveBlending, color );
-	// star.body.add( textureFlare_ring3, 30, 0.9, THREE.AdditiveBlending, color );
-	// //star.body.add( textureFlare_ring4, 70, 1.0, THREE.AdditiveBlending, color );
-
-	star.body.customUpdateCallback = lensFlareUpdateCallbackStars;
+	var geometry = new THREE.PlaneBufferGeometry( 1e7, 1e7);
+	var material = new THREE.MeshBasicMaterial({
+			map: textureFlare_star1,
+			color: color,
+			blending: THREE.AdditiveBlending,
+			depthWrite: false,
+			transparent: true
+		}
+	)
+	star.body = new THREE.Mesh( geometry, material );
 	star.body.position.copy( star.position );
 
 	if (star.starFX == null){
