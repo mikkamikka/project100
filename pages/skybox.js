@@ -125,11 +125,13 @@ var cameraCubeActive = false;
 
 function initSkyBoxSimple(){
 
-	var geometry = new THREE.SphereGeometry( 1e10, 60, 40 );
+	var geometry = new THREE.SphereGeometry( 1e14, 60, 40 );
 	geometry.applyMatrix( new THREE.Matrix4().makeScale( -1, 1, 1 ) );
 
 	var material = new THREE.MeshBasicMaterial( {
-			map: THREE.ImageUtils.loadTexture( 'textures/space/stars_skybox_4096.jpg' )
+			//map: THREE.ImageUtils.loadTexture( 'textures/space/stars_skybox_4096.jpg' )
+			map: THREE.ImageUtils.loadTexture( 'textures/space/milkyway_eso0932a.jpg' )
+
 	} );
 
  	mesh = new THREE.Mesh( geometry, material );
