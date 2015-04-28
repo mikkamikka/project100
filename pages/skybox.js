@@ -126,7 +126,7 @@ var cameraCubeActive = false;
 function initSkyBoxSimple( texture_src ){
 
   var _texture;
-	var geometry = new THREE.SphereGeometry( 1e14, 60, 40 );
+	var geometry = new THREE.SphereGeometry( 1e10, 60, 40 );
 	geometry.applyMatrix( new THREE.Matrix4().makeScale( -1, 1, 1 ) );
 
 	if ( texture_src == null || texture_src == undefined ){
