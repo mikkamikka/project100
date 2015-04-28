@@ -15,7 +15,7 @@ var LY = 9.460731e12;
 var initialCameraDistance = 4.5e6 * global.DistanceScale,
     minCameraDistance = 3e6 * global.DistanceScale,
     maxCameraDistance = LY * 100 * global.DistanceScale * global.starsDistanceScale,    // 100 light years in km
-    initialCameraFOV = 45;
+    initialCameraFOV = 60;
 
 var zoomSpeed = 5250, fastZoomSpeed = zoomSpeed * 20,
     wheelZoomStep = 300, fastWheelZoomStep = wheelZoomStep * 20;

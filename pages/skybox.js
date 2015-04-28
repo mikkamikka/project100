@@ -130,7 +130,7 @@ function initSkyBoxSimple(){
 
 	var material = new THREE.MeshBasicMaterial( {
 			//map: THREE.ImageUtils.loadTexture( 'textures/space/stars_skybox_4096.jpg' )
-			map: THREE.ImageUtils.loadTexture( 'textures/space/milkyway_eso0932a.jpg' )
+			map: THREE.ImageUtils.loadTexture( 'textures/space/background.jpg' )
 
 	} );
 
