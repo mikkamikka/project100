@@ -123,14 +123,26 @@ var cameraCubeFOV = 45;
 var cameraCubeActive = false;
 
 
-function initSkyBoxSimple(){
+function initSkyBoxSimple( texture_src ){
 
+  var _texture;
 	var geometry = new THREE.SphereGeometry( 1e14, 60, 40 );
 	geometry.applyMatrix( new THREE.Matrix4().makeScale( -1, 1, 1 ) );
 
+	if ( texture_src == null || texture_src == undefined ){
+
+		_texture = THREE.ImageUtils.loadTexture( 'textures/space/stars_skybox_4096.jpg' );
+
+	}
+	else{
+
+		_texture = THREE.ImageUtils.loadTexture( texture_src );
+
+	}
+
 	var material = new THREE.MeshBasicMaterial( {
 			//map: THREE.ImageUtils.loadTexture( 'textures/space/stars_skybox_4096.jpg' )
-			map: THREE.ImageUtils.loadTexture( 'textures/space/background.jpg' )
+			map: _texture
 
 	} );
 

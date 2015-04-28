@@ -435,6 +435,25 @@
 
 			}
 
+			if (debug){
+				var fileSelector = document.createElement('input');
+				fileSelector.setAttribute('type', 'file');
+				fileSelector.onchange = updateBGtexture;
+
+				var loadBG = { loadBG: function(){
+					fileSelector.click();
+	        }
+	      };
+				function updateBGtexture(event){
+
+					var objectURL = window.URL.createObjectURL(fileSelector.files[0]);
+					console.log(objectURL);
+					initSkyBoxSimple( objectURL );
+				}
+
+			}
+
+
 			// debug gui
 			function initGUI(){
 
@@ -452,6 +471,8 @@
 					ambientLightIntensity = value;
 					hemiLight.intensity = value;
 				});;
+
+				gui.add(loadBG, 'loadBG');
 
 				// gui.add(renderer, 'gammaInput').onChange(function(value) {
 				// 	alert(value);
