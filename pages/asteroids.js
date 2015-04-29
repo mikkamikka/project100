@@ -10,13 +10,13 @@ var KuiperBelt;
 var maxAsteroidRange = global.DistanceScale * 100e6;
 var maxAsteroidRadius = 2000;
 
-var fog = new THREE.Fog( 0x4584b4, - 100, 3000 );
+var cloudFog = new THREE.Fog( 0x4584b4, - 100, 3000 );
 
 // shader modified from clouds shader by mr.doob (http://mrdoob.com/lab/javascript/webgl/clouds/)
 var cloudShader = {
       uniforms: {
         'texture': { type: 't', value: null },
-				'fogColor' : { type: "c", value: fog.color },
+				'fogColor' : { type: "c", value: cloudFog.color },
 				'fogNear' : { type: "f", value: 0 },
 				'fogFar' : { type: "f", value: 2e7 },
       },
@@ -457,19 +457,19 @@ function initAsteroids(){
 	KuiperBelt.dustCloudMaxSize = 5e5;
 	KuiperBelt.initAsteroidsCloud();
 
-  dustCloud1 = new asteroidsCloud(2);
-  dustCloud1.centerPos = new THREE.Vector3( 0, 0, lyToKM(0.009) * global.DistanceScale );
-  dustCloud1.distribution = 660e6 * global.DistanceScale;
-  dustCloud1.dustCloudTexturesAmount = 10;
-  dustCloud1.dustCloudMaxSize = 160e6;
-  dustCloud1.initAsteroidsCloud();
-
-  dustCloud2 = new asteroidsCloud(3);
-  dustCloud2.centerPos = new THREE.Vector3( 0, 0, lyToKM(0.009 ) * global.DistanceScale );
-  dustCloud2.distribution = 360e6 * global.DistanceScale;
-  dustCloud2.dustCloudTexturesAmount = 10;
-  dustCloud2.dustCloudMaxSize = 80e6;
-  dustCloud2.initAsteroidsCloud();
+  // dustCloud1 = new asteroidsCloud(2);
+  // dustCloud1.centerPos = new THREE.Vector3( 0, 0, lyToKM(0.009) * global.DistanceScale );
+  // dustCloud1.distribution = 660e6 * global.DistanceScale;
+  // dustCloud1.dustCloudTexturesAmount = 10;
+  // dustCloud1.dustCloudMaxSize = 160e6;
+  // dustCloud1.initAsteroidsCloud();
+  //
+  // dustCloud2 = new asteroidsCloud(3);
+  // dustCloud2.centerPos = new THREE.Vector3( 0, 0, lyToKM(0.009 ) * global.DistanceScale );
+  // dustCloud2.distribution = 360e6 * global.DistanceScale;
+  // dustCloud2.dustCloudTexturesAmount = 10;
+  // dustCloud2.dustCloudMaxSize = 80e6;
+  // dustCloud2.initAsteroidsCloud();
 
 
 	console.log("Init asteroids done");

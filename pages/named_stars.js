@@ -45,7 +45,7 @@ Star.prototype.update = function(){
 			initStarBody(this);
 			scene.add(this.body);
 			this.isInCameraRange = true;
-			if (debug) console.log("Star body added");
+			//if (debug) console.log("Star body added");
 		}
 		else{
 
@@ -64,7 +64,7 @@ Star.prototype.update = function(){
 			scene.remove(this.body);
 			this.body = null;
 			this.isInCameraRange = false;
-			if (debug) console.log("Star body removed");
+			//if (debug) console.log("Star body removed");
 		}
 	}
 
@@ -99,7 +99,7 @@ function initStarBody(star){
 	// star.body.customUpdateCallback = lensFlareUpdateCallbackStars;
 	// star.body.position.copy( star.position );
 
-	var geometry = new THREE.PlaneBufferGeometry( 1e7, 1e7);
+	var geometry = new THREE.PlaneBufferGeometry( 1.5e7, 1.5e7);
 	var material = new THREE.MeshBasicMaterial({
 			map: textureFlare_star1,
 			color: color,

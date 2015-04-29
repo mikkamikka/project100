@@ -170,7 +170,7 @@ StarFX.prototype.update = function(){
 
 			scene.add( this.mesh );
 			this.isInView = true;
-			if (debug) console.log("StarFX added");
+			//if (debug) console.log("StarFX added");
 		}
 	}
 	else {
@@ -178,7 +178,7 @@ StarFX.prototype.update = function(){
 			scene.remove( this.mesh );
 
 			this.isInView = false;
-			if (debug) console.log("StarFX removed");
+			//if (debug) console.log("StarFX removed");
 		}
 	}
 
