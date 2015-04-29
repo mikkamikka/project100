@@ -36,6 +36,8 @@ function lyToAU ( ly ) {
 
 //// 100 light years is 6 323 911 AU (astronomical units)
 
+var LY = 9.460731e12;   // 1 light year in km
+
 var PI = Math.PI;
 var PI_HALF = Math.PI / 2;
 
