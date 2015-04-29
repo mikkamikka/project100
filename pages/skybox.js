@@ -132,7 +132,8 @@ function initSkyBoxSimple( texture_src ){
 
 	if ( texture_src == null || texture_src == undefined ){
 
-		_texture = THREE.ImageUtils.loadTexture( 'textures/space/stars_skybox_4096.jpg' );
+		//_texture = THREE.ImageUtils.loadTexture( 'textures/space/stars_skybox_4096.jpg' );
+		_texture = THREE.ImageUtils.loadTexture( 'textures/space/stars_texture13.jpg' );
 
 	}
 	else{

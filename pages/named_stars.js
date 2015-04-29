@@ -43,6 +43,7 @@ Star.prototype.update = function(){
 	if ( this.distFromCamera > 0 && this.distFromCamera < maxFlareRange ){
 		if (this.body == null) {
 			initStarBody(this);
+			this.body.scale.set(0,0,0);
 			scene.add(this.body);
 			this.isInCameraRange = true;
 			//if (debug) console.log("Star body added");
@@ -105,6 +106,7 @@ function initStarBody(star){
 			color: color,
 			blending: THREE.AdditiveBlending,
 			depthWrite: false,
+			//depthTest: false,
 			transparent: true
 		}
 	)

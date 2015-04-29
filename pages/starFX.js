@@ -137,6 +137,7 @@ var starFXmaterial = new THREE.ShaderMaterial({
   blending: THREE.AdditiveBlending,
   transparent: true,
   depthWrite	: false
+  //depthTest: false
 
 });
 

@@ -84,6 +84,7 @@ NebulaCloud.prototype.init = function() {
     			//color: color,
     			blending: THREE.AdditiveBlending,
     			depthWrite: false,
+          depthTest: false,
     			transparent: true
     		}
     	)
@@ -201,7 +202,7 @@ function createNebulaCloud ( centerPos, distribution, numPlanes, maxSize, type, 
 						vertexShader: nebulaShader.vertexShader,
 						fragmentShader: nebulaShader.fragmentShader,
 						depthWrite: false,
-						depthTest: true,
+						//depthTest: false,
 						transparent: true
 
 					} );
