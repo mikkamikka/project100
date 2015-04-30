@@ -134,11 +134,13 @@ function initSkyBoxSimple( texture_src ){
 
 		//_texture = THREE.ImageUtils.loadTexture( 'textures/space/stars_skybox_4096.jpg' );
 		_texture = THREE.ImageUtils.loadTexture( 'textures/space/stars_texture13.jpg' );
+		_texture.minFilter = THREE.LinearFilter;
 
 	}
 	else{
 
 		_texture = THREE.ImageUtils.loadTexture( texture_src );
+		_texture.minFilter = THREE.LinearFilter;
 
 	}
 
