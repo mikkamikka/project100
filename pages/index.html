@@ -183,6 +183,7 @@
 					realDistanceKM;
 
 			var curZoomSpeed = 0, curZoomStep = zoomSteps[0];
+			var autoZoomOut = false;
 
 			var OutDistance, ResetButton;					// UI
 
@@ -203,7 +204,11 @@
 
 				ResetButton.addEventListener( 'click', function ( event ) {
 					//distance = initialCameraDistance;
-					distanceTarget -= distance - initialCameraDistance;
+					distanceTarget = initialCameraDistance;
+					if ( autoZoomOut ){
+						autoZoomOut = false;
+						curZoomSpeed = 0;
+					}
 				}, false );
 
 				camera = new THREE.PerspectiveCamera( initialCameraFOV, SCREEN_WIDTH / SCREEN_HEIGHT, 10000, 1e12 );
@@ -405,7 +410,9 @@
 				}
 
 
-				distanceTarget -= curZoomSpeed;
+				distanceTarget -= curZoomSpeed * curZoomStep.zoom_factor;
+
+
 
 				distance += (distanceTarget - distance) * cameraZoomDamp;
 
@@ -540,6 +547,18 @@
 
 				gui.add(loadBG, 'loadBG');
 
+				gui.add(this, 'autoZoomOut').onFinishChange(
+					function(){
+
+						if ( autoZoomOut ) {
+							curZoomSpeed = - zoomSpeed;
+						}
+						else {
+							curZoomSpeed = 0;
+						}
+
+					}).listen();
+
 				// gui.add(renderer, 'gammaInput').onChange(function(value) {
 				// 	alert(value);
 				// 	renderer.gammaInput = value;
@@ -606,15 +625,50 @@
 
 				switch ( event.button ) {
 
-					case 0: fastZoom ? curZoomSpeed = fastZoomSpeed * curZoomStep.zoom_factor
-													 : curZoomSpeed = zoomSpeed * curZoomStep.zoom_factor;
+					case 0: fastZoom ? curZoomSpeed = fastZoomSpeed
+													 : curZoomSpeed = zoomSpeed;
 						break;
-					case 2: fastZoom ? curZoomSpeed = -fastZoomSpeed * curZoomStep.zoom_factor
-													 : curZoomSpeed = -zoomSpeed * curZoomStep.zoom_factor;
+					case 2: fastZoom ? curZoomSpeed = -fastZoomSpeed
+													 : curZoomSpeed = -zoomSpeed;
 						break;
 
 				}
 
+				autoZoomOut = false;
+
+			}
+
+			function onMouseUp(event) {
+				container.removeEventListener('mousemove', onMouseMove, false);
+				container.removeEventListener('mouseup', onMouseUp, false);
+				container.removeEventListener('mouseout', onMouseOut, false);
+				container.style.cursor = 'auto';
+				curZoomSpeed = 0;
+			}
+
+			function onMouseWheel(event) {
+				event.preventDefault();
+
+				var zoomStep = wheelZoomStep;
+
+				fastZoom ? zoomStep = fastWheelZoomStep
+								: zoomStep = wheelZoomStep;
+						//old way:
+				//zoom( event.wheelDeltaY * zoomStep );
+
+						//new way:
+				//curZoomSpeed = zoomStep * curZoomStep.zoom_factor;
+				distanceTarget += -event.wheelDeltaY * zoomStep * curZoomStep.zoom_factor;
+
+
+				if ( autoZoomOut ){
+					autoZoomOut = false;
+					curZoomSpeed = 0;
+				}
+
+				//curZoomSpeed = event.wheelDeltaY * curZoomStep.zoom_factor;
+
+				return false;
 			}
 
 			function onMouseMove(event) {
@@ -635,41 +689,11 @@
 
 			}
 
-			function onMouseUp(event) {
-				container.removeEventListener('mousemove', onMouseMove, false);
-				container.removeEventListener('mouseup', onMouseUp, false);
-				container.removeEventListener('mouseout', onMouseOut, false);
-				container.style.cursor = 'auto';
-				curZoomSpeed = 0;
-			}
-
 			function onMouseOut(event) {
 				container.removeEventListener('mousemove', onMouseMove, false);
 				container.removeEventListener('mouseup', onMouseUp, false);
 				container.removeEventListener('mouseout', onMouseOut, false);
 			}
-
-			function onMouseWheel(event) {
-				event.preventDefault();
-
-				var zoomStep = wheelZoomStep;
-
-				fastZoom ? zoomStep = fastWheelZoomStep * curZoomStep.zoom_factor
-								 : zoomStep = wheelZoomStep * curZoomStep.zoom_factor;
-						//old way:
-				//zoom( event.wheelDeltaY * zoomStep );
-
-						//new way:
-				//curZoomSpeed = zoomStep * curZoomStep.zoom_factor;
-				distanceTarget += -event.wheelDeltaY * zoomStep;
-
-
-				//curZoomSpeed = event.wheelDeltaY * curZoomStep.zoom_factor;
-
-				return false;
-			}
-
-
 
 			function onDocumentKeyDown(event) {
 				//alert(event.keyCode);
@@ -688,6 +712,7 @@
 						break;
 				}
 			}
+
 			function onDocumentKeyUp(event) {
 				//alert(event.keyCode);
 				switch (event.keyCode) {

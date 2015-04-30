@@ -440,7 +440,7 @@ function initAsteroids(){
 	asteroidsCloud1.distribution = 30e6 * global.DistanceScale;
 	asteroidsCloud1.distribution3Droids = 20e6 * global.DistanceScale;
 	asteroidsCloud1.pointCloudPatriclesAmount = 300;
-	asteroidsCloud1.pointCloudMaxSize = 10000;
+	asteroidsCloud1.pointCloudMaxSize = 1000;
 	asteroidsCloud1.dustCloudTexturesAmount = 100;
 	asteroidsCloud1.dustCloudMaxSize = 5e5;
 	asteroidsCloud1.initAsteroidsCloud();
@@ -452,7 +452,7 @@ function initAsteroids(){
 	KuiperBelt.distribution = 60e6 * global.DistanceScale;
 	KuiperBelt.distribution3Droids = 20e6 * global.DistanceScale;
 	KuiperBelt.pointCloudPatriclesAmount = 500;
-	KuiperBelt.pointCloudMaxSize = 10000;
+	KuiperBelt.pointCloudMaxSize = 1000;
 	KuiperBelt.dustCloudTexturesAmount = 200;
 	KuiperBelt.dustCloudMaxSize = 5e5;
 	KuiperBelt.initAsteroidsCloud();

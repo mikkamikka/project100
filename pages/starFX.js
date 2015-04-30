@@ -91,8 +91,8 @@ var starShader = {
 
           'vec2 d = vUv  - vec2(0.5)  ;',
 
-          'vec4 f1 = texture2D( noise_texture, vec2( atan( d.x, d.y ) / 15.0, 0.3 ) + 0.002 * time );',
-          'vec4 f2 = texture2D( noise_texture, vec2( atan( d.y, d.x ) / 10.0, 0.3 ) + 0.002 * time );',
+          'vec4 f1 = texture2D( noise_texture, vec2( atan( d.x, d.y ) / 15.0, 0.3 ) + 0.003 * time );',
+          'vec4 f2 = texture2D( noise_texture, vec2( atan( d.y, d.x ) / 10.0, 0.3 ) + 0.003 * time );',
 
           //'vec4 color_tex = texture2D( texture_color, TexCoord );',
 
@@ -108,7 +108,9 @@ var starShader = {
           '}',
 
           //'gl_FragColor = vec4( Color  * color_shift, 1.0 );',
-          'gl_FragColor = vec4( Color  * vec3( 1.0, 0.9, 0.8 ), 1.0 );',
+          'gl_FragColor = vec4( Color  * vec3( 1.0, 0.8, 0.6 ), 1.0 );',
+
+
           //vec3( 1.0, 0.8, 0.6 )
         '}'
       ].join('\n')

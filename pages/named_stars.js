@@ -12,6 +12,7 @@ if (debug) console.log('stars maxFlareRange, light years: ' + maxFlareRangeLY);
 //var maxFlareRange = 400000000;
 
 var textureFlare_star1 = THREE.ImageUtils.loadTexture( "textures/lensflare/star1.png" ); // star
+var textureFlare_star3 = THREE.ImageUtils.loadTexture( "textures/lensflare/star3.png" ); // star
 
 //var textureFlare_line1 = THREE.ImageUtils.loadTexture( "textures/lensflare/lensflare2.png" );  // line
 //var textureFlare_line2 = THREE.ImageUtils.loadTexture( "textures/lensflare/lensflare_blue_line_hor.png" );
@@ -25,6 +26,7 @@ var textureFlare_star1 = THREE.ImageUtils.loadTexture( "textures/lensflare/star1
 function Star(){
 	this.name = '';
 	this.id = 0;
+	this.size = 1.5e7;
 	this.position = new THREE.Vector3();
 	this.distance = 0;
 	this.color;
@@ -100,10 +102,11 @@ function initStarBody(star){
 	// star.body.customUpdateCallback = lensFlareUpdateCallbackStars;
 	// star.body.position.copy( star.position );
 
-	var geometry = new THREE.PlaneBufferGeometry( 1.5e7, 1.5e7);
+
+	var geometry = new THREE.PlaneBufferGeometry( star.size * 0.4, star.size * 0.4 );
 	var material = new THREE.MeshBasicMaterial({
-			map: textureFlare_star1,
-			color: color,
+			map: textureFlare_star3,
+			color: color.offsetHSL( 0, 0, -0.2 ),
 			blending: THREE.AdditiveBlending,
 			depthWrite: false,
 			//depthTest: false,
@@ -116,7 +119,7 @@ function initStarBody(star){
 	if (star.starFX == null){
 
 		star.starFX = new StarFX();
-		star.starFX.init( new THREE.Vector3().copy( star.position ), 1.5e7, new THREE.Color(1.0,1.0,1.0) );
+		star.starFX.init( new THREE.Vector3().copy( star.position ), star.size, new THREE.Color(1.0,1.0,1.0) );
 
 	}
 
