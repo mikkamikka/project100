@@ -494,11 +494,9 @@
 
 					if ( GET.use_pp === 'true' ) usePostprocessing = true
 					else usePostprocessing = false;
-console.log(GET.dist);
 					if ( GET.dist != undefined ) {
 
 						distanceTarget = lyToKM(GET.dist) * global.DistanceScale * global.starsDistanceScale;
-						console.log(distanceTarget);
 
 					}
 
@@ -513,11 +511,12 @@ console.log(GET.dist);
 				SCREEN_HEIGHT = window.innerHeight;
 				SCREEN_WIDTH  = window.innerWidth;
 
-
-				effectFXAA.uniforms[ 'resolution' ].value.set( 1 / SCREEN_WIDTH , 1 / SCREEN_HEIGHT );
+				if (usePostprocessing){
+							effectFXAA.uniforms[ 'resolution' ].value.set( 1 / SCREEN_WIDTH , 1 / SCREEN_HEIGHT );
+							composer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+				}
 
 				renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
-				composer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
 
 				solarSystemResize();
 				skyboxResize();
@@ -525,7 +524,9 @@ console.log(GET.dist);
 				camera.aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
 				camera.updateProjectionMatrix();
 
-				composer.reset();
+				if (usePostprocessing){
+							composer.reset();
+				}
 
 			};
 
