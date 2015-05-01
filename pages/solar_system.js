@@ -184,7 +184,7 @@ function initSolarSystem() {
     shader = Shaders['atmosphere'];
     uniforms = THREE.UniformsUtils.clone(shader.uniforms);
 
-    uniforms['texture'].value = THREE.ImageUtils.loadTexture("textures/planets/earth_clouds_2048_bright.jpg");
+    //uniforms['texture'].value = THREE.ImageUtils.loadTexture("textures/planets/earth_clouds_2048_bright.jpg");
 
     var atmoMaterial = new THREE.ShaderMaterial({
 
@@ -220,8 +220,8 @@ function initSolarSystem() {
      // clouds
    	geometryClouds = new THREE.SphereGeometry( planets[2].radius*1.02, 100, 50 );
    	var materialClouds = new THREE.MeshPhongMaterial( {
-        map: THREE.ImageUtils.loadTexture( "textures/planets/earth_clouds_2048_bright.png" ),
-        bumpMap: THREE.ImageUtils.loadTexture( "textures/planets/earth_clouds_bump2_2048.png" ),
+        map: THREE.ImageUtils.loadTexture( "textures/planets/earth_clouds_2048_bright_comp.png" ),
+        bumpMap: THREE.ImageUtils.loadTexture( "textures/planets/earth_clouds_bump2_2048_comp.png" ),
         bumpScale: 20,
         color: 0xffffff,
         shininess: 10,

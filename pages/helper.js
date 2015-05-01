@@ -70,3 +70,12 @@ var lerp = function (value1, value2, amount) {
 var scale = function ( valueIn, baseMin, baseMax, limitMin, limitMax ) {
   return ((limitMax - limitMin) * (valueIn - baseMin) / (baseMax - baseMin)) + limitMin;
 };
+
+var isInteger = function(value){
+  if (Math.ceil(value) - value > 0) {
+    return false;
+  }
+  else {
+    return true;
+  }
+}

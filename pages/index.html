@@ -63,7 +63,13 @@
 				height: 100%;
 				opacity: 0.5;
 				z-index: 100;
-
+			}
+			.trackmeta{
+				position: absolute;
+				bottom:10px;
+				right: 20px;
+				padding: 4px;
+				margin: 10px 0;
 			}
 
 		</style>
@@ -115,8 +121,8 @@
 		<script src="asteroids.js"></script>
 		<script src="nebulas.js"></script>
 
-		<script src="http://:www.projects.mikelacher.com/lightyear/audioplayer/tracks.js"></script>
-		<script src="http://:www.projects.mikelacher.com/lightyear/audioplayer/audio.js"></script>
+		<script src="//projects.mikelacher.com/lightyear/audioplayer/tracks.js"></script>
+		<script src="//projects.mikelacher.com/lightyear/audioplayer/audio.js"></script>
 
 		<script>
 		// slider for fast navigation
@@ -152,7 +158,11 @@
   	<div id="distance"></div>
 		<div id="slider-vertical"></div>
 
-
+		<div class="trackmeta">
+			<div id="tracktitle"></div>
+			<div id="trackartist"></div>
+			<div id="trackyear"></div>
+		</div>
 
 		<script>
 
@@ -180,7 +190,9 @@
 
 		  var distance = initialCameraDistance,
 					distanceTarget = initialCameraDistance,
-					realDistanceKM;
+					realDistanceKM,
+					distLY,
+					prevDistLY;
 
 			var curZoomSpeed = 0, curZoomStep = zoomSteps[0];
 			var autoZoomOut = false;
@@ -316,6 +328,7 @@
 				initNebulaClouds();
 				initSkyBoxSimple();
 
+				initAudio();
 
 				//Events
 
@@ -356,7 +369,7 @@
 				stats.update();
 
 				realDistanceKM = Math.round(distance) / global.DistanceScale;
-				var s=0.0;
+				var s = 0.0;
 				if (curZoomStep.id == 3) {
 
 					// Scales transition
@@ -372,10 +385,7 @@
 					s = lerp( 0.1, 0.001, pos_norm );
 
 					//cam.x = pos_norm;
-
 					//var transitionScale = smoothstep( 1.0, global.starsDistanceScale, pos_norm );
-
-
 
 					realDistanceKM /= s;
 
@@ -383,9 +393,20 @@
 
 				if (curZoomStep.id > 3) realDistanceKM /= global.starsDistanceScale;
 
+				distLY = kmToLY(realDistanceKM).toPrecision(3);
+
 				//OutDistance.innerHTML = "Distance from Earth: " + camera.position.distanceTo(earthPos);
 				OutDistance.innerHTML = s.toPrecision(3)+ "     " + "Distance from Earth: " + Math.round(realDistanceKM) + " km   /   "
-																+ kmToLY(realDistanceKM).toPrecision(3) + " light years";
+																+ distLY + " light years";
+
+			  if ( Math.floor(distLY) > Math.floor(prevDistLY) || Math.floor(distLY) < Math.floor(prevDistLY) )	{
+
+					console.log("new distance, LY: " + Math.floor(distLY) );
+					updateAudio( Math.floor(distLY) );
+
+				}
+
+				prevDistLY = distLY;
 
 			};
 
@@ -418,10 +439,7 @@
 
 				////if (distance - delta > minCameraDistance && distance + delta < maxCameraDistance){
 				//if (distance + (distanceTarget - distance) * 0.3> minCameraDistance && distance  < maxCameraDistance)
-				//{
-
-				//}
-
+				//{}
 
 				//zoom(curZoomSpeed);
 
@@ -433,10 +451,7 @@
 
 				}
 
-
 				distanceTarget -= curZoomSpeed * curZoomStep.zoom_factor;
-
-
 
 				distance += (distanceTarget - distance) * cameraZoomDamp;
 
@@ -522,15 +537,15 @@
 
 			function initAudio(){
 
-				//audioPlayer = new AudioPlayer(tracks, remainingTimeToBuffer, remainingTimeToCrossfade);
-				//distanceMonitor = new DistanceMonitor(audioPlayer.playYear);
+				audioPlayer = new AudioPlayer(tracks, remainingTimeToBuffer, remainingTimeToCrossfade);
+				distanceMonitor = new DistanceMonitor(audioPlayer.playYear);
 
 			}
 
-			function updateAudio(){
+			function updateAudio( dist ){
 
 				//then whenever the distance from earth changes, call this:
-				//distanceMonitor.setDistance( kmToLY( distance ) );
+				distanceMonitor.setDistance( dist );
 
 			}
 
@@ -549,6 +564,13 @@
 					console.log(objectURL);
 					initSkyBoxSimple( objectURL );
 				}
+
+				// var audio = { update: function(){
+				//
+				// 		updateAudio();
+				//
+				// 	}
+				// };
 
 			}
 
@@ -585,6 +607,9 @@
 
 					}).listen();
 
+
+					//gui.add(audio, 'update');
+
 				// gui.add(renderer, 'gammaInput').onChange(function(value) {
 				// 	alert(value);
 				// 	renderer.gammaInput = value;
@@ -604,9 +629,10 @@
 
 					}
 
-
 					init();
 					animate();
+
+					updateAudio(0);
 
 			}
 
