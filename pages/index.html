@@ -103,6 +103,9 @@
 		<script src="js/libs/stats.min.js"></script>
 		<script src="js/libs/dat.gui.min.js"></script>
 		<script src="js/loaders/DDSLoader.js"></script>
+		<script src="js/loaders/STLLoader.js"></script>
+		<script src="js/loaders/PLYLoader.js"></script>
+		<script src="js/loaders/OBJLoader.js"></script>
 		<script src="js/shaders/NormalDisplacementShader.js"></script>
 		<!--script src="data/gaussian.js"></script-->
 		<script src="data/random-0.26.js"></script>
@@ -120,6 +123,7 @@
 		<script src="named_stars.js"></script>
 		<script src="asteroids.js"></script>
 		<script src="nebulas.js"></script>
+		<script src="models.js"></script>
 
 		<script src="//projects.mikelacher.com/lightyear/audioplayer/tracks.js"></script>
 		<script src="//projects.mikelacher.com/lightyear/audioplayer/audio.js"></script>
@@ -223,7 +227,7 @@
 					}
 				}, false );
 
-				camera = new THREE.PerspectiveCamera( initialCameraFOV, SCREEN_WIDTH / SCREEN_HEIGHT, 10000, 1e12 );
+				camera = new THREE.PerspectiveCamera( initialCameraFOV, SCREEN_WIDTH / SCREEN_HEIGHT, 1000, 1e12 );
 				//camera.position.z = 63000;
 
 				scene = new THREE.Scene();
@@ -327,6 +331,7 @@
 				initAsteroids();
 				initNebulaClouds();
 				initSkyBoxSimple();
+				initModels();
 
 				initAudio();
 
@@ -421,6 +426,7 @@
 				starsUpdate();
 				asteroidsUpdate();
 				NebulaCloudsUpdate();
+				updateModels();
 
 				//controls.movementSpeed = 0.33 * d;
 				//controls.update( delta );
