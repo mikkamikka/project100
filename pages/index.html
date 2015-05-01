@@ -356,11 +356,35 @@
 				stats.update();
 
 				realDistanceKM = Math.round(distance) / global.DistanceScale;
+				var s=0.0;
+				if (curZoomStep.id == 3) {
+
+					// Scales transition
+					//var transition = smoothstep( zoomSteps[2].border,  curZoomStep.border, distance );
+					var pos = distance / global.DistanceScale - zoomSteps[2].border;
+					var stepLength = zoomSteps[3].border - zoomSteps[2].border;
+					var pos_norm = 1.0 - (stepLength - pos)/stepLength; // 0 -> 1
+
+					//s = scale( pos_norm, 0.0, 1.0, 0.001, 1.0 );
+
+					//s = lerp( 1.0, 0.1, pos_norm );
+
+					s = lerp( 0.1, 0.001, pos_norm );
+
+					//cam.x = pos_norm;
+
+					//var transitionScale = smoothstep( 1.0, global.starsDistanceScale, pos_norm );
+
+
+
+					realDistanceKM /= s;
+
+				}
 
 				if (curZoomStep.id > 3) realDistanceKM /= global.starsDistanceScale;
 
 				//OutDistance.innerHTML = "Distance from Earth: " + camera.position.distanceTo(earthPos);
-				OutDistance.innerHTML = "Distance from Earth: " + realDistanceKM + " km   /   "
+				OutDistance.innerHTML = s.toPrecision(3)+ "     " + "Distance from Earth: " + Math.round(realDistanceKM) + " km   /   "
 																+ kmToLY(realDistanceKM).toPrecision(3) + " light years";
 
 			};
@@ -428,7 +452,9 @@
 
 				//target.x = 0.2 - ( 1 - initialCameraDistance / distance )/10;
 				if (debug){
-					cam.x = camera.position.x; cam.y = camera.position.y; cam.z = camera.position.z;
+					//cam.x = camera.position.x;
+					cam.y = camera.position.y;
+					cam.z = camera.position.z;
 				}
 
 				//var speedAccel = Math.pow(distance / initialCameraDistance, 1);

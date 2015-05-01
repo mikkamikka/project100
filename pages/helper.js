@@ -47,9 +47,9 @@ var axis_z = new THREE.Vector3( 0, 0, 1 );
 
 var camDebug = function(){
   this.position = new THREE.Vector3();
-  this.x = 0;
-  this.y = 0;
-  this.z = 0;
+  this.x = 0.0;
+  this.y = 0.0;
+  this.z = 0.0;
 }
 var debug_curZoomStep = function() { this.zoom_factor = 0; }
 
@@ -59,4 +59,14 @@ var clamp = function ( x, min, max ) {
 var smoothstep = function ( edge0, edge1, x ) {
     var t = clamp( ( x - edge0 ) / ( edge1 - edge0 ), 0.0, 1.0 );
     return t * t * ( 3.0 - 2.0 * t );
+};
+
+var lerp = function (value1, value2, amount) {
+	amount = amount < 0 ? 0 : amount;
+	amount = amount > 1 ? 1 : amount;
+	return value1 + (value2 - value1) * amount;
+};
+
+var scale = function ( valueIn, baseMin, baseMax, limitMin, limitMax ) {
+  return ((limitMax - limitMin) * (valueIn - baseMin) / (baseMax - baseMin)) + limitMin;
 };
