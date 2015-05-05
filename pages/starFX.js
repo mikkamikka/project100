@@ -167,7 +167,7 @@ StarFX.prototype.update = function(){
   //this.distFromCamera = camera.position.distanceTo( this.position );
 	this.distFromCamera = camera.position.z - this.mesh.position.z;
 
-	//if ( this.distFromCamera > maxFlareRange ){
+	//if ( this.distFromCamera > maxFlareRange )
 	if ( this.distFromCamera > 0 && this.distFromCamera < maxStarFXRange ){
 		if ( this.isInView == false ) {
 
@@ -193,15 +193,49 @@ StarFX.prototype.update = function(){
     //var distFromCamera = camera.position.distanceTo( object.position );
     //this.mesh.scale = 1 / Math.pow( distance, 1/3 ) * 10;
     var descending = ( maxStarFXRange - this.distFromCamera ) / maxStarFXRange;
-    this.mesh.scale.set( 1 *	smoothstep( 0.0, 1.0, descending ), 1 *	smoothstep( 0.0, 1.0, descending ), 1.0 );
+    var newScale = 1 *	smoothstep( 0.0, 1.0, descending );
+    this.mesh.scale.set( newScale, newScale, 1.0 );
     //console.log(this.mesh.scale);
 
   }
 
-
 }
 
+StarFX.prototype.updateCustom = function( range, resizeRange ){
 
+	this.distFromCamera = camera.position.z - this.mesh.position.z;
+
+	if ( this.distFromCamera > 0 && this.distFromCamera < range ){
+		if ( this.isInView == false ) {
+
+			scene.add( this.mesh );
+			this.isInView = true;
+			//if (debug) console.log("StarFX added");
+		}
+	}
+	else {
+		if ( this.isInView == true ) {
+			scene.remove( this.mesh );
+
+			this.isInView = false;
+			//if (debug) console.log("StarFX removed");
+		}
+	}
+
+  if ( this.isInView ){
+
+    starShader.uniforms.time.value = clock.getElapsedTime();
+
+    //this.mesh.scale = 1 / Math.pow( distance, 1/3 ) * 10;
+    var relPos = distance - minCameraDistance;
+    var descending = ( resizeRange - relPos ) / resizeRange;  // 1 -> 0
+    var newScale = 1 * smoothstep( 0.4, 1.0, descending );
+    newScale = scale( newScale, 0.0, 1.0, 0.5, 1.0 );
+    this.mesh.scale.set( newScale, newScale, 1.0 );
+
+  }
+
+}
 
 // function starFXupdate( delta ){
 //

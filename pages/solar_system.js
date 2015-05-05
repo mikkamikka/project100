@@ -290,7 +290,6 @@ function SetLight(){
   makeupLight.position.set( 1, 0.25, -0.5 );
 	scene.add( makeupLight );
 
-
 }
 
 function initLensFlare(){
@@ -384,7 +383,6 @@ function lensFlareUpdateCallback( object ) {
 
 }
 
-
 function initPlanets(){
 
 	for ( var i = 3; i < planets.length ; i ++ ) {
@@ -412,7 +410,7 @@ function initPlanets(){
 			var relativePos = new THREE.Vector3( 0, 0 , planet.distanceFromSun * global.DistanceScale );
 			var posFromSun = sunPos.clone().add( relativePos );
 
-      var deltaX = 0, deltaY = 0;
+      var deltaX = 0, deltaY = 0, slowDownRange = 0;
       switch (i) {
         case 0:   //mercury
           deltaX = + 20000; deltaY = 1000;
@@ -421,22 +419,22 @@ function initPlanets(){
           deltaX = + 300000; deltaY = 200000;
           break;
         case 3:   //mars
-          deltaX = 12000; deltaY = 4000;
+          deltaX = 12000; deltaY = 4000; slowDownRange = 120000;
           break;
         case 4:   //jupiter
-          deltaX = -80000; deltaY = -40000;
+          deltaX = -80000; deltaY = -40000; slowDownRange = 250000;
           break;
         case 5:   //saturn
-         deltaX = 90000; deltaY = -30000;
+         deltaX = 90000; deltaY = -30000; slowDownRange = 200000;
           break;
         case 6:   //uranus
-          deltaX = -80000; deltaY = -50000;
+          deltaX = -80000; deltaY = -50000; slowDownRange = 200000;
           break;
         case 7:   //neptune
-          deltaX = 90000; deltaY = 2000;
+          deltaX = 90000; deltaY = 2000;  slowDownRange = 200000;
           break;
         case 8:   //pluto
-          deltaX = -20000; deltaY = 1500;
+          deltaX = -5000; deltaY = 1500; slowDownRange = 200000;
           break;
 
       }
@@ -447,6 +445,9 @@ function initPlanets(){
 
       planet.mesh.rotation.set( planet.tilt, 0, planet.tilt / 2 ); // Set initial rotation
       planet.mesh.matrix.makeRotationFromEuler( planet.mesh.rotation ); // Apply rotation to the object's matrix
+
+      planet.cameraSlowDownRange = slowDownRange;
+
 
       planets[i] = planet;
 
@@ -563,7 +564,7 @@ var createUranusRing	= function(){
 		// map		: THREE.ImageUtils.loadTexture(THREEx.Planets.baseURL+'images/ash_uvgrid01.jpg'),
 		side		: THREE.DoubleSide,
 		transparent	: true,
-		opacity		: 0.8
+		opacity		: 0.5
 	});
 
   var mesh	= new THREE.Mesh( geometry, material );
@@ -692,16 +693,23 @@ function renderSolarSystem() {
 	meshClouds.rotation.y += 0.90 * rotationSpeed * delta;
   meshLights.rotation.y += rotationSpeed * delta;
 
-  sunFX.update();
+  // Sun update
+  sunFX.updateCustom( 6e9 * global.DistanceScale, 228e6 * global.DistanceScale );
 
   // planets update
   for ( var i = 3; i < planets.length ; i ++ ) {
 
     if (i != 2){		// skip Earth
 
-      var deltaZ = planets[i].mesh.position.z - camera.position.z;    // planet's approximation to camera
+      var deltaZ = planets[i].mesh.position.z - distance;    // planet's approximation to camera
 
-      if (Math.abs(deltaZ) < 100000) {  // is within approximation range
+      var maxSlowDownRange = planets[i].cameraSlowDownRange * curZoomStep.zoom_factor;
+
+      if ( Math.abs(deltaZ) < maxSlowDownRange ) {  // is within approximation range
+
+        //console.log(deltaZ);
+
+        setCameraSlowDown( deltaZ, maxSlowDownRange,  0.15 );
 
         if ( deltaZ < 0 ){    // is in front of the camera
           //planets[i].mesh.position.x =  planets[i].mesh.position.x - 1.0;

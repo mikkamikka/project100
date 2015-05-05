@@ -123,7 +123,6 @@ function initStarBody(star){
 
 	}
 
-
 }
 
 function initNamedStars() {

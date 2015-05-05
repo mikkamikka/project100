@@ -1,3 +1,5 @@
+var maxModelRange = global.DistanceScale * 40e6;
+
 var loader = new THREE.STLLoader();
 
 // var material = new THREE.MeshBasicMaterial( {
@@ -132,6 +134,26 @@ function initModels(){
 
 function updateModels(){
 
-  if ( voyager != undefined )  voyager.rotation.y += 0.005;
+  if ( voyager != undefined )  {
+    voyager.rotation.y += 0.005;
+
+    var camDistance = voyager.position.z - distance;
+
+    setCameraSlowDown( camDistance, maxModelRange,  0.02 );
+
+    // if ( Math.abs( camDistance ) < maxModelRange ) {
+    //
+    //   //voyager.position.z += 1000.0;
+    //   //var d = 1.0 - smoothstep( 0, maxModelRange/2, camDistance) * ( 1 - smoothstep( maxModelRange/2, maxModelRange, camDistance));
+    //   var d = smoothstep(0, maxModelRange, Math.abs( camDistance )) ;
+    //   d = scale( d, 0.0, 1.0, 0.005, 1.0 );
+    //
+    //   slowDown =  d;
+    // }
+    // else{
+    //   slowDown = 1.0;
+    // }
+
+  }
 
 }

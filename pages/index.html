@@ -196,7 +196,8 @@
 					distanceTarget = initialCameraDistance,
 					realDistanceKM,
 					distLY,
-					prevDistLY;
+					prevDistLY,
+					slowDown = 1;
 
 			var curZoomSpeed = 0, curZoomStep = zoomSteps[0];
 			var autoZoomOut = false;
@@ -225,6 +226,9 @@
 						autoZoomOut = false;
 						curZoomSpeed = 0;
 					}
+
+					slowDown = 1.0;
+
 				}, false );
 
 				camera = new THREE.PerspectiveCamera( initialCameraFOV, SCREEN_WIDTH / SCREEN_HEIGHT, 1000, 1e12 );
@@ -374,10 +378,12 @@
 				stats.update();
 
 				realDistanceKM = Math.round(distance) / global.DistanceScale;
+
+
 				var s = 0.0;
 				if (curZoomStep.id == 3) {
 
-					// Scales transition
+					// Scale transition
 					//var transition = smoothstep( zoomSteps[2].border,  curZoomStep.border, distance );
 					var pos = distance / global.DistanceScale - zoomSteps[2].border;
 					var stepLength = zoomSteps[3].border - zoomSteps[2].border;
@@ -401,7 +407,7 @@
 				distLY = kmToLY(realDistanceKM).toPrecision(3);
 
 				//OutDistance.innerHTML = "Distance from Earth: " + camera.position.distanceTo(earthPos);
-				OutDistance.innerHTML = s.toPrecision(3)+ "     " + "Distance from Earth: " + Math.round(realDistanceKM) + " km   /   "
+				OutDistance.innerHTML = slowDown.toPrecision(4)+ "     " + "Distance from Earth: " + Math.round(realDistanceKM) + " km   /   "
 																+ distLY + " light years";
 
 			  if ( Math.floor(distLY) > Math.floor(prevDistLY) || Math.floor(distLY) < Math.floor(prevDistLY) )	{
@@ -422,11 +428,24 @@
 				delta = clock.getDelta();
 
 				renderSkybox();
-				renderSolarSystem();
-				starsUpdate();
+
+				if ( curZoomStep.id < 3 ) {
+					renderSolarSystem();
+				}
+
+				if ( curZoomStep.id < 4 ) {
+					updateModels();
+				}
+
+				if ( curZoomStep.id > 3 ) {
+
+					starsUpdate();
+					NebulaCloudsUpdate();
+
+				}
+
 				asteroidsUpdate();
-				NebulaCloudsUpdate();
-				updateModels();
+
 
 				//controls.movementSpeed = 0.33 * d;
 				//controls.update( delta );
@@ -449,7 +468,7 @@
 
 				//zoom(curZoomSpeed);
 
-				if ( distanceTarget - curZoomSpeed <= minCameraDistance ){
+				if ( distanceTarget - curZoomSpeed <= minCameraDistance ){		// limit zoom in
 
 					//distanceTarget -= curZoomSpeed;
 					curZoomSpeed = 0;
@@ -457,7 +476,7 @@
 
 				}
 
-				distanceTarget -= curZoomSpeed * curZoomStep.zoom_factor;
+				distanceTarget -= curZoomSpeed * curZoomStep.zoom_factor * slowDown;
 
 				distance += (distanceTarget - distance) * cameraZoomDamp;
 
@@ -484,9 +503,15 @@
 				//fastZoomSpeed += speedAccel;
 				//wheelZoomStep += speedAccel/10;
 
-				for (var i=1; i < zoomSteps.length; i++){
-					if ( distance < zoomSteps[i].border * global.DistanceScale
-							 && distance > zoomSteps[i-1].border * global.DistanceScale ) {
+				for (var i=0; i < zoomSteps.length; i++){				// switch zoom steps
+
+					var hiBorder = zoomSteps[i].border * global.DistanceScale;
+					var lowBorder;
+					( zoomSteps[i-1] != undefined ) ? lowBorder = zoomSteps[i-1].border * global.DistanceScale
+																					: lowBorder = 0;
+
+					if ( distance < hiBorder
+							 && distance > lowBorder ) {
 
 						curZoomStep = zoomSteps[i];
 						debug_zoom.zoom_factor = curZoomStep.zoom_factor;
@@ -525,7 +550,7 @@
 			function setZoomLevel( ui_value ){  // handler for slider zoom
 
 				var span = maxCameraDistance;
-
+				slowDown = 1.0;
 
 				if ( ui_value < 250 ){
 
@@ -571,13 +596,6 @@
 					initSkyBoxSimple( objectURL );
 				}
 
-				// var audio = { update: function(){
-				//
-				// 		updateAudio();
-				//
-				// 	}
-				// };
-
 			}
 
 
@@ -612,7 +630,6 @@
 						}
 
 					}).listen();
-
 
 					//gui.add(audio, 'update');
 
@@ -716,8 +733,7 @@
 
 						//new way:
 				//curZoomSpeed = zoomStep * curZoomStep.zoom_factor;
-				distanceTarget += -event.wheelDeltaY * zoomStep * curZoomStep.zoom_factor;
-
+				distanceTarget += -event.wheelDeltaY * zoomStep * curZoomStep.zoom_factor * slowDown;
 
 				if ( autoZoomOut ){
 					autoZoomOut = false;
