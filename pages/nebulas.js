@@ -142,7 +142,6 @@ NebulaCloud.prototype.update = function() {
 
         this.isInView = false;
 
-
       }
 
   }
@@ -165,32 +164,30 @@ function createNebulaCloud ( centerPos, distribution, numPlanes, maxSize, type, 
 
   switch (type) {
     case 1:
-      texture = THREE.ImageUtils.loadTexture("textures/asteroids/cloud01.png");
+      texture = THREE.ImageUtils.loadTexture("textures/nebulas/cloud01.png");
       uniforms['fogFar'].value = maxSize;
       break
     case 2:
-      texture = THREE.ImageUtils.loadTexture("textures/asteroids/cloud02.png");
+      texture = THREE.ImageUtils.loadTexture("textures/nebulas/cloud02.png");
       uniforms['fogFar'].value = maxSize;
       break
     case 3:
-      texture = THREE.ImageUtils.loadTexture("textures/asteroids/cloud03.png");
+      texture = THREE.ImageUtils.loadTexture("textures/nebulas/cloud03.png");
       uniforms['fogFar'].value = maxSize;
       break
     case 4:
-      texture = THREE.ImageUtils.loadTexture("textures/asteroids/cloud04.png");
+      texture = THREE.ImageUtils.loadTexture("textures/nebulas/cloud04.png");
       uniforms['fogFar'].value = maxSize;
       break
     case 5:
-      texture = THREE.ImageUtils.loadTexture("textures/asteroids/cloud05.png");
+      texture = THREE.ImageUtils.loadTexture("textures/nebulas/cloud05.png");
       uniforms['fogFar'].value = maxSize;
       break
     case 6:
-      texture = THREE.ImageUtils.loadTexture("textures/asteroids/cloud06.png");
+      texture = THREE.ImageUtils.loadTexture("textures/nebulas/cloud06.png");
       uniforms['fogFar'].value = maxSize;
       break
   }
-
-
 
 	uniforms['texture'].value = texture;
   uniforms['fogColor'].value = color;
@@ -215,6 +212,8 @@ function createNebulaCloud ( centerPos, distribution, numPlanes, maxSize, type, 
 		plane.position.y = distribution * dist.normal(0, 0.5) + centerPos.y;
 		plane.position.z = distribution * dist.normal(0, 5) + centerPos.z;
 
+    //plane.position.z = Math.min( plane.position.z, distribution * 5 + centerPos.z );
+
 		plane.rotation.z = Math.random() * 2 * PI;
 		plane.scale.x = plane.scale.y = Math.random() * Math.random() * 1.5 + 0.5;
 
@@ -234,39 +233,51 @@ function createNebulaCloud ( centerPos, distribution, numPlanes, maxSize, type, 
 function initNebulaClouds(){
 
   //================ Nebula 1 =================
-  var dist = lyToKM( 9.0 ) * global.DistanceScale * global.starsDistanceScale;
 
-  Nebula1_layer1 = new NebulaCloud(1);
+  var dist = lyToKM( 7.0 ) * global.DistanceScale * global.starsDistanceScale;
+
+  Nebula1_layer1 = new NebulaCloud(6);
   Nebula1_layer1.centerPos = new THREE.Vector3( 0, 0, dist );
-  Nebula1_layer1.distribution = 1600e6 * global.DistanceScale;
-  Nebula1_layer1.dustCloudTexturesAmount = 10;
-  Nebula1_layer1.dustCloudMaxSize = 300e6;
+  Nebula1_layer1.distribution = 6600e6 * global.DistanceScale;
+  Nebula1_layer1.dustCloudTexturesAmount = 26;
+  Nebula1_layer1.dustCloudMaxSize = 1200e6;
   Nebula1_layer1.color = new THREE.Color(0x5687a8);
   Nebula1_layer1.init();
 
-  Nebula1_layer2 = new NebulaCloud(2);
-  Nebula1_layer2.centerPos = new THREE.Vector3( 0, 0, dist );
-  Nebula1_layer2.distribution = 1400e6 * global.DistanceScale;
-  Nebula1_layer2.dustCloudTexturesAmount = 10;
-  Nebula1_layer2.dustCloudMaxSize = 400e6;
-  Nebula1_layer2.color = new THREE.Color(0x051c3b);
-  Nebula1_layer2.init();
 
-  Nebula1_layer3 = new NebulaCloud(3);
-  Nebula1_layer3.centerPos = new THREE.Vector3( -4e5, 0, dist );
-  Nebula1_layer3.distribution = 1000e6 * global.DistanceScale;
-  Nebula1_layer3.dustCloudTexturesAmount = 5;
-  Nebula1_layer3.dustCloudMaxSize = 200e6;
-  Nebula1_layer3.color = new THREE.Color(0x04261d);
-  Nebula1_layer3.init();
-
-  Nebula1_layer4 = new NebulaCloud(5);
-  Nebula1_layer4.centerPos = new THREE.Vector3( 0, 0, dist );
-  Nebula1_layer4.distribution = 600e6 * global.DistanceScale;
-  Nebula1_layer4.dustCloudTexturesAmount = 6;
-  Nebula1_layer4.dustCloudMaxSize = 300e6;
-  Nebula1_layer4.color = new THREE.Color(0x111111);
-  Nebula1_layer4.init();
+  // var dist = lyToKM( 9.0 ) * global.DistanceScale * global.starsDistanceScale;
+  //
+  // Nebula1_layer1 = new NebulaCloud(1);
+  // Nebula1_layer1.centerPos = new THREE.Vector3( 0, 0, dist );
+  // Nebula1_layer1.distribution = 1600e6 * global.DistanceScale;
+  // Nebula1_layer1.dustCloudTexturesAmount = 10;
+  // Nebula1_layer1.dustCloudMaxSize = 300e6;
+  // Nebula1_layer1.color = new THREE.Color(0x5687a8);
+  // Nebula1_layer1.init();
+  //
+  // Nebula1_layer2 = new NebulaCloud(2);
+  // Nebula1_layer2.centerPos = new THREE.Vector3( 0, 0, dist );
+  // Nebula1_layer2.distribution = 1400e6 * global.DistanceScale;
+  // Nebula1_layer2.dustCloudTexturesAmount = 10;
+  // Nebula1_layer2.dustCloudMaxSize = 400e6;
+  // Nebula1_layer2.color = new THREE.Color(0x051c3b);
+  // Nebula1_layer2.init();
+  //
+  // Nebula1_layer3 = new NebulaCloud(3);
+  // Nebula1_layer3.centerPos = new THREE.Vector3( -4e5, 0, dist );
+  // Nebula1_layer3.distribution = 1000e6 * global.DistanceScale;
+  // Nebula1_layer3.dustCloudTexturesAmount = 5;
+  // Nebula1_layer3.dustCloudMaxSize = 200e6;
+  // Nebula1_layer3.color = new THREE.Color(0x04261d);
+  // Nebula1_layer3.init();
+  //
+  // Nebula1_layer4 = new NebulaCloud(5);
+  // Nebula1_layer4.centerPos = new THREE.Vector3( 0, 0, dist );
+  // Nebula1_layer4.distribution = 600e6 * global.DistanceScale;
+  // Nebula1_layer4.dustCloudTexturesAmount = 6;
+  // Nebula1_layer4.dustCloudMaxSize = 300e6;
+  // Nebula1_layer4.color = new THREE.Color(0x111111);
+  // Nebula1_layer4.init();
 
 
   //================ Nebula 2 =================
@@ -331,9 +342,9 @@ function initNebulaClouds(){
 function NebulaCloudsUpdate(){
 
   Nebula1_layer1.update();
-  Nebula1_layer2.update();
-  Nebula1_layer3.update();
-  Nebula1_layer4.update();
+  //Nebula1_layer2.update();
+  //Nebula1_layer3.update();
+  //Nebula1_layer4.update();
 
   Nebula2_layer1.update();
   Nebula2_layer2.update();
