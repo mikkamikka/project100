@@ -134,10 +134,6 @@ asteroidsCloud.prototype.update = function() {
 
    	if (roid != undefined ){
 
-			roid.mesh.rotation.x += roid.rotationSpeed.x;
-			roid.mesh.rotation.y += roid.rotationSpeed.y;
-			roid.mesh.rotation.z += roid.rotationSpeed.z;
-
 			// add and remove asteroid
 			roid.distFromCamera = camera.position.distanceTo( roid.mesh.position );
 			var deltaZ = roid.mesh.position.z - camera.position.z;
@@ -148,10 +144,15 @@ asteroidsCloud.prototype.update = function() {
 				var depth = 1 - ( maxAsteroidRange - roid.distFromCamera ) / maxAsteroidRange;   // from 0 to 1
 				roid.mesh.material.uniforms.opacity.value = 1 - smoothstep( 0.5, 1.0, depth );
 				roid.mesh.material.needsUpdate = true;
+
+        roid.mesh.rotation.x += roid.rotationSpeed.x;
+        roid.mesh.rotation.y += roid.rotationSpeed.y;
+        roid.mesh.rotation.z += roid.rotationSpeed.z;
+
 			}
 
 			if ( roid.distFromCamera < maxAsteroidRange ){  // is within approximation range
-				if ( !roid.isInView && deltaZ < 100) {
+				if ( !roid.isInView && deltaZ < 1000) {
 
 					scene.add( roid.mesh );
 					roid.isInView = true;
@@ -434,25 +435,25 @@ function createDustCloud ( centerPos, distribution, numParticles, maxSize, type 
 function initAsteroids(){
 
 	asteroidsCloud1 = new asteroidsCloud();
-	asteroidsCloud1.numAsteroids = 150;
+	asteroidsCloud1.numAsteroids = 100;
 	asteroidsCloud1.centerPos = new THREE.Vector3( 0, 0, auToKM(1.8) * global.DistanceScale );
 	asteroidsCloud1.asteroid_cloud = [];
 	asteroidsCloud1.distribution = 30e6 * global.DistanceScale;
 	asteroidsCloud1.distribution3Droids = 20e6 * global.DistanceScale;
 	asteroidsCloud1.pointCloudPatriclesAmount = 300;
-	asteroidsCloud1.pointCloudMaxSize = 1000;
+	asteroidsCloud1.pointCloudMaxSize = 5000;
 	asteroidsCloud1.dustCloudTexturesAmount = 100;
 	asteroidsCloud1.dustCloudMaxSize = 5e5;
 	asteroidsCloud1.initAsteroidsCloud();
 
 	KuiperBelt = new asteroidsCloud();
-	KuiperBelt.numAsteroids = 150;
+	KuiperBelt.numAsteroids = 100;
 	KuiperBelt.centerPos = new THREE.Vector3( 0, 0, auToKM(40) * global.DistanceScale );
 	KuiperBelt.asteroid_cloud = [];
 	KuiperBelt.distribution = 60e6 * global.DistanceScale;
 	KuiperBelt.distribution3Droids = 20e6 * global.DistanceScale;
 	KuiperBelt.pointCloudPatriclesAmount = 500;
-	KuiperBelt.pointCloudMaxSize = 1000;
+	KuiperBelt.pointCloudMaxSize = 5000;
 	KuiperBelt.dustCloudTexturesAmount = 200;
 	KuiperBelt.dustCloudMaxSize = 5e5;
 	KuiperBelt.initAsteroidsCloud();

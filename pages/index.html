@@ -412,7 +412,7 @@
 
 			  if ( Math.floor(distLY) > Math.floor(prevDistLY) || Math.floor(distLY) < Math.floor(prevDistLY) )	{
 
-//					console.log("new distance, LY: " + Math.floor(distLY) );
+					console.log("new distance, LY: " + Math.floor(distLY) );
 					updateAudio( Math.floor(distLY) );
 
 				}
@@ -576,7 +576,7 @@
 			function updateAudio( dist ){
 
 				//then whenever the distance from earth changes, call this:
-	//			distanceMonitor.setDistance( dist );
+				distanceMonitor.setDistance( dist );
 
 			}
 
