@@ -35,9 +35,10 @@ var nebulaShader = {
 					'alpha = smoothstep( 0.0, 0.5, alpha ) * ( 1.0 - smoothstep( 0.8, 1.0, alpha ));',
 
 					'gl_FragColor.w = gl_FragColor.w * alpha;',
+          //'gl_FragColor.w = alpha;',
 					//'gl_FragColor = vec4( gl_FragColor.xyz, gl_FragColor.w );',
 					//'gl_FragColor = mix( vec4( fogColor, gl_FragColor.w ), gl_FragColor , fogFactor );',
-          'gl_FragColor.xyz = fogColor * gl_FragColor.xyz;',
+          //'gl_FragColor.xyz = fogColor * gl_FragColor.xyz;',
           'gl_FragColor = vec4( fogColor, gl_FragColor.w );',
 
         '}'
@@ -57,20 +58,22 @@ function NebulaCloud(type){
   this.staticImagesSrc = [];
   this.staticImages = [];
   this.color = new THREE.Color( 0x4584b4 );
-  this.fadeoutRange = 10e9;
+  this.fadeoutRange;
 
 }
 
 NebulaCloud.prototype.init = function() {
 
-	//var dist = new Random();
+	if ( this.fadeoutRange == undefined ) this.fadeoutRange = this.dustCloudMaxSize;
 
 	this.dustCloud = createNebulaCloud (this.centerPos,
                                       this.distribution,
                                       this.dustCloudTexturesAmount,
                                       this.dustCloudMaxSize,
                                       this.type,
-                                      this.color);
+                                      this.color,
+                                      this.fadeoutRange
+                                      );
 	//scene.add( this.dustCloud );
 
   if ( this.staticImagesSrc.length > 0 ){
@@ -83,7 +86,7 @@ NebulaCloud.prototype.init = function() {
     	var material = new THREE.MeshBasicMaterial({
     			map: texture,
     			//color: color,
-    			blending: THREE.AdditiveBlending,
+    			//blending: THREE.NormalBlending,
     			depthWrite: false,
           //depthTest: false,
     			transparent: true
@@ -104,8 +107,14 @@ NebulaCloud.prototype.update = function() {
 
 	this.distFromCamera = camera.position.distanceTo( this.centerPos );			// cloud's center approximation to camera
 
+  var deltaZ = this.centerPos.z - distance;
+
 	// add and remove nebula clouds
-	if ( this.distFromCamera < this.fadeoutRange ){  // is within approximation range
+	if ( this.distFromCamera < this.fadeoutRange + this.distribution * 5 )  // is within approximation range
+  // if ( this.centerPos.z - this.distribution * 5   < distance
+  //       && this.centerPos.z + this.distribution * 5   > distance
+  //     )
+  {  // is within approximation range
 
     for (var i=0; i < this.staticImages.length; i++){
 
@@ -120,11 +129,11 @@ NebulaCloud.prototype.update = function() {
 
       for (var i=0; i < this.staticImages.length; i++){
         scene.add( this.staticImages[i] );
-        if (debug) console.log("Nebula cloud added" );
       }
 
       this.isInView = true;
 
+      if (debug) console.log("Nebula cloud added" );
 
     }
 
@@ -137,10 +146,11 @@ NebulaCloud.prototype.update = function() {
 
         for (var i=0; i < this.staticImages.length; i++){
           scene.remove( this.staticImages[i] );
-          if (debug) console.log("Nebula cloud removed" );
         }
 
         this.isInView = false;
+
+        if (debug) console.log("Nebula cloud removed" );
 
       }
 
@@ -150,7 +160,7 @@ NebulaCloud.prototype.update = function() {
 
 
 
-function createNebulaCloud ( centerPos, distribution, numPlanes, maxSize, type, color ){
+function createNebulaCloud ( centerPos, distribution, numPlanes, maxSize, type, color, fadeoutRange ){
 
 	var mesh, geometry, material, uniforms, texture;
 
@@ -165,30 +175,35 @@ function createNebulaCloud ( centerPos, distribution, numPlanes, maxSize, type, 
   switch (type) {
     case 1:
       texture = THREE.ImageUtils.loadTexture("textures/nebulas/cloud01.png");
-      uniforms['fogFar'].value = maxSize;
+      //uniforms['fogFar'].value = maxSize;
       break
     case 2:
       texture = THREE.ImageUtils.loadTexture("textures/nebulas/cloud02.png");
-      uniforms['fogFar'].value = maxSize;
+      //uniforms['fogFar'].value = maxSize;
       break
     case 3:
       texture = THREE.ImageUtils.loadTexture("textures/nebulas/cloud03.png");
-      uniforms['fogFar'].value = maxSize;
+      //uniforms['fogFar'].value = maxSize;
       break
     case 4:
       texture = THREE.ImageUtils.loadTexture("textures/nebulas/cloud04.png");
-      uniforms['fogFar'].value = maxSize;
+      //uniforms['fogFar'].value = maxSize;
       break
     case 5:
       texture = THREE.ImageUtils.loadTexture("textures/nebulas/cloud05.png");
-      uniforms['fogFar'].value = maxSize;
+      //uniforms['fogFar'].value = maxSize;
       break
     case 6:
       texture = THREE.ImageUtils.loadTexture("textures/nebulas/cloud06.png");
-      uniforms['fogFar'].value = maxSize;
+      //uniforms['fogFar'].value = maxSize;
+      break
+    case 7:
+      texture = THREE.ImageUtils.loadTexture("textures/nebulas/cloud07.png");
+      //uniforms['fogFar'].value = maxSize;
       break
   }
 
+  uniforms['fogFar'].value = fadeoutRange;
 	uniforms['texture'].value = texture;
   uniforms['fogColor'].value = color;
 
@@ -197,6 +212,7 @@ function createNebulaCloud ( centerPos, distribution, numPlanes, maxSize, type, 
 						uniforms: uniforms,
 						vertexShader: nebulaShader.vertexShader,
 						fragmentShader: nebulaShader.fragmentShader,
+            //blending: THREE.AdditiveBlending,
 						depthWrite: false,
 						//depthTest: false,
 						transparent: true
@@ -208,11 +224,16 @@ function createNebulaCloud ( centerPos, distribution, numPlanes, maxSize, type, 
 	for ( var i = 0; i < numPlanes; i++ ) {
 		var plane = new THREE.Mesh( new THREE.PlaneGeometry( maxSize, maxSize ) );
 
+
+
 		plane.position.x = distribution * dist.uniform(-3, 3) * dist.normal(0, 3) + centerPos.x;
 		plane.position.y = distribution * dist.normal(0, 0.5) + centerPos.y;
 		plane.position.z = distribution * dist.normal(0, 5) + centerPos.z;
 
-    //plane.position.z = Math.min( plane.position.z, distribution * 5 + centerPos.z );
+    if ( plane.position.z > centerPos.z )
+      plane.position.z = Math.min( plane.position.z, distribution * 5 + centerPos.z );
+    else
+      plane.position.z = Math.max( plane.position.z, - distribution * 5 + centerPos.z );
 
 		plane.rotation.z = Math.random() * 2 * PI;
 		plane.scale.x = plane.scale.y = Math.random() * Math.random() * 1.5 + 0.5;
@@ -234,15 +255,27 @@ function initNebulaClouds(){
 
   //================ Nebula 1 =================
 
-  var dist = lyToKM( 7.0 ) * global.DistanceScale * global.starsDistanceScale;
+  var dist = lyToKM( 2.5 ) * global.DistanceScale * global.starsDistanceScale;
+  var fadeoutRange = 600e6;
 
   Nebula1_layer1 = new NebulaCloud(6);
   Nebula1_layer1.centerPos = new THREE.Vector3( 0, 0, dist );
-  Nebula1_layer1.distribution = 6600e6 * global.DistanceScale;
+  Nebula1_layer1.distribution = 3600e6 * global.DistanceScale;
   Nebula1_layer1.dustCloudTexturesAmount = 26;
-  Nebula1_layer1.dustCloudMaxSize = 1200e6;
+  Nebula1_layer1.dustCloudMaxSize = 400e6;
   Nebula1_layer1.color = new THREE.Color(0x5687a8);
+  Nebula1_layer1.fadeoutRange = fadeoutRange;
   Nebula1_layer1.init();
+
+  dist = lyToKM( 6.0 ) * global.DistanceScale * global.starsDistanceScale;
+  Nebula1_layer2 = new NebulaCloud(7);
+  Nebula1_layer2.centerPos = new THREE.Vector3( 0, 0, dist );
+  Nebula1_layer2.distribution = 6600e6 * global.DistanceScale;
+  Nebula1_layer2.dustCloudTexturesAmount = 6;
+  Nebula1_layer2.dustCloudMaxSize = 1600e6;
+  Nebula1_layer2.color = new THREE.Color(0x5687a8);
+  Nebula1_layer2.fadeoutRange = fadeoutRange * 2;
+  Nebula1_layer2.init();
 
 
   // var dist = lyToKM( 9.0 ) * global.DistanceScale * global.starsDistanceScale;
@@ -281,7 +314,8 @@ function initNebulaClouds(){
 
 
   //================ Nebula 2 =================
-  dist = lyToKM( 55.0 ) * global.DistanceScale * global.starsDistanceScale;
+  dist = lyToKM( 40.0 ) * global.DistanceScale * global.starsDistanceScale;
+  fadeoutRange = 2400e6;
 
   Nebula2_layer1 = new NebulaCloud(1);
   Nebula2_layer1.centerPos = new THREE.Vector3( 0, 0, dist );
@@ -289,6 +323,7 @@ function initNebulaClouds(){
   Nebula2_layer1.dustCloudTexturesAmount = 10;
   Nebula2_layer1.dustCloudMaxSize = 4 * 600e6;
   Nebula2_layer1.color = new THREE.Color(0x5687a8);
+  Nebula2_layer1.fadeoutRange = fadeoutRange;
   Nebula2_layer1.init();
 
   Nebula2_layer2 = new NebulaCloud(2);
@@ -297,6 +332,7 @@ function initNebulaClouds(){
   Nebula2_layer2.dustCloudTexturesAmount = 10;
   Nebula2_layer2.dustCloudMaxSize = 4 * 400e6;
   Nebula2_layer2.color = new THREE.Color(0x051c3b);
+  Nebula2_layer2.fadeoutRange = fadeoutRange;
   Nebula2_layer2.init();
 
   Nebula2_layer3 = new NebulaCloud(3);
@@ -305,6 +341,7 @@ function initNebulaClouds(){
   Nebula2_layer3.dustCloudTexturesAmount = 6;
   Nebula2_layer3.dustCloudMaxSize = 4 * 500e6;
   Nebula2_layer3.color = new THREE.Color(0x04261d);
+  Nebula2_layer3.fadeoutRange = fadeoutRange;
   Nebula2_layer3.init();
 
   Nebula2_layer4 = new NebulaCloud(4);
@@ -313,14 +350,16 @@ function initNebulaClouds(){
   Nebula2_layer4.dustCloudTexturesAmount = 6;
   Nebula2_layer4.dustCloudMaxSize = 4 * 600e6;
   Nebula2_layer4.color = new THREE.Color(0x791d01);
+  Nebula2_layer4.fadeoutRange = fadeoutRange;
   Nebula2_layer4.init();
 
   Nebula2_layer5 = new NebulaCloud(5);
   Nebula2_layer5.centerPos = new THREE.Vector3( 0, 0, dist );
   Nebula2_layer5.distribution = 4 * 900e6 * global.DistanceScale;
-  Nebula2_layer5.dustCloudTexturesAmount = 4;
+  Nebula2_layer5.dustCloudTexturesAmount = 6;
   Nebula2_layer5.dustCloudMaxSize = 4 * 300e6;
   Nebula2_layer5.color = new THREE.Color(0x111111);
+  Nebula2_layer5.fadeoutRange = fadeoutRange;
   Nebula2_layer5.init();
 
 
@@ -333,6 +372,7 @@ function initNebulaClouds(){
   Nebula_photo1.dustCloudMaxSize = 100e7;
   Nebula_photo1.color = new THREE.Color(0x6a1212);
   Nebula_photo1.staticImagesSrc = [ "Boomerang_Nebula_1_1.jpg" ];
+  Nebula_photo1.fadeoutRange = 40e7;
   Nebula_photo1.init();
 
 	console.log("Init nebulas done");
@@ -342,7 +382,7 @@ function initNebulaClouds(){
 function NebulaCloudsUpdate(){
 
   Nebula1_layer1.update();
-  //Nebula1_layer2.update();
+  Nebula1_layer2.update();
   //Nebula1_layer3.update();
   //Nebula1_layer4.update();
 
