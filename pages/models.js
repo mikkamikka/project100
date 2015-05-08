@@ -15,6 +15,8 @@ var material = new THREE.MeshNormalMaterial( {
   } );
 
 var voyager;
+var voyagerInitialPos = new THREE.Vector3( -10000, 0.2, 8534500000 * global.DistanceScale );   // real is 19534500000 km
+var voyagerIsInView, prevVoyagerIsInView;
 
 function loadVoyager(){
 
@@ -42,28 +44,26 @@ function loadVoyager(){
 }
 
 function loadVoyagerPLY(){
-var loader = new THREE.PLYLoader();
-				loader.addEventListener( 'load', function ( event ) {
+  var loader = new THREE.PLYLoader();
+	loader.addEventListener( 'load', function ( event ) {
 
-					var geometry = event.content;
-					var material = new THREE.MeshPhongMaterial( { color: 0x0055ff, specular: 0x111111, shininess: 200 } );
-					var mesh = new THREE.Mesh( geometry, material );
+  	var geometry = event.content;
+  	var material = new THREE.MeshPhongMaterial( { color: 0x0055ff, specular: 0x111111, shininess: 200 } );
+  	var mesh = new THREE.Mesh( geometry, material );
 
-					mesh.position.set( 0, - 0.25, 0 );
-					mesh.rotation.set( 0, - Math.PI / 2, 0 );
-					mesh.scale.set( 600, 600, 600 );
+  	mesh.position.set( 0, - 0.25, 0 );
+  	mesh.rotation.set( 0, - Math.PI / 2, 0 );
+  	mesh.scale.set( 600, 600, 600 );
 
-					//mesh.castShadow = true;
-					//mesh.receiveShadow = true;
+  	//mesh.castShadow = true;
+  	//mesh.receiveShadow = true;
 
-					scene.add( mesh );
+  	scene.add( mesh );
 
-				} );
-				loader.load( 'models/Voyager_17.ply' );
+	} );
+	loader.load( 'models/Voyager_17.ply' );
 
 }
-
-
 
 
 function loadVoyagerOBJ(){
@@ -112,7 +112,7 @@ function loadVoyagerOBJ(){
 
 					} );
 
-          object.position.set( -10000, 0.2, 8534500000 * global.DistanceScale );   // real is 19534500000 km
+          object.position.set( voyagerInitialPos.x, voyagerInitialPos.y, voyagerInitialPos.z );
           object.rotation.set( -PI/2, PI/4, 0 );
           object.scale.set( 1200, 1200, 1200);
           voyager = object;
@@ -139,20 +139,34 @@ function updateModels(){
 
     var camDistance = voyager.position.z - distance;
 
-    setCameraSlowDown( camDistance, maxModelRange,  0.02 );
+    //setCameraSlowDown( camDistance, maxModelRange,  0.02 );
 
-    // if ( Math.abs( camDistance ) < maxModelRange ) {
-    //
-    //   //voyager.position.z += 1000.0;
-    //   //var d = 1.0 - smoothstep( 0, maxModelRange/2, camDistance) * ( 1 - smoothstep( maxModelRange/2, maxModelRange, camDistance));
-    //   var d = smoothstep(0, maxModelRange, Math.abs( camDistance )) ;
-    //   d = scale( d, 0.0, 1.0, 0.005, 1.0 );
-    //
-    //   slowDown =  d;
-    // }
-    // else{
-    //   slowDown = 1.0;
-    // }
+    var range = maxModelRange * 3;
+    if ( Math.abs( camDistance ) < range ) {
+
+      voyagerIsInView = true;
+
+      voyager.position.z += 100.0;
+
+      var a = smoothstep( - range, 0, camDistance );    // in front of the camera
+      var b = 1 - smoothstep( 0, range - range/4, camDistance );        // behind the camera
+      var d = 1.0 - a * b;
+
+      slowDown = scale( d, 0.0, 1.0, 0.02, 1.0 );
+
+    }
+    else{
+
+      voyagerIsInView = false;
+      slowDown = 1.0;
+
+    }
+
+    if ( !voyagerIsInView && prevVoyagerIsInView ){
+      voyager.position.z = voyagerInitialPos.z;
+    }
+
+    prevVoyagerIsInView = voyagerIsInView;
 
   }
 

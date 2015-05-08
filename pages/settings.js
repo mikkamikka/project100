@@ -21,6 +21,8 @@ var zoomSpeed = 5250, fastZoomSpeed = zoomSpeed * 20,
 
 var cameraZoomDamp = 0.06;
 
+var useSlowDown = false;
+
 var allowCameraLookAround = false;
 
 var drawSkyBox = true;

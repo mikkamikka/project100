@@ -709,7 +709,10 @@ function renderSolarSystem() {
 
         //console.log(deltaZ);
 
-        setCameraSlowDown( deltaZ, maxSlowDownRange,  0.3 );
+        if ( useSlowDown ){
+          setCameraSlowDown( deltaZ, maxSlowDownRange,  0.3 );
+        }
+
 
         if ( deltaZ < 0 ){    // is in front of the camera
           //planets[i].mesh.position.x =  planets[i].mesh.position.x - 1.0;

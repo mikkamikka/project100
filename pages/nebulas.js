@@ -423,7 +423,7 @@ function initNebulaClouds(){
   Nebula3_layer1.dustCloudMaxSize = 4 * 600e6;
   Nebula3_layer1.color = new THREE.Color(0x220202);
   Nebula3_layer1.fadeoutRange = fadeoutRange;
-  Nebula3_layer1.distributionVector = new THREE.Vector3( 6, 2, 5 );
+  Nebula3_layer1.distributionVector = new THREE.Vector3( 6, 0.5, 5 );
   Nebula3_layer1.init();
 
   Nebula3_layer2 = new NebulaCloud(2);
@@ -443,7 +443,7 @@ function initNebulaClouds(){
   Nebula3_layer3.dustCloudMaxSize = 2 * 500e6;
   Nebula3_layer3.color = new THREE.Color(0x061127);
   Nebula3_layer3.fadeoutRange = fadeoutRange;
-  Nebula3_layer3.distributionVector = new THREE.Vector3( 3, 1, 5 );
+  Nebula3_layer3.distributionVector = new THREE.Vector3( 3, 0.5, 5 );
   Nebula3_layer3.init();
 
   Nebula3_layer4 = new NebulaCloud(4);
@@ -453,7 +453,7 @@ function initNebulaClouds(){
   Nebula3_layer4.dustCloudMaxSize = 4 * 600e6;
   Nebula3_layer4.color = new THREE.Color(0x6e6e6e);
   Nebula3_layer4.fadeoutRange = fadeoutRange;
-  Nebula3_layer4.distributionVector = new THREE.Vector3( 3, 1, 5 );
+  Nebula3_layer4.distributionVector = new THREE.Vector3( 3, 0.5, 5 );
   Nebula3_layer4.init();
 
   Nebula3_layer5 = new NebulaCloud(5);
@@ -463,7 +463,7 @@ function initNebulaClouds(){
   Nebula3_layer5.dustCloudMaxSize = 4 * 300e6;
   Nebula3_layer5.color = new THREE.Color(0x111111);
   Nebula3_layer5.fadeoutRange = fadeoutRange;
-  Nebula3_layer5.distributionVector = new THREE.Vector3( 3, 1, 5 );
+  Nebula3_layer5.distributionVector = new THREE.Vector3( 3, 0.5, 5 );
   Nebula3_layer5.init();
 
 
