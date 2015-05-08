@@ -170,7 +170,8 @@ function initSkyBoxLayered( texture_src ){
 	material = new THREE.MeshBasicMaterial( {
 													map: _texture,
 													//color: new THREE.Color( 0x848484 ),
-								    			blending: THREE.AdditiveBlending,
+								    			//blending: THREE.AdditiveBlending,
+													//blending: THREE.NoBlending,
 								    			//depthWrite: false,
 								          //depthTest: true,
 								    			transparent: true
