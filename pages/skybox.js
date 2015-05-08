@@ -162,14 +162,14 @@ function initSkyBoxLayered( texture_src ){
 
 
 	// layer 1
-	_texture = THREE.ImageUtils.loadTexture( 'textures/space/milky_way_02.jpg' );
+	_texture = THREE.ImageUtils.loadTexture( 'textures/space/stars_layer_2.jpg' );
 	//_texture = THREE.ImageUtils.loadTexture( 'textures/space/milky_way_eso0932a.jpg' );
 
 	_texture.minFilter = THREE.LinearFilter;
 
 	material = new THREE.MeshBasicMaterial( {
 													map: _texture,
-													color: new THREE.Color( 0x848484 ),
+													//color: new THREE.Color( 0x848484 ),
 								    			blending: THREE.AdditiveBlending,
 								    			//depthWrite: false,
 								          //depthTest: true,
