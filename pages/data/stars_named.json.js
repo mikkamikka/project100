@@ -1,7 +1,7 @@
 var star_init_list = [
  { starName:"Sol", id:101, galX:0, galY:0, galZ:0,  dist:0, color:0xfff5ec},
  { starName:"Proxima Centauri", id:203, galX:2.972, galY:-2.994, galZ:-0.077,  dist:4.22, color:0xffcd75},
- { starName:"Alpha Centauri", id:201, galX:3.205, galY:-3.014, galZ:0.035,  dist:4.4, color:0xfff5ec},
+ { starName:"Alpha Centauri", id:201, galX:-18.205, galY:-3.014, galZ:0.035,  dist:4.4, color:0xfff5ec},
  //{ starName:"Beta Centauri", id:202, galX:3.205, galY:-3.014, galZ:0.035,  dist:4.4, color:0xffd7ae},
  { starName:"Barnard's Star", id:301, galX:4.935, galY:3, galZ:1.388,  dist:5.94, color:0xffbb7b},
  { starName:"CN Leonis", id:401, galX:-1.897, galY:-3.904, galZ:6.481,  dist:7.8, color:0xffbb7b},
