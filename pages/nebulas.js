@@ -468,7 +468,7 @@ function initNebulaClouds(){
 
 
   //================ photo Nebula 1 =================
-  dist = lyToKM( 30 ) * global.DistanceScale * global.starsDistanceScale;
+  dist = lyToKM( 70 ) * global.DistanceScale * global.starsDistanceScale;
   Nebula_photo1 = new NebulaCloud(1);
   Nebula_photo1.centerPos = new THREE.Vector3( -2e9, 1e9, dist );
   Nebula_photo1.distribution = 600e6 * global.DistanceScale;

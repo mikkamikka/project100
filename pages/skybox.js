@@ -158,6 +158,7 @@ function initSkyBoxLayered( texture_src ){
 													} );
 
 	layered_skybox_mesh[0] = new THREE.Mesh( geometry, material );
+	layered_skybox_mesh[0].rotation.y = -PI/2;
 	scene.add( layered_skybox_mesh[0] );
 
 
