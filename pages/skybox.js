@@ -466,7 +466,7 @@ function renderSkybox() {
 
 	//simple_skybox_mesh.rotation.z = distance / lyToKM(0.001);
 
-	var transition = smoothstep( 35, 60, distLY );
+	var transition = smoothstep( 5, 50, distLY );
 
 	layered_skybox_mesh[0].material.opacity = 1 - transition;
 	layered_skybox_mesh[1].material.opacity = transition;
