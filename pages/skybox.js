@@ -121,7 +121,66 @@ var equirect_starfield = {
 
 var cameraCubeFOV = 45;
 var cameraCubeActive = false;
-var simple_skybox_mesh;
+var simple_skybox_mesh,
+		layered_skybox_mesh = [];
+
+
+function initSkyBoxLayered( texture_src ){
+
+  var _texture;
+	var geometry = new THREE.SphereGeometry( 1.01e10, 60, 40 );
+	var geometry2 = new THREE.SphereGeometry( 1.01e10, 60, 40 );
+	geometry.applyMatrix( new THREE.Matrix4().makeScale( -1, 1, 1 ) );
+	geometry2.applyMatrix( new THREE.Matrix4().makeScale( -1, 1, 1 ) );
+
+	// layer 0
+	if ( texture_src == null || texture_src == undefined ){
+
+		//_texture = THREE.ImageUtils.loadTexture( 'textures/space/stars_skybox_4096.jpg' );
+		_texture = THREE.ImageUtils.loadTexture( 'textures/space/stars_texture13.jpg' );
+		_texture.minFilter = THREE.LinearFilter;
+
+	}
+	else{
+
+		_texture = THREE.ImageUtils.loadTexture( texture_src );
+		_texture.minFilter = THREE.LinearFilter;
+
+	}
+
+	var material = new THREE.MeshBasicMaterial( {
+													map: _texture,
+													//color: color,
+								    			blending: THREE.AdditiveBlending,
+								    			//depthWrite: false,
+								          //depthTest: false,
+								    			transparent: true
+													} );
+
+	layered_skybox_mesh[0] = new THREE.Mesh( geometry, material );
+	scene.add( layered_skybox_mesh[0] );
+
+
+	// layer 1
+	_texture = THREE.ImageUtils.loadTexture( 'textures/space/milky_way_02.jpg' );
+	//_texture = THREE.ImageUtils.loadTexture( 'textures/space/milky_way_eso0932a.jpg' );
+
+	_texture.minFilter = THREE.LinearFilter;
+
+	material = new THREE.MeshBasicMaterial( {
+													map: _texture,
+													color: new THREE.Color( 0x848484 ),
+								    			blending: THREE.AdditiveBlending,
+								    			//depthWrite: false,
+								          //depthTest: true,
+								    			transparent: true
+													} );
+
+	layered_skybox_mesh[1] = new THREE.Mesh( geometry2, material );
+	layered_skybox_mesh[1].rotation.y = -PI/2;
+	scene.add( layered_skybox_mesh[1] );
+
+}
 
 
 function initSkyBoxSimple( texture_src ){
@@ -155,7 +214,6 @@ function initSkyBoxSimple( texture_src ){
 
 }
 
-
 function initSkyBoxCube(){
 
 	cameraCube = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1e9 );
@@ -188,7 +246,6 @@ function initSkyBoxCube(){
     composer.addPass( skyboxPass );
 
 }
-
 
 function initSkyBoxEquirec(){
 
@@ -245,9 +302,6 @@ function initSkyBoxEquirec(){
 var sb_material, sb_geometry, sb_pointcloud;
 var pSize = [];
 var pOpacity = [];
-
-
-
 var skyboxShader = {
 
   uniforms: {
@@ -338,7 +392,7 @@ function initSkyBoxProcedural(){
 		// 	pOpacity.push( Math.random() / 4 + 0.5 );
 		//
 		// }
-//	}
+	//	}
 	var attributes =  {
 		//'color': { type: 'c', value: new THREE.Color(0xffffff) },
 		//pSize: { type: 'f', value: pSize },
@@ -349,7 +403,7 @@ function initSkyBoxProcedural(){
 
 		color: { type: "c", value: new THREE.Color( 0x00ff00 ) },
 
-};
+	};
 
 	// attributes.pSize.value = pSize;
 	// attributes.pOpacity.value = pOpacity;
@@ -375,20 +429,20 @@ function initSkyBoxProcedural(){
 	//attributes.pOpacity.needsUpdate = true;
 
 	// point cloud geometry
-var geometry = new THREE.SphereGeometry( 100, 16, 8 );
+	var geometry = new THREE.SphereGeometry( 100, 16, 8 );
 
-// point cloud
-cloud = new THREE.PointCloud( geometry, sb_material );
+	// point cloud
+	cloud = new THREE.PointCloud( geometry, sb_material );
 
-for( var i = 0; i < cloud.geometry.vertices.length; i ++ ) {
+	for( var i = 0; i < cloud.geometry.vertices.length; i ++ ) {
 
-		// set alpha randomly
-		//attributes.pSize.value[ i ] = Math.random();
-		attributes.pOpacity.value[ i ] = Math.random();
-}
-//attributes.pSize.needsUpdate = true;
-//attributes.pOpacity.needsUpdate = true;
-scene.add( cloud );
+			// set alpha randomly
+			//attributes.pSize.value[ i ] = Math.random();
+			attributes.pOpacity.value[ i ] = Math.random();
+	}
+	//attributes.pSize.needsUpdate = true;
+	//attributes.pOpacity.needsUpdate = true;
+	scene.add( cloud );
 	//scene.add( sb_pointcloud );
 
 }
@@ -410,9 +464,17 @@ function renderSkybox() {
 	  cameraCube.updateProjectionMatrix();
 	}
 
-	simple_skybox_mesh.rotation.z = distance / lyToKM(0.001);
-	//simple_skybox_mesh.geometry.
+	//simple_skybox_mesh.rotation.z = distance / lyToKM(0.001);
 
+	var transition = smoothstep( 40, 55, distLY );
+
+	layered_skybox_mesh[0].material.opacity = 1 - transition;
+	layered_skybox_mesh[1].material.opacity = transition;
+
+	for ( var i=0; i < layered_skybox_mesh.length; i++ ) {
+		layered_skybox_mesh[i].material.needsUpdate = true;
+		//console.log(layered_skybox_mesh[i].material.opacity);
+	}
 
 }
 

@@ -231,7 +231,7 @@
 
 				}, false );
 
-				camera = new THREE.PerspectiveCamera( initialCameraFOV, SCREEN_WIDTH / SCREEN_HEIGHT, 1000, 1e12 );
+				camera = new THREE.PerspectiveCamera( initialCameraFOV, SCREEN_WIDTH / SCREEN_HEIGHT, 5000, 1e12 );
 				//camera.position.z = 63000;
 
 				scene = new THREE.Scene();
@@ -334,7 +334,8 @@
 				initNamedStars();
 				initAsteroids();
 				initNebulaClouds();
-				initSkyBoxSimple();
+				//initSkyBoxSimple();
+				initSkyBoxLayered();
 				initModels();
 
 				initAudio();
@@ -514,7 +515,7 @@
 							 && distance > lowBorder ) {
 
 						curZoomStep = zoomSteps[i];
-						debug_zoom.zoom_factor = curZoomStep.zoom_factor;
+						if (debug) debug_zoom.zoom_factor = curZoomStep.zoom_factor;
 						//wheelZoomStep = 300 * , fastWheelZoomStep = wheelZoomStep * 20;
 					}
 				}
