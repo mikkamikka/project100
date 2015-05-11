@@ -138,7 +138,7 @@ function initSkyBoxLayered( texture_src ){
 	// layer 0
 	if ( texture_src == null || texture_src == undefined ){
 
-		_texture = THREE.ImageUtils.loadTexture( 'textures/space/stars_layer_1_2.jpg' );
+		_texture = THREE.ImageUtils.loadTexture( 'textures/space/stars_layer_1.jpg' );
 		_texture.minFilter = THREE.LinearFilter;
 
 	}
@@ -163,7 +163,7 @@ function initSkyBoxLayered( texture_src ){
 
 
 	// layer 1
-	_texture = THREE.ImageUtils.loadTexture( 'textures/space/stars_layer_2_2.jpg' );
+	_texture = THREE.ImageUtils.loadTexture( 'textures/space/stars_layer_2.jpg' );
 	_texture.minFilter = THREE.LinearFilter;
 
 	material = new THREE.MeshBasicMaterial( {
