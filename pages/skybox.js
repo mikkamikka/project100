@@ -123,20 +123,21 @@ var cameraCubeFOV = 45;
 var cameraCubeActive = false;
 var simple_skybox_mesh,
 		layered_skybox_mesh = [];
+var rotation_matrix;
 
 
 function initSkyBoxLayered( texture_src ){
 
   var _texture;
 	var geometry = new THREE.SphereGeometry( 1.01e10, 60, 40 );
-	//var geometry2 = new THREE.SphereGeometry( 1.01e10, 60, 40 );
 	geometry.applyMatrix( new THREE.Matrix4().makeScale( -1, 1, 1 ) );
-	//geometry2.applyMatrix( new THREE.Matrix4().makeScale( -1, 1, 1 ) );
+	geometry.applyMatrix( new THREE.Matrix4().makeRotationY( -PI/2 ) );
+	geometry.applyMatrix( new THREE.Matrix4().makeRotationZ( - 55 * PI / 180 ) );
+
 
 	// layer 0
 	if ( texture_src == null || texture_src == undefined ){
 
-		//_texture = THREE.ImageUtils.loadTexture( 'textures/space/stars_skybox_4096.jpg' );
 		_texture = THREE.ImageUtils.loadTexture( 'textures/space/stars_layer_1.jpg' );
 		_texture.minFilter = THREE.LinearFilter;
 
@@ -158,48 +159,33 @@ function initSkyBoxLayered( texture_src ){
 													} );
 
 	layered_skybox_mesh[0] = new THREE.Mesh( geometry, material );
-	layered_skybox_mesh[0].rotation.y = -PI/2;
 	scene.add( layered_skybox_mesh[0] );
 
 
 	// layer 1
 	_texture = THREE.ImageUtils.loadTexture( 'textures/space/stars_layer_2.jpg' );
-	//_texture = THREE.ImageUtils.loadTexture( 'textures/space/milky_way_eso0932a.jpg' );
-
 	_texture.minFilter = THREE.LinearFilter;
 
 	material = new THREE.MeshBasicMaterial( {
 													map: _texture,
 													//color: new THREE.Color( 0x848484 ),
-								    			//blending: THREE.AdditiveBlending,
-													//blending: THREE.NoBlending,
-								    			//depthWrite: false,
-								          //depthTest: true,
 								    			transparent: true
 													} );
 
 	layered_skybox_mesh[1] = new THREE.Mesh( geometry, material );
-	layered_skybox_mesh[1].rotation.y = -PI/2;
 	scene.add( layered_skybox_mesh[1] );
 
 	// layer 2
 	_texture = THREE.ImageUtils.loadTexture( 'textures/space/stars_layer_3.jpg' );
-	//_texture = THREE.ImageUtils.loadTexture( 'textures/space/milky_way_eso0932a.jpg' );
-
 	_texture.minFilter = THREE.LinearFilter;
 
 	material = new THREE.MeshBasicMaterial( {
 													map: _texture,
 													//color: new THREE.Color( 0x848484 ),
-								    			//blending: THREE.AdditiveBlending,
-													//blending: THREE.NoBlending,
-								    			//depthWrite: false,
-								          //depthTest: true,
 								    			transparent: true
 													} );
 
 	layered_skybox_mesh[2] = new THREE.Mesh( geometry, material );
-	layered_skybox_mesh[2].rotation.y = -PI/2;
 	scene.add( layered_skybox_mesh[2] );
 
 
@@ -482,7 +468,6 @@ function renderSkybox() {
 
 	  cameraCube.fov = cameraCubeFOV + (distance - initialCameraDistance)/3e8;
 
-
 	  cameraCube.position.z = distance /120;
 	  cameraCube.updateProjectionMatrix();
 	}
@@ -505,8 +490,12 @@ function renderSkybox() {
 
 
 	for ( var i=0; i < layered_skybox_mesh.length; i++ ) {
+
 		layered_skybox_mesh[i].material.needsUpdate = true;
-		//console.log(layered_skybox_mesh[i].material.opacity);
+
+		layered_skybox_mesh[i].matrix = ( new THREE.Matrix4().makeRotationZ( distance / lyToKM(0.001) ) );
+		layered_skybox_mesh[i].rotation.setFromRotationMatrix( layered_skybox_mesh[i].matrix );
+
 	}
 
 }
