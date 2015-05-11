@@ -138,7 +138,7 @@ function initSkyBoxLayered( texture_src ){
 	// layer 0
 	if ( texture_src == null || texture_src == undefined ){
 
-		_texture = THREE.ImageUtils.loadTexture( 'textures/space/stars_layer_1.jpg' );
+		_texture = THREE.ImageUtils.loadTexture( 'textures/space/stars_layer_1_2.jpg' );
 		_texture.minFilter = THREE.LinearFilter;
 
 	}
@@ -163,7 +163,7 @@ function initSkyBoxLayered( texture_src ){
 
 
 	// layer 1
-	_texture = THREE.ImageUtils.loadTexture( 'textures/space/stars_layer_2.jpg' );
+	_texture = THREE.ImageUtils.loadTexture( 'textures/space/stars_layer_2_2.jpg' );
 	_texture.minFilter = THREE.LinearFilter;
 
 	material = new THREE.MeshBasicMaterial( {
@@ -176,17 +176,17 @@ function initSkyBoxLayered( texture_src ){
 	scene.add( layered_skybox_mesh[1] );
 
 	// layer 2
-	_texture = THREE.ImageUtils.loadTexture( 'textures/space/stars_layer_3.jpg' );
-	_texture.minFilter = THREE.LinearFilter;
+	//_texture = THREE.ImageUtils.loadTexture( 'textures/space/stars_layer_3.jpg' );
+	//_texture.minFilter = THREE.LinearFilter;
 
-	material = new THREE.MeshBasicMaterial( {
-													map: _texture,
-													//color: new THREE.Color( 0x848484 ),
-								    			transparent: true
-													} );
+	// material = new THREE.MeshBasicMaterial( {
+	// 												map: _texture,
+	// 												//color: new THREE.Color( 0x848484 ),
+	// 							    			transparent: true
+	// 												} );
 
-	layered_skybox_mesh[2] = new THREE.Mesh( geometry, material );
-	scene.add( layered_skybox_mesh[2] );
+	//layered_skybox_mesh[2] = new THREE.Mesh( geometry, material );
+	//scene.add( layered_skybox_mesh[2] );
 
 
 }
@@ -473,14 +473,22 @@ function renderSkybox() {
 	}
 
 	// layers crossfading
+	// var transition_1 = smoothstep( 0, 35, distLY );  // 0 -> 1
+	// layered_skybox_mesh[0].material.opacity = 1 - transition_1;  // 1 -> 0
+	//
+	// var transition_2 = smoothstep( 0, 35, distLY ) * ( 1 - smoothstep( 50, 87, distLY ) ); // 0 -> 1 and 1 -> 0
+	// layered_skybox_mesh[1].material.opacity = transition_2;
+
+	//ar transition_3 = smoothstep( 50, 87, distLY );  // 0 -> 1
+	//layered_skybox_mesh[2].material.opacity = transition_3;
+
+
 	var transition_1 = smoothstep( 0, 35, distLY );  // 0 -> 1
-	layered_skybox_mesh[0].material.opacity = 1 - transition_1;  // 1 -> 0
+	transition_1 = scale( transition_1, 0, 1, 0.2, 1 );
+	layered_skybox_mesh[0].material.opacity = transition_1 * ( 1 - smoothstep( 45, 70, distLY ) );
 
-	var transition_2 = smoothstep( 0, 35, distLY ) * ( 1 - smoothstep( 50, 87, distLY ) ); // 0 -> 1 and 1 -> 0
+	var transition_2 = smoothstep( 45, 70, distLY ); // 0 -> 1
 	layered_skybox_mesh[1].material.opacity = transition_2;
-
-	var transition_3 = smoothstep( 50, 87, distLY );  // 0 -> 1
-	layered_skybox_mesh[2].material.opacity = transition_3;
 
 
 	//layers rotation
