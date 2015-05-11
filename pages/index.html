@@ -281,13 +281,15 @@
 				}
 				container.appendChild( renderer.domElement );
 
-				stats = new Stats();
-				stats.domElement.style.position = 'absolute';
-				stats.domElement.style.top = '0px';
-				stats.domElement.style.left = '20px';
-				stats.domElement.style.zIndex = 5;
-				container.appendChild( stats.domElement );
 
+				if (debug){
+					stats = new Stats();
+					stats.domElement.style.position = 'absolute';
+					stats.domElement.style.top = '0px';
+					stats.domElement.style.left = '20px';
+					stats.domElement.style.zIndex = 5;
+					container.appendChild( stats.domElement );
+				}
 
 				// postprocessing
 
@@ -377,10 +379,9 @@
 				requestAnimationFrame( animate );
 
 				render();
-				stats.update();
+				if (debug) stats.update();
 
 				realDistanceKM = Math.round(distance) / global.DistanceScale;
-
 
 				var s = 0.0;
 				if (curZoomStep.id == 3) {
@@ -392,7 +393,6 @@
 					var pos_norm = 1.0 - (stepLength - pos)/stepLength; // 0 -> 1
 
 					//s = scale( pos_norm, 0.0, 1.0, 0.001, 1.0 );
-
 					//s = lerp( 1.0, 0.1, pos_norm );
 
 					s = lerp( 0.1, 0.001, pos_norm );
@@ -475,6 +475,13 @@
 					//distanceTarget -= curZoomSpeed;
 					curZoomSpeed = 0;
 					distanceTarget = minCameraDistance;
+
+				}
+
+				if ( distanceTarget - curZoomSpeed >= maxCameraDistance ){		// limit zoom out
+
+					curZoomSpeed = 0;
+					distanceTarget = maxCameraDistance;
 
 				}
 

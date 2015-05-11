@@ -12,7 +12,7 @@ var global = new Global();
 
 var initialCameraDistance = 4.5e6 * global.DistanceScale,
     minCameraDistance = 3e6 * global.DistanceScale,
-    maxCameraDistance = LY * 100 * global.DistanceScale * global.starsDistanceScale,    // 100 light years in km
+    maxCameraDistance = LY * 110 * global.DistanceScale * global.starsDistanceScale,    // 100 light years in km
     initialCameraFOV = 60;
 
 var zoomSpeed = 5250, fastZoomSpeed = zoomSpeed * 20,
