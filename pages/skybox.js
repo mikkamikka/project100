@@ -472,23 +472,18 @@ function renderSkybox() {
 	  cameraCube.updateProjectionMatrix();
 	}
 
-	//simple_skybox_mesh.rotation.z = distance / lyToKM(0.001);
-
+	// layers crossfading
 	var transition_1 = smoothstep( 0, 35, distLY );  // 0 -> 1
-
 	layered_skybox_mesh[0].material.opacity = 1 - transition_1;  // 1 -> 0
-	//layered_skybox_mesh[1].material.opacity = transition_1;
 
 	var transition_2 = smoothstep( 0, 35, distLY ) * ( 1 - smoothstep( 50, 87, distLY ) ); // 0 -> 1 and 1 -> 0
-
 	layered_skybox_mesh[1].material.opacity = transition_2;
 
-
 	var transition_3 = smoothstep( 50, 87, distLY );  // 0 -> 1
-
 	layered_skybox_mesh[2].material.opacity = transition_3;
 
 
+	//layers rotation
 	for ( var i=0; i < layered_skybox_mesh.length; i++ ) {
 
 		layered_skybox_mesh[i].material.needsUpdate = true;

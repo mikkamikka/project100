@@ -116,12 +116,12 @@ NebulaCloud.prototype.update = function() {
     if ( this.distFromCamera < this.fadeoutRange )  // is within approximation range
     {
 
-      for (var i=0; i < this.staticImages.length; i++){
+      //for (var i=0; i < this.staticImages.length; i++){
+        //var transition = 1 - smoothstep( 0, this.fadeoutRange, this.distFromCamera );
+        //this.staticImages[i].material.opacity = ( this.fadeoutRange - this.distFromCamera ) / this.fadeoutRange;
+        //this.staticImages[i].material.needsUpdate = true;
 
-        this.staticImages[i].material.opacity = ( this.fadeoutRange - this.distFromCamera ) / this.fadeoutRange;
-        this.staticImages[i].material.needsUpdate = true;
-
-      }
+      //}
 
       if ( !this.isInView ){
 
@@ -160,14 +160,6 @@ NebulaCloud.prototype.update = function() {
   //       && this.centerPos.z + this.distribution * 5   > distance
   //     )
   {
-
-    // for (var i=0; i < this.staticImages.length; i++){
-    //
-		// 	this.staticImages[i].material.opacity = ( this.fadeoutRange - this.distFromCamera ) / this.fadeoutRange;
-		// 	this.staticImages[i].material.needsUpdate = true;
-    //   console.log(this.staticImages[i].material.opacity);
-    //
-		// }
 
     if ( !this.isInView ){
 
