@@ -85,6 +85,7 @@ var starShader = {
           'vec2 Direction = vec2(0.5) - TexCoord;',
           'Direction /= vec2( Samples, Samples );',
           'vec3 Color = texture2D( texture, TexCoord ).rgb;',
+          //'vec3 Dim = vec3( 0.0, 0.0, 0.0);',
 
 
           // radial shift from https://www.shadertoy.com/view/llfGD4 - sketch by @pheeelicks
@@ -100,6 +101,7 @@ var starShader = {
           '{',
 
             'Color += texture2D( texture, TexCoord ).rgb * (f1.rgb + f2.rgb) * Intensity;',
+            //'Dim += texture2D( texture, TexCoord ).rgb * Intensity;',
             //'Color.r += texture2D( texture, TexCoord ).r * Intensity * noise( vUv* makem2(time)*2.0 );',
             //'Color.g += texture2D( texture, TexCoord ).g * Intensity * noise( vUv* makem2(time)*2.0 );',
             //'Color.b += texture2D( texture, TexCoord ).b * Intensity * noise( vUv* makem2(time)*2.0 );',
@@ -108,6 +110,7 @@ var starShader = {
           '}',
 
           //'gl_FragColor = vec4( Color  * color_shift, 1.0 );',
+          //'gl_FragColor = vec4( Color  * vec3( 1.0, 0.8, 0.6 ), Dim.x + ( Color.x + Color.y + Color.z ) / 1.0 );',
           'gl_FragColor = vec4( Color  * vec3( 1.0, 0.8, 0.6 ), 1.0 );',
 
 
@@ -138,7 +141,7 @@ var starFXmaterial = new THREE.ShaderMaterial({
   side: THREE.FrontSide,
   blending: THREE.AdditiveBlending,
   transparent: true,
-  depthWrite	: false
+  depthWrite: false
   //depthTest: false
 
 });

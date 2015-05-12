@@ -13,6 +13,9 @@ if (debug) console.log('stars maxFlareRange, light years: ' + maxFlareRangeLY);
 
 var textureFlare_star1 = THREE.ImageUtils.loadTexture( "textures/lensflare/star1.png" ); // star
 var textureFlare_star3 = THREE.ImageUtils.loadTexture( "textures/lensflare/star3.png" ); // star
+//var textureFlare_star3 = THREE.ImageUtils.loadTexture( "textures/lensflare/star2_alpha.png" ); // star
+
+
 
 //var textureFlare_line1 = THREE.ImageUtils.loadTexture( "textures/lensflare/lensflare2.png" );  // line
 //var textureFlare_line2 = THREE.ImageUtils.loadTexture( "textures/lensflare/lensflare_blue_line_hor.png" );
