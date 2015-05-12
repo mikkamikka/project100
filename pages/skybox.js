@@ -482,7 +482,7 @@ function renderSkybox() {
 	//layered_skybox_mesh[2].material.opacity = transition_3;
 
 
-	var transition_1 = smoothstep( 0, 1, distLY );  // 0 -> 1
+	var transition_1 = smoothstep( 0, 4, distLY );  // 0 -> 1
 	transition_1 = scale( transition_1, 0.0, 1.0, 0.8, 1.0 );
 	layered_skybox_mesh[0].material.opacity = transition_1 * ( 1 - smoothstep( 35, 60, distLY ) );
 

@@ -15,8 +15,6 @@ var textureFlare_star1 = THREE.ImageUtils.loadTexture( "textures/lensflare/star1
 var textureFlare_star3 = THREE.ImageUtils.loadTexture( "textures/lensflare/star3.png" ); // star
 //var textureFlare_star3 = THREE.ImageUtils.loadTexture( "textures/lensflare/star2_alpha.png" ); // star
 
-
-
 //var textureFlare_line1 = THREE.ImageUtils.loadTexture( "textures/lensflare/lensflare2.png" );  // line
 //var textureFlare_line2 = THREE.ImageUtils.loadTexture( "textures/lensflare/lensflare_blue_line_hor.png" );
 //var textureFlare_line3 = THREE.ImageUtils.loadTexture( "textures/lensflare/lensflare_yellow_line_hor.png" );
@@ -62,7 +60,6 @@ Star.prototype.update = function(){
 				1.0);
 
 		}
-
 
 	}
 	else {
@@ -137,26 +134,43 @@ function initNamedStars() {
 		//if (isHideDwarfs && (star_init_list[i].starName.charAt(0) == "M")) continue; //Hide M-type stars
 
 		var source = star_init_list[i];
-		if ( source.dist > 100 ) continue;		// filter out stars far then 100 ly
+		if ( source.dist > 110 ) continue;		// filter out stars far then 100 ly
 
 		stars[i] = new Star();
 		stars[i].name = source.starName;
 		stars[i].id = source.id;
 		stars[i].distance = source.dist;
 
+		var x = source.galX,
+				y = source.galY;
+
+		if ( stars[i].distance > 60 ){
+
+			if (40 < x && x < 50)  x /= Math.floor( x / 10 );
+			if (50 < x && x < 60)  x /= 3;
+			if (60 < x && x < 80)	 x /= 5;
+			if (80 < x && x < 120) x /= 8;
+
+			if (40 < y && y < 50)  y /= Math.floor( y / 10 );
+			if (50 < y && y < 60)  y /= 2;
+			if (60 < y && y < 80)	 y /= 5;
+			if (80 < y && y < 120) y /= 8;
+		}
+
+		var X = x * 5e6 / 3.0;
+		var Y = y * 5e6 / 3.0;
+
 		stars[i].position.set(
-			source.galX * 5e6 / 3.0,
-			source.galY * 5e6 / 3.0,
-			Math.abs( stars[i].distance * DistanceScale )
+			X, Y,	Math.abs( stars[i].distance * DistanceScale )
 			);
 
-		if ( stars[i-1] != undefined )			// trick to show double stars with gap
-			if ( stars[i-1].distance == stars[i].distance ){
-
-				//if (debug) console.log(stars[i].name + " double star");
-				stars[i].position.set( stars[i].position.x + 2e6, stars[i].position.y + 1e6, stars[i].position.z + 1e6 );
-
-			}
+		// if ( stars[i-1] != undefined )			// trick to show double stars with gap
+		// 	if ( stars[i-1].distance == stars[i].distance ){
+		//
+		// 		//if (debug) console.log(stars[i].name + " double star");
+		// 		stars[i].position.set( stars[i].position.x + 2e6, stars[i].position.y + 1e6, stars[i].position.z + 1e6 );
+		//
+		// 	}
 
 		// stars[i].position.set(
 		// 	(0.5-Math.random()) * 1e10,
