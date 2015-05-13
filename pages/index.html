@@ -109,6 +109,8 @@
 		<script src="js/loaders/STLLoader.js"></script>
 		<script src="js/loaders/PLYLoader.js"></script>
 		<script src="js/loaders/OBJLoader.js"></script>
+		<script src="js/loaders/MTLLoader.js"></script>
+		<script src="js/loaders/OBJMTLLoader.js"></script>
 		<script src="js/shaders/NormalDisplacementShader.js"></script>
 		<!--script src="data/gaussian.js"></script-->
 		<script src="data/random-0.26.js"></script>
@@ -181,7 +183,7 @@
 			var container, stats;
 			var camera, controls, scene, sceneCube, renderer, composer, dpr;
 
-			var usePostprocessing = true;
+			var usePostprocessing = false;
 
 			var effectFilm, effectFXAA, effectBlend, effectSave, copyPass;
 
@@ -245,11 +247,6 @@
 				//controls.minDistance = 1;
 				//controls.maxDistance = 5e12;
 
-				//controls.movementSpeed = 1000;
-				//controls.domElement = container;
-				//controls.rollSpeed = 0; //Math.PI / 240;
-				//controls.autoForward = false;
-				//controls.dragToLook = true;
 
 				// retina displays fix
 				dpr = 1;
@@ -326,11 +323,11 @@
 
 								// motion blur
 
-				effectBlend.uniforms[ 'tDiffuse2' ].value = effectSave.renderTarget;
-				effectBlend.uniforms[ 'mixRatio' ].value = 0.7;
-				//effectBlend.renderToScreen = true;
+								effectBlend.uniforms[ 'tDiffuse2' ].value = effectSave.renderTarget;
+								effectBlend.uniforms[ 'mixRatio' ].value = 0.7;
+								//effectBlend.renderToScreen = true;
 
-				var scenePass = new THREE.RenderPass( scene, camera );
+								var scenePass = new THREE.RenderPass( scene, camera );
 								//scenePass.clear = true;
 
 								var renderTarget = new THREE.WebGLRenderTarget( SCREEN_WIDTH , SCREEN_HEIGHT , parameters );

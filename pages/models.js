@@ -14,9 +14,12 @@ var material = new THREE.MeshNormalMaterial( {
   //shininess: 200
   } );
 
-var voyager;
+var voyager, eva_pod;
 var voyagerInitialPos = new THREE.Vector3( -10000, 0.2, 8534500000 * global.DistanceScale );   // real is 19534500000 km
 var voyagerIsInView, prevVoyagerIsInView;
+
+var eva_podInitialPos = new THREE.Vector3( -35000, 7000, (778e6 - 149.5e6 + 30e6) * global.DistanceScale );   // real is 19534500000 km
+
 
 function loadVoyager(){
 
@@ -123,11 +126,60 @@ function loadVoyagerOBJ(){
 
 }
 
+function loadEVA2001OBJ(){
+
+				var manager = new THREE.LoadingManager();
+				manager.onProgress = function ( item, loaded, total ) {
+
+					console.log( item, loaded, total );
+
+				};
+
+				var texture = new THREE.Texture();
+        //var texture2 = new THREE.Texture();
+
+				var onProgress = function ( xhr ) {
+					if ( xhr.lengthComputable ) {
+						var percentComplete = xhr.loaded / xhr.total * 100;
+						console.log( Math.round(percentComplete, 2) + '% downloaded' );
+					}
+				};
+
+				var onError = function ( xhr ) {
+				};
+
+
+				var loader = new THREE.ImageLoader( manager );
+				loader.load( 'models/texture/Voyager_tex_01.jpg', function ( image ) {
+
+					texture.image = image;
+					texture.needsUpdate = true;
+
+				} );
+
+				// model
+
+        var loader = new THREE.OBJMTLLoader();
+				loader.load( 'models/eva_pod.obj', 'models/eva_pod.mtl', function ( object ) {
+
+          object.position.set( eva_podInitialPos.x, eva_podInitialPos.y, eva_podInitialPos.z );
+          object.rotation.set( -PI/2, 0, 0 );
+          object.scale.set( 1200, 1200, 1200);
+          eva_pod = object;
+          scene.add( eva_pod );
+
+				}, onProgress, onError );
+
+
+}
+
+
 
 
 function initModels(){
 
   loadVoyagerOBJ();
+  loadEVA2001OBJ();
 
 }
 
@@ -167,6 +219,12 @@ function updateModels(){
     }
 
     prevVoyagerIsInView = voyagerIsInView;
+
+  }
+
+  if ( eva_pod != undefined )  {
+
+    eva_pod.rotation.z -= 0.005;
 
   }
 
