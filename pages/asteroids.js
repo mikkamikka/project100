@@ -117,7 +117,7 @@ asteroidsCloud.prototype.initAsteroidsCloud = function() {
 
 	this.pointClouds = createPointClouds (this.centerPos, this.distribution, this.pointCloudPatriclesAmount, this.pointCloudMaxSize); // added and removed dynamically
 	this.dustCloud = createDustCloud (this.centerPos, this.distribution, this.dustCloudTexturesAmount, this.dustCloudMaxSize, this.type);
-	scene.add( this.dustCloud );
+	//scene.add( this.dustCloud );
 
 
 }
@@ -176,7 +176,7 @@ asteroidsCloud.prototype.update = function() {
 
 
 	// add and remove point clouds
-	if ( this.distFromCamera < maxAsteroidRange * 10 ){  // is within approximation range
+	if ( this.distFromCamera < maxAsteroidRange * 5 ){  // is within approximation range
 
 		for (var i=0; i < this.pointClouds.length; i++){
 
@@ -189,6 +189,9 @@ asteroidsCloud.prototype.update = function() {
 			for (var i=0; i < this.pointClouds.length; i++){
 				scene.add( this.pointClouds[i] );
 			}
+
+      scene.add( this.dustCloud );
+
 			this.isInView = true;
 			if (debug) console.log("point cloud added " + i);
 		}
@@ -199,6 +202,9 @@ asteroidsCloud.prototype.update = function() {
 			for (var i=0; i < this.pointClouds.length; i++){
 				scene.remove( this.pointClouds[i] );
 			}
+
+      scene.remove( this.dustCloud );
+
 			this.isInView = false;
 			if (debug) console.log("point cloud removed " + i);
 		}

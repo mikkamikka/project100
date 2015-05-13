@@ -83,21 +83,24 @@
 
 		<script src="../build/three.min.js"></script>
 
-		<script src="js/controls/FlyControls.js"></script>
-		<script src="js/controls/OrbitControls.js"></script>
+		<!--script src="js/controls/FlyControls.js"></script-->
+		<!--script src="js/controls/OrbitControls.js"></script-->
 
 		<script src="js/shaders/CopyShader.js"></script>
 		<script src="js/shaders/FilmShader.js"></script>
-		<script src="js/shaders/FresnelShader.js"></script>
+		<!--script src="js/shaders/FresnelShader.js"></script-->
 		<script src="js/shaders/FXAAShader.js"></script>
+		<script src="js/shaders/BlendShader.js"></script>
 
 		<script src="js/postprocessing/EffectComposer.js"></script>
 		<script src="js/postprocessing/ShaderPass.js"></script>
 		<script src="js/postprocessing/MaskPass.js"></script>
 		<script src="js/postprocessing/RenderPass.js"></script>
 		<script src="js/postprocessing/FilmPass.js"></script>
-		<script src="js/postprocessing/BokehPass.js"></script>
-		<script src="js/postprocessing/BloomPass.js"></script>
+		<!--script src="js/postprocessing/BokehPass.js"></script-->
+		<!--script src="js/postprocessing/BloomPass.js"></script-->
+		<script src="js/postprocessing/SavePass.js"></script>
+
 
 		<script src="js/Detector.js"></script>
 		<script src="js/libs/stats.min.js"></script>
@@ -180,7 +183,7 @@
 
 			var usePostprocessing = true;
 
-			var effectFXAA;
+			var effectFilm, effectFXAA, effectBlend, effectSave, copyPass;
 
 			var clock = new THREE.Clock();
 			var delta;
@@ -257,7 +260,7 @@
 				if (debug) console.log("dpr: " + dpr);
 
 				if (usePostprocessing){
-								renderer = new THREE.WebGLRenderer( { antialias: false , alpha: true } );
+								renderer = new THREE.WebGLRenderer( { antialias: true , alpha: true } );
 				}else{
 								renderer = new THREE.WebGLRenderer( { antialias: true , alpha: true } );
 				}
@@ -295,24 +298,40 @@
 
 				if (usePostprocessing){
 
-								var scenePass = new THREE.RenderPass( scene, camera );
-								scenePass.clear = true;
+								var parameters = {
+									minFilter: THREE.LinearFilter,
+									magFilter: THREE.LinearFilter,
+									format: THREE.RGBAFormat,
+									stencilBuffer: false };
 
-								var effectFilm = new THREE.FilmPass( 0.1, 0.1, 2048, false );
-								effectFXAA = new THREE.ShaderPass( THREE.FXAAShader );
+
+								//effectFilm = new THREE.FilmPass( 0.1, 0.1, 2048, false );
+								//effectFXAA = new THREE.ShaderPass( THREE.FXAAShader );
 
 								//var effectBokeh = new THREE.ShaderPass( THREE.BokehPass );
 
-								effectFXAA.uniforms[ 'resolution' ].value.set( 1 / SCREEN_WIDTH, 1 / SCREEN_HEIGHT);
-								//effectFXAA.uniforms[ 'resolution' ].value.set( 1 / SCREEN_WIDTH * dpr, 1 / SCREEN_HEIGHT * dpr);
+								effectSave = new THREE.SavePass( new THREE.WebGLRenderTarget( SCREEN_WIDTH, SCREEN_HEIGHT, parameters ) );
 
-								effectFilm.renderToScreen = true;
+								effectBlend = new THREE.ShaderPass( THREE.BlendShader, "tDiffuse1" );
+
+								//effectFXAA.uniforms[ 'resolution' ].value.set( 1 / SCREEN_WIDTH, 1 / SCREEN_HEIGHT);
+								////effectFXAA.uniforms[ 'resolution' ].value.set( 1 / SCREEN_WIDTH * dpr, 1 / SCREEN_HEIGHT * dpr);
+
+								copyPass = new THREE.ShaderPass( THREE.CopyShader );
+
+								copyPass.renderToScreen = true;
+								//effectFilm.renderToScreen = true;
 								//effectFXAA.renderToScreen = true;
 
-								var parameters = { minFilter: THREE.LinearFilter,
-									magFilter: THREE.LinearFilter,
-									format: THREE.RGBAFormat,
-									stencilBuffer: true };
+
+								// motion blur
+
+				effectBlend.uniforms[ 'tDiffuse2' ].value = effectSave.renderTarget;
+				effectBlend.uniforms[ 'mixRatio' ].value = 0.7;
+				//effectBlend.renderToScreen = true;
+
+				var scenePass = new THREE.RenderPass( scene, camera );
+								//scenePass.clear = true;
 
 								var renderTarget = new THREE.WebGLRenderTarget( SCREEN_WIDTH , SCREEN_HEIGHT , parameters );
 
@@ -323,8 +342,12 @@
 
 								composer.addPass( scenePass );
 
-								composer.addPass( effectFXAA );  //final pass
-								composer.addPass( effectFilm );
+								composer.addPass( effectBlend );
+								composer.addPass( effectSave );
+
+								//composer.addPass( effectFXAA );  //final pass
+								//composer.addPass( effectFilm );
+								composer.addPass( copyPass );
 				}
 
 				//initSkyBoxCube();
@@ -453,6 +476,7 @@
 				//controls.update( delta );
 
 				if (usePostprocessing){
+								renderer.setRenderTarget( null );
 								renderer.clear();
 								composer.render( delta );
 				}else{
@@ -674,7 +698,7 @@
 				SCREEN_WIDTH  = window.innerWidth;
 
 				if (usePostprocessing){
-							effectFXAA.uniforms[ 'resolution' ].value.set( 1 / SCREEN_WIDTH , 1 / SCREEN_HEIGHT );
+							//effectFXAA.uniforms[ 'resolution' ].value.set( 1 / SCREEN_WIDTH , 1 / SCREEN_HEIGHT );
 							composer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
 				}
 
