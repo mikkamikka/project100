@@ -149,13 +149,13 @@ function loadEVA2001OBJ(){
 				};
 
 
-				var loader = new THREE.ImageLoader( manager );
-				loader.load( 'models/texture/Voyager_tex_01.jpg', function ( image ) {
-
-					texture.image = image;
-					texture.needsUpdate = true;
-
-				} );
+				// var loader = new THREE.ImageLoader( manager );
+				// loader.load( 'models/texture/Voyager_tex_01.jpg', function ( image ) {
+        //
+				// 	texture.image = image;
+				// 	texture.needsUpdate = true;
+        //
+				// } );
 
 				// model
 
