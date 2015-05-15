@@ -162,6 +162,7 @@ StarFX.prototype.init = function( pos,  size, color_shift ){
    this.mesh = new THREE.Mesh( geometry, starFXmaterial );
    this.mesh.scale.set( 1.0, 1.0, 1.0 );
    this.mesh.position.set( pos.x, pos.y, pos.z );
+   this.mesh.renderOrder = 1;
    //scene.add( this.mesh );
 }
 
@@ -176,7 +177,7 @@ StarFX.prototype.update = function(){
 
 			scene.add( this.mesh );
 			this.isInView = true;
-			//if (debug) console.log("StarFX added");
+			if (debug) console.log("StarFX added");
 		}
 	}
 	else {
@@ -184,7 +185,7 @@ StarFX.prototype.update = function(){
 			scene.remove( this.mesh );
 
 			this.isInView = false;
-			//if (debug) console.log("StarFX removed");
+			if (debug) console.log("StarFX removed");
 		}
 	}
 

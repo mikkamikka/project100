@@ -4,15 +4,15 @@ var stars = [];
 var show_amount = 716;
 var isHideDwarfs = true;
 var DistanceScale = global.DistanceScale * LY * global.starsDistanceScale;
-var maxFlareRange = global.DistanceScale * LY * global.starsDistanceScale * 2;
+var maxFlareRange = global.DistanceScale * LY * global.starsDistanceScale * 2 * 10;
 //var maxFlareRange = DistanceScale;
 var maxFlareRangeLY = kmToLY(maxFlareRange);
 
 if (debug) console.log('stars maxFlareRange, light years: ' + maxFlareRangeLY);
 //var maxFlareRange = 400000000;
 
-var textureFlare_star1 = THREE.ImageUtils.loadTexture( "textures/lensflare/star1.png" ); // star
-var textureFlare_star3 = THREE.ImageUtils.loadTexture( "textures/lensflare/star3.png" ); // star
+var textureFlare_star1 = THREE.ImageUtils.loadTexture( "textures/lensflare/star5_alpha.png" ); // star
+var textureFlare_star2 = THREE.ImageUtils.loadTexture( "textures/lensflare/star5_alpha.png" ); // star
 //var textureFlare_star3 = THREE.ImageUtils.loadTexture( "textures/lensflare/star2_alpha.png" ); // star
 
 //var textureFlare_line1 = THREE.ImageUtils.loadTexture( "textures/lensflare/lensflare2.png" );  // line
@@ -32,6 +32,7 @@ function Star(){
 	this.distance = 0;
 	this.color;
 	this.body = null; //= new THREE.LensFlare();
+	this.body2 = null;
 	this.distFromCamera =  0;
 	this.isInCameraRange = false;
 	this.starFX = null;
@@ -44,20 +45,59 @@ Star.prototype.update = function(){
 
 	//if ( this.distFromCamera > maxFlareRange ){
 	if ( this.distFromCamera > 0 && this.distFromCamera < maxFlareRange ){
+
 		if (this.body == null) {
+
 			initStarBody(this);
-			this.body.scale.set(0,0,0);
+			this.body.scale.set( 0.1, 0.1, 0.1 );
+			this.body2.scale.set( 0.1, 0.1, 0.1 );
 			scene.add(this.body);
+			scene.add(this.body2);
 			this.isInCameraRange = true;
-			//if (debug) console.log("Star body added");
+			if (debug) console.log("Star body added");
 		}
 		else{
 
 			//var distFromCamera = camera.position.distanceTo( this.body.position );
-			var descending = ( maxFlareRange - this.distFromCamera ) / maxFlareRange;
-			this.body.scale.set( 1 *	smoothstep( 0.0, 1.0, descending),
-				1 *	smoothstep( 0.0, 1.0, descending),
-				1.0);
+			//var descending = ( maxFlareRange - this.distFromCamera ) / maxFlareRange;		// 1 -> 0
+			//var scale = smoothstep( 0.0, 1.0, descending );  // 0 -> 1
+			var scale = 1 - smoothstep( 3 * maxFlareRange / 4, maxFlareRange, this.distFromCamera);  // 1 -> 0
+			this.body.scale.set( scale,	scale, 1.0);
+			this.body2.scale.set( scale,	scale, 1.0);
+
+			//var relocateRange = maxFlareRange/3;
+			//var relocateRange = 0;
+			//if ( this.distFromCamera > relocateRange ){
+
+				//var outOfRelocateRangeDist = Math.sqrt( (this.distFromCamera - relocateRange) ) ;
+				//var outOfRelocateRangeDist = this.distFromCamera - relocateRange;
+
+				//	var outOfRelocateRangeDistNormalized = smoothstep( 0, maxFlareRange , outOfRelocateRangeDist );  // 0 -> 1
+
+				//var linearCorrection = (maxFlareRange*3 - this.distFromCamera ) / maxFlareRange*3;  // 0 -> 1
+				//cam.x = linearCorrection * 100;
+
+				//var deltaX = outOfRelocateRangeDistNormalized * this.position.x * 10;
+				//var deltaY = outOfRelocateRangeDistNormalized * this.position.y * 10;
+				//var deltaX = linearCorrection * this.position.x * 10;
+				//var deltaY = linearCorrection * this.position.y * 10;
+
+				var deltaX = this.distFromCamera * this.position.x /5e7;
+				var deltaY = this.distFromCamera * this.position.y /5e7;
+
+				this.body.position.x = this.position.x + deltaX;
+				this.body.position.y = this.position.y + deltaY;
+
+				this.body2.position.x = this.position.x + deltaX;
+				this.body2.position.y = this.position.y + deltaY;
+
+				if ( this.starFX != null ){
+
+					this.starFX.mesh.position.copy( this.body.position );
+
+				}
+
+			//}
 
 		}
 
@@ -66,8 +106,10 @@ Star.prototype.update = function(){
 		if (this.body != null) {
 			scene.remove(this.body);
 			this.body = null;
+			scene.remove(this.body2);
+			this.body2 = null;
 			this.isInCameraRange = false;
-			//if (debug) console.log("Star body removed");
+			if (debug) console.log("Star body removed");
 		}
 	}
 
@@ -84,10 +126,11 @@ function initStarBody(star){
 
 	var color = new THREE.Color( star.color );
 
-	var hsl = color.getHSL();
+	//var hsl = color.getHSL();
 	//color.setHSL( hsl.h, hsl.s, 0.8);
 	//console.log(color.getHSL());
 
+//unused
 	// star.body = new THREE.LensFlare();
 	// star.body.add( textureFlare_star1, 512, 0.0, THREE.AdditiveBlending, color.offsetHSL( 0, 0, -0.1 ) );
 	// star.body.lensFlares[0].rotation = THREE.Math.degToRad( 0 );
@@ -102,19 +145,31 @@ function initStarBody(star){
 	// star.body.customUpdateCallback = lensFlareUpdateCallbackStars;
 	// star.body.position.copy( star.position );
 
-
 	var geometry = new THREE.PlaneBufferGeometry( star.size * 0.4, star.size * 0.4 );
 	var material = new THREE.MeshBasicMaterial({
-			map: textureFlare_star3,
+			map: textureFlare_star1,
 			color: color.offsetHSL( 0, 0, -0.2 ),
-			blending: THREE.AdditiveBlending,
+			//color: color,
+			//blending: THREE.AdditiveBlending,
 			depthWrite: false,
 			//depthTest: false,
 			transparent: true
-		}
-	)
+		});
 	star.body = new THREE.Mesh( geometry, material );
 	star.body.position.copy( star.position );
+
+	geometry = new THREE.PlaneBufferGeometry( star.size * 0.3, star.size * 0.3 );
+	material = new THREE.MeshBasicMaterial({
+			map: textureFlare_star2,
+			//color: color.offsetHSL( 0, 0, -0.2 ),
+			//color: color,
+			//blending: THREE.AdditiveBlending,
+			depthWrite: false,
+			//depthTest: false,
+			transparent: true
+		});
+	star.body2 = new THREE.Mesh( geometry, material );
+	star.body2.position.copy( star.position );
 
 	if (star.starFX == null){
 
@@ -147,14 +202,14 @@ function initNamedStars() {
 		if ( stars[i].distance > 60 ){
 
 			if (40 < x && x < 50)  x /= Math.floor( x / 10 );
-			if (50 < x && x < 60)  x /= 3;
-			if (60 < x && x < 80)	 x /= 5;
-			if (80 < x && x < 120) x /= 8;
+			if (50 < x && x < 60)  x /= Math.floor( x / 10 );
+			if (60 < x && x < 80)	 x /= Math.floor( x / 10 );
+			if (80 < x && x < 160) x /= Math.floor( x / 10 );
 
 			if (40 < y && y < 50)  y /= Math.floor( y / 10 );
-			if (50 < y && y < 60)  y /= 2;
-			if (60 < y && y < 80)	 y /= 5;
-			if (80 < y && y < 120) y /= 8;
+			if (50 < y && y < 60)  y /= Math.floor( y / 10 );
+			if (60 < y && y < 80)	 y /= Math.floor( y / 10 );
+			if (80 < y && y < 160) y /= Math.floor( y / 10 );
 		}
 
 		var X = x * 5e6 / 3.0;
@@ -232,6 +287,8 @@ function starsUpdate(){
 			stars[i].update();
 	}
 
+	//starsPointCloudUpdate();
+
 }
 
 
@@ -266,6 +323,14 @@ function initStarsPointCloud() {
 		scene.add( particles );
 }
 
+function starsPointCloudUpdate(){
+
+	var scale = distance / ( lyToKM(4.22) * global.DistanceScale * global.starsDistanceScale );
+	particles.scale.set( scale, scale, 1 );
+	cam.x = particles.scale.x * 100;
+
+
+}
 
 function init_renderer() {
 

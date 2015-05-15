@@ -286,6 +286,7 @@ function createNebulaCloud ( centerPos, distribution, distributionVector, numPla
 	}
 
 	mesh = new THREE.Mesh( geometry, material );
+  //mesh.renderOrder = 2;
 
 	return mesh;
 
