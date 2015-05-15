@@ -4,7 +4,7 @@ var stars = [];
 var show_amount = 716;
 var isHideDwarfs = true;
 var DistanceScale = global.DistanceScale * LY * global.starsDistanceScale;
-var maxFlareRange = global.DistanceScale * LY * global.starsDistanceScale * 2 * 10;
+var maxFlareRange = global.DistanceScale * LY * global.starsDistanceScale * 2 * 6;
 //var maxFlareRange = DistanceScale;
 var maxFlareRangeLY = kmToLY(maxFlareRange);
 
