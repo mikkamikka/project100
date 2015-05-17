@@ -611,14 +611,7 @@
 			}
 
 			if (debug){
-				var fileSelector = document.createElement('input');
-				fileSelector.setAttribute('type', 'file');
-				fileSelector.onchange = updateBGtexture;
 
-				var loadBG = { loadBG: function(){
-					fileSelector.click();
-	        }
-	      };
 				function updateBGtexture(event){
 
 					var objectURL = window.URL.createObjectURL(fileSelector.files[0]);
@@ -627,6 +620,22 @@
 					reloadLayer1( objectURL );
 				}
 
+				var fileSelector = document.createElement('input');
+				fileSelector.setAttribute('type', 'file');
+				fileSelector.onchange = updateBGtexture;
+
+				var loadBG = { loadBG: function(){
+					fileSelector.click();
+	        }
+	      };
+
+				function updateBGtexture2(event){
+
+					var objectURL = window.URL.createObjectURL(fileSelector2.files[0]);
+					console.log(objectURL);
+					//initSkyBoxSimple( objectURL );
+					reloadLayer2( objectURL );
+				}
 
 				var fileSelector2 = document.createElement('input');
 				fileSelector2.setAttribute('type', 'file');
@@ -635,13 +644,7 @@
 					fileSelector2.click();
 	        }
 	      };
-				function updateBGtexture2(event){
 
-					var objectURL = window.URL.createObjectURL(fileSelector2.files[0]);
-					console.log(objectURL);
-					//initSkyBoxSimple( objectURL );
-					reloadLayer2( objectURL );
-				}
 
 			}
 
