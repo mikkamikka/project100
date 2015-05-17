@@ -190,6 +190,78 @@ function initSkyBoxLayered( texture_src ){
 
 }
 
+function reloadLayer1( texture_src ){
+
+	scene.remove( layered_skybox_mesh[0] );
+
+	var _texture;
+	var geometry = new THREE.SphereGeometry( 1.01e10, 60, 40 );
+	geometry.applyMatrix( new THREE.Matrix4().makeScale( -1, 1, 1 ) );
+	geometry.applyMatrix( new THREE.Matrix4().makeRotationY( -PI/2 ) );
+	geometry.applyMatrix( new THREE.Matrix4().makeRotationZ( - 55 * PI / 180 ) );
+
+
+	// layer 0
+	if ( texture_src == null || texture_src == undefined ){
+
+		_texture = THREE.ImageUtils.loadTexture( 'textures/space/stars_layer_1.jpg' );
+		_texture.minFilter = THREE.LinearFilter;
+
+	}
+	else{
+
+		_texture = THREE.ImageUtils.loadTexture( texture_src );
+		_texture.minFilter = THREE.LinearFilter;
+
+	}
+
+	var material = new THREE.MeshBasicMaterial( {
+													map: _texture,
+								    			transparent: true
+													} );
+
+	layered_skybox_mesh[0] = new THREE.Mesh( geometry, material );
+	layered_skybox_mesh[0].renderOrder = -1;
+	scene.add( layered_skybox_mesh[0] );
+
+}
+
+function reloadLayer2( texture_src ){
+
+	scene.remove( layered_skybox_mesh[1] );
+
+	var _texture;
+	var geometry = new THREE.SphereGeometry( 1.01e10, 60, 40 );
+	geometry.applyMatrix( new THREE.Matrix4().makeScale( -1, 1, 1 ) );
+	geometry.applyMatrix( new THREE.Matrix4().makeRotationY( -PI/2 ) );
+	geometry.applyMatrix( new THREE.Matrix4().makeRotationZ( - 55 * PI / 180 ) );
+
+
+	// layer 1
+	if ( texture_src == null || texture_src == undefined ){
+
+		_texture = THREE.ImageUtils.loadTexture( 'textures/space/stars_layer_2.jpg' );
+		_texture.minFilter = THREE.LinearFilter;
+
+	}
+	else{
+
+		_texture = THREE.ImageUtils.loadTexture( texture_src );
+		_texture.minFilter = THREE.LinearFilter;
+
+	}
+
+	var material = new THREE.MeshBasicMaterial( {
+													map: _texture,
+								    			transparent: true
+													} );
+
+	layered_skybox_mesh[1] = new THREE.Mesh( geometry, material );
+	layered_skybox_mesh[1].renderOrder = -1;
+	scene.add( layered_skybox_mesh[1] );
+
+}
+
 
 function initSkyBoxSimple( texture_src ){
 
