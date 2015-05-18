@@ -30,11 +30,11 @@
 			b { color:orange }
 
 			#distance {
-			  position: absolute;
-			  width:100%;
-			  height:30px;
-			  bottom:0px;
-			  color:#fff;
+				position: absolute;
+				width:100%;
+				height:30px;
+				bottom:0px;
+				color:#fff;
 				z-index: 10;
 			}
 			#button_reset {
@@ -53,8 +53,8 @@
 			}
 			#gui {
 				position: absolute;
-			  height:30px;
-			  top:0px;
+				height:30px;
+				top:0px;
 				right:0px;
 				z-index: 100;
 			}
@@ -78,7 +78,7 @@
 		<link rel="stylesheet" href="styles/jquery-ui.css">
 
 		<script src="//code.jquery.com/jquery-1.10.2.js"></script>
-  	<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+		<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 
 
 		<script src="../build/three.min.js"></script>
@@ -164,7 +164,7 @@
 		<div id="gui"></div>
 
 		<div id="button_reset" >Reset camera</div>
-  	<div id="distance"></div>
+		<div id="distance"></div>
 		<div id="slider-vertical"></div>
 
 		<div class="trackmeta">
@@ -178,7 +178,7 @@
 			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
 			var SCREEN_HEIGHT = window.innerHeight;
-			var SCREEN_WIDTH  = window.innerWidth;
+			var SCREEN_WIDTH	= window.innerWidth;
 
 			var container, stats;
 			var camera, controls, scene, sceneCube, renderer, composer, dpr;
@@ -190,14 +190,14 @@
 			var clock = new THREE.Clock();
 			var delta;
 
-		  var mouse = { x: 0, y: 0 }, mouseOnDown = { x: 0, y: 0 };
+			var mouse = { x: 0, y: 0 }, mouseOnDown = { x: 0, y: 0 };
 
 			// camera initial settings
-		  var rotation = { x: 0.0, y: 0.0 },
-			  	target = { x: 0.0, y: 0.0 },
-			  	targetOnDown = { x: 0, y: 0 };
+			var rotation = { x: 0.0, y: 0.0 },
+					target = { x: 0.0, y: 0.0 },
+					targetOnDown = { x: 0, y: 0 };
 
-		  var distance = initialCameraDistance,
+			var distance = initialCameraDistance,
 					distanceTarget = initialCameraDistance,
 					realDistanceKM,
 					distLY,
@@ -251,7 +251,7 @@
 				// retina displays fix
 				dpr = 1;
 				if (window.devicePixelRatio !== undefined) {
-				  dpr = window.devicePixelRatio;
+					dpr = window.devicePixelRatio;
 				}
 
 				if (debug) console.log("dpr: " + dpr);
@@ -342,7 +342,7 @@
 								composer.addPass( effectBlend );
 								composer.addPass( effectSave );
 
-								//composer.addPass( effectFXAA );  //final pass
+								//composer.addPass( effectFXAA );	//final pass
 								//composer.addPass( effectFilm );
 								composer.addPass( copyPass );
 				}
@@ -368,7 +368,23 @@
 				window.addEventListener( 'resize', onWindowResize, false );
 
 				container.addEventListener('mousedown', onMouseDown, false);
-				container.addEventListener('mousewheel', onMouseWheel, false);
+
+				//container.addEventListener('mousewheel', onMouseWheel, false);
+
+				//if (container.addEventListener) {
+				  if ('onwheel' in document) {
+				    // IE9+, FF17+, Ch31+
+						container.addEventListener("wheel", onMouseWheel);
+				  } else if ('onmousewheel' in document) {
+				    // устаревший вариант события
+						container.addEventListener("mousewheel", onMouseWheel);
+				  } else {
+				    // Firefox < 17
+						container.addEventListener("MozMousePixelScroll", onMouseWheel);
+				  }
+				//} else { // IE8-
+					//container.attachEvent("onmousewheel", onWheel);
+				//}
 
 				document.addEventListener('keydown', onDocumentKeyDown, false);
 				document.addEventListener('keyup', onDocumentKeyUp, false);
@@ -378,14 +394,14 @@
 				}, false);
 
 				container.addEventListener('mouseout', function() {
-				  overRenderer = false;
+					overRenderer = false;
 				}, false);
 
 
 				if (debug) {
 
 					cam = new camDebug();
-					debug_zoom  = new debug_curZoomStep();
+					debug_zoom	= new debug_curZoomStep();
 					initGUI();
 
 				}
@@ -407,7 +423,7 @@
 				if (curZoomStep.id == 3) {
 
 					// Scale transition
-					//var transition = smoothstep( zoomSteps[2].border,  curZoomStep.border, distance );
+					//var transition = smoothstep( zoomSteps[2].border,	curZoomStep.border, distance );
 					var pos = distance / global.DistanceScale - zoomSteps[2].border;
 					var stepLength = zoomSteps[3].border - zoomSteps[2].border;
 					var pos_norm = 1.0 - (stepLength - pos)/stepLength; // 0 -> 1
@@ -429,10 +445,10 @@
 				distLY = kmToLY(realDistanceKM).toPrecision(3);
 
 				//OutDistance.innerHTML = "Distance from Earth: " + camera.position.distanceTo(earthPos);
-				OutDistance.innerHTML = slowDown.toPrecision(4)+ "     " + "Distance from Earth: " + Math.round(realDistanceKM) + " km   /   "
+				OutDistance.innerHTML = slowDown.toPrecision(4)+ "		 " + "Distance from Earth: " + Math.round(realDistanceKM) + " km	 /	 "
 																+ distLY + " light years";
 
-			  if ( Math.floor(distLY) > Math.floor(prevDistLY) || Math.floor(distLY) < Math.floor(prevDistLY) )	{
+				if ( Math.floor(distLY) > Math.floor(prevDistLY) || Math.floor(distLY) < Math.floor(prevDistLY) )	{
 
 					console.log("new distance, LY: " + Math.floor(distLY) );
 					updateAudio( Math.floor(distLY) );
@@ -486,7 +502,7 @@
 			function updateCamera(){
 
 				////if (distance - delta > minCameraDistance && distance + delta < maxCameraDistance){
-				//if (distance + (distanceTarget - distance) * 0.3> minCameraDistance && distance  < maxCameraDistance)
+				//if (distance + (distanceTarget - distance) * 0.3> minCameraDistance && distance	< maxCameraDistance)
 				//{}
 
 				//zoom(curZoomSpeed);
@@ -557,7 +573,7 @@
 			//
 			// 	if ( distanceTarget - delta > minCameraDistance ){
 			//
-			// 		//delta = Math.min( delta,   );
+			// 		//delta = Math.min( delta,	 );
 			// 		var d;
 			// 		if ( (distanceTarget - minCameraDistance) < delta ){
 			// 			d = distanceTarget - minCameraDistance;
@@ -577,7 +593,7 @@
 			// 		//distanceTarget = distanceTarget < 350 ? 350 : distanceTarget;
 			// }
 
-			function setZoomLevel( ui_value ){  // handler for slider zoom
+			function setZoomLevel( ui_value ){	// handler for slider zoom
 
 				var span = maxCameraDistance;
 				slowDown = 1.0;
@@ -626,8 +642,8 @@
 
 				var loadBG = { loadBG: function(){
 					fileSelector.click();
-	        }
-	      };
+					}
+				};
 
 				function updateBGtexture2(event){
 
@@ -642,8 +658,8 @@
 				fileSelector2.onchange = updateBGtexture2;
 				var loadBG2 = { loadBG2: function(){
 					fileSelector2.click();
-	        }
-	      };
+					}
+				};
 
 
 			}
@@ -654,7 +670,7 @@
 
 				gui = new dat.GUI( { autoPlace: false } );
 				var guiContainer = document.getElementById('gui');
-			  guiContainer.appendChild(gui.domElement);
+				guiContainer.appendChild(gui.domElement);
 				//gui.add(global, 'DistanceScale').min(0.001).max(1.0).step(0.01);
 				gui.add(cam, 'x').listen();
 				gui.add(cam, 'y').listen();
@@ -713,7 +729,7 @@
 			function onWindowResize( event ) {
 
 				SCREEN_HEIGHT = window.innerHeight;
-				SCREEN_WIDTH  = window.innerWidth;
+				SCREEN_WIDTH	= window.innerWidth;
 
 				if (usePostprocessing){
 							//effectFXAA.uniforms[ 'resolution' ].value.set( 1 / SCREEN_WIDTH , 1 / SCREEN_HEIGHT );
@@ -773,25 +789,37 @@
 			}
 
 			function onMouseWheel(event) {
-				event.preventDefault();
+
+				event = event || window.event;
+
+			  var delta = event.deltaY || event.detail || event.wheelDelta;
+
+				//event.preventDefault();
 
 				var zoomStep = wheelZoomStep;
 
-				fastZoom ? zoomStep = fastWheelZoomStep
-								: zoomStep = wheelZoomStep;
+				fastZoom 	? zoomStep = fastWheelZoomStep
+									: zoomStep = wheelZoomStep;
 						//old way:
 				//zoom( event.wheelDeltaY * zoomStep );
 
 						//new way:
 				//curZoomSpeed = zoomStep * curZoomStep.zoom_factor;
-				distanceTarget += -event.wheelDeltaY * zoomStep * curZoomStep.zoom_factor * slowDown;
+
+				if (typeof InstallTrigger !== 'undefined'){			// if Firefox
+
+					delta *= 33.3333;
+
+				}
+
+				distanceTarget += -delta * zoomStep * curZoomStep.zoom_factor * slowDown;
 
 				if ( autoZoomOut ){
 					autoZoomOut = false;
 					curZoomSpeed = 0;
 				}
 
-				//curZoomSpeed = event.wheelDeltaY * curZoomStep.zoom_factor;
+				event.preventDefault ? event.preventDefault() : (event.returnValue = false);
 
 				return false;
 			}
@@ -831,7 +859,7 @@
 						zoom(-100);
 						event.preventDefault();
 						break;
-					case 17:                  // Ctrl key
+					case 17:									// Ctrl key
 						fastZoom = true;
 						event.preventDefault();
 						break;
@@ -851,12 +879,12 @@
 			//fetch url params
 			var GET = {};
 			var query = window.location.search.substring(1).split("&");
-			for (var i = 0;  i < 3; i++)	{
-    		if (query[i] === "" || query[i] == undefined) // check for trailing & with no param
-        	continue;
+			for (var i = 0;	i < 3; i++)	{
+				if (query[i] === "" || query[i] == undefined) // check for trailing & with no param
+					continue;
 
-    		var param = query[i].split("=");
-    		GET[decodeURIComponent(param[0])] = decodeURIComponent(param[1] || "");
+				var param = query[i].split("=");
+				GET[decodeURIComponent(param[0])] = decodeURIComponent(param[1] || "");
 			}
 
 
