@@ -4,7 +4,7 @@ var stars = [];
 var show_amount = 716;
 var isHideDwarfs = true;
 var DistanceScale = global.DistanceScale * LY * global.starsDistanceScale;
-var maxFlareRange = global.DistanceScale * LY * global.starsDistanceScale * 2 * 6;
+var maxFlareRange = global.DistanceScale * LY * global.starsDistanceScale * 2 * 7;
 //var maxFlareRange = DistanceScale;
 var maxFlareRangeLY = kmToLY(maxFlareRange);
 
@@ -61,7 +61,7 @@ Star.prototype.update = function(){
 			//var distFromCamera = camera.position.distanceTo( this.body.position );
 			//var descending = ( maxFlareRange - this.distFromCamera ) / maxFlareRange;		// 1 -> 0
 			//var scale = smoothstep( 0.0, 1.0, descending );  // 0 -> 1
-			var scale = 1 - smoothstep( 3 * maxFlareRange / 4, maxFlareRange, this.distFromCamera);  // 1 -> 0
+			var scale = 1 - smoothstep( 2 * maxFlareRange / 4, maxFlareRange, this.distFromCamera);  // 1 -> 0
 			this.body.scale.set( scale,	scale, 1.0);
 			this.body2.scale.set( scale,	scale, 1.0);
 
