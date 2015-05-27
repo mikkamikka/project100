@@ -101,6 +101,10 @@
 		<!--script src="js/postprocessing/BloomPass.js"></script-->
 		<script src="js/postprocessing/SavePass.js"></script>
 
+		<script src="js/wagner/Wagner.js"></script>
+		<script src="js/wagner/Wagner.base.js"></script>
+		<script src="js/wagner/ShaderLoader.js"></script>
+
 
 		<script src="js/Detector.js"></script>
 		<script src="js/libs/stats.min.js"></script>
@@ -184,8 +188,11 @@
 			var camera, controls, scene, sceneCube, renderer, composer, dpr;
 
 			var usePostprocessing = false;
+			var useWagner = false;
 
 			var effectFilm, effectFXAA, effectBlend, effectSave, copyPass;
+
+			var zoomBlurPass, multiPassBloomPass;		//Wagner postprocessing
 
 			var clock = new THREE.Clock();
 			var delta;
@@ -211,7 +218,13 @@
 
 			var gui, cam;
 
+			var fps = 0, now, lastUpdate = (new Date())*1 - 1, fpsFilter = 60;
+
 			var audioPlayer, distanceMonitor;
+
+			WAGNER.vertexShadersPath = 'js/wagner/vertex-shaders';
+			WAGNER.fragmentShadersPath = 'js/wagner/fragment-shaders';
+			WAGNER.assetsPath = 'js/wagner/assets/';
 
 			//init();
 			//animate();
@@ -247,7 +260,6 @@
 				//controls.minDistance = 1;
 				//controls.maxDistance = 5e12;
 
-
 				// retina displays fix
 				dpr = 1;
 				if (window.devicePixelRatio !== undefined) {
@@ -257,7 +269,7 @@
 				if (debug) console.log("dpr: " + dpr);
 
 				if (usePostprocessing){
-								renderer = new THREE.WebGLRenderer( { antialias: true , alpha: true } );
+								renderer = new THREE.WebGLRenderer( { antialias: false , alpha: true } );
 				}else{
 								renderer = new THREE.WebGLRenderer( { antialias: true , alpha: true } );
 				}
@@ -271,6 +283,7 @@
 
 				if (debug) console.log( "renderer MaxAnisotropy: " + renderer.getMaxAnisotropy() );
 				if (debug) console.log( "renderer precision: " + renderer.getPrecision() );
+				if (debug) console.log( renderer );
 
 
 				if (usePostprocessing){
@@ -336,25 +349,36 @@
 								//composer = new THREE.EffectComposer( renderer );
 								//composer.setSize(SCREEN_WIDTH *2, SCREEN_HEIGHT *2 );
 
-
 								composer.addPass( scenePass );
-
 								composer.addPass( effectBlend );
 								composer.addPass( effectSave );
-
 								//composer.addPass( effectFXAA );	//final pass
 								//composer.addPass( effectFilm );
 								composer.addPass( copyPass );
+				}
+
+				if (useWagner){
+
+					composer = new WAGNER.Composer( renderer );
+					composer.setSize( SCREEN_WIDTH , SCREEN_HEIGHT );
+
+					zoomBlurPass = new WAGNER.ZoomBlurPass();
+					zoomBlurPass.params.strength = .3;
+					zoomBlurPass.params.center.set( .5 * composer.width, .5 * composer.height );
+					//multiPassBloomPass = new WAGNER.MultiPassBloomPass();
+
 				}
 
 				//initSkyBoxCube();
 				//initSkyBoxEquirec();
 				//initSkyBoxProcedural();
 				//initSkyBoxSimple();
+				//initStars();
+
 				initSkyBoxLayered();
 
 				initSolarSystem();
-				//initStars();
+
 				initNamedStars();
 				initAsteroids();
 				initNebulaClouds();
@@ -409,6 +433,10 @@
 				console.log("Init done");
 			};
 
+			// setInterval(function(){
+			// 	fpsOut.innerHTML = fps.toFixed(1) + " fps";
+			// }, 100);
+
 
 			function animate() {
 
@@ -444,8 +472,13 @@
 
 				distLY = kmToLY(realDistanceKM).toPrecision(3);
 
+				var thisFrameFPS = 1000 / ((now = new Date()) - lastUpdate);
+				fps += (thisFrameFPS - fps) / fpsFilter;
+				lastUpdate = now;
+				fpsStats.update();
+
 				//OutDistance.innerHTML = "Distance from Earth: " + camera.position.distanceTo(earthPos);
-				OutDistance.innerHTML = slowDown.toPrecision(4)+ "		 " + "Distance from Earth: " + Math.round(realDistanceKM) + " km	 /	 "
+				OutDistance.innerHTML = fpsStats.getMean().toFixed(1) + "   " + curZoomStep.id + "   " + slowDown.toPrecision(4) + "		 " + "Distance from Earth: " + Math.round(realDistanceKM) + " km	 /	 "
 																+ distLY + " light years";
 
 				if ( Math.floor(distLY) > Math.floor(prevDistLY) || Math.floor(distLY) < Math.floor(prevDistLY) )	{
@@ -467,8 +500,9 @@
 
 				renderSkybox();
 
-				if ( curZoomStep.id < 3 ) {
+				if ( curZoomStep.id < 4 ) {
 					renderSolarSystem();
+					asteroidsUpdate();
 				}
 
 				if ( curZoomStep.id < 4 ) {
@@ -482,9 +516,6 @@
 
 				}
 
-				asteroidsUpdate();
-
-
 				//controls.movementSpeed = 0.33 * d;
 				//controls.update( delta );
 
@@ -492,9 +523,22 @@
 								renderer.setRenderTarget( null );
 								renderer.clear();
 								composer.render( delta );
-				}else{
-								renderer.render( scene, camera );
 				}
+				else
+					if (useWagner){
+
+						renderer.autoClearColor = true;
+						composer.reset();
+						composer.render( scene, camera );
+						//composer.pass( multiPassBloomPass );
+						composer.pass( zoomBlurPass );
+						composer.toScreen();
+
+					}
+					else
+					{
+									renderer.render( scene, camera );
+					}
 
 			};
 
@@ -553,7 +597,7 @@
 
 					var hiBorder = zoomSteps[i].border * global.DistanceScale;
 					var lowBorder;
-					( zoomSteps[i-1] != undefined ) ? lowBorder = zoomSteps[i-1].border * global.DistanceScale
+					( zoomSteps[i-1] !== undefined ) ? lowBorder = zoomSteps[i-1].border * global.DistanceScale
 																					: lowBorder = 0;
 
 					if ( distance < hiBorder
@@ -565,9 +609,9 @@
 					}
 				}
 
-				camera.lookAt( new THREE.Vector3( earthPos.x, earthPos.y, earthPos.z ));
+				//camera.lookAt( new THREE.Vector3( 0, earthPos.y, earthPos.z ));
 
-			};
+			}
 
 			// function zoom(delta) {
 			//

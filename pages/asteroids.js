@@ -158,7 +158,7 @@ asteroidsCloud.prototype.update = function() {
 					//scene.add( roid.mesh );
 					this.asteroid_cloud[i].mesh.visible = true;
 					this.asteroid_cloud[i].isInView = true;
-					//if (debug) console.log("Asteroid added");
+					if (debug) console.log("Asteroid added");
 				}
 			}
 			else {
@@ -167,7 +167,7 @@ asteroidsCloud.prototype.update = function() {
 					//scene.remove( roid.mesh );
 					this.asteroid_cloud[i].mesh.visible = false;
 					this.asteroid_cloud[i].isInView = false;
-					//if (debug) console.log("Asteroid removed");
+					if (debug) console.log("Asteroid removed");
 				}
 			}
 

@@ -78,15 +78,14 @@ var starShader = {
 
           //'if (alpha < 0.5) { const int Samples = 0; }',
 
-          'const int Samples = 42;',
+          'const int Samples = 38;',
           'float Intensity = 0.12;',
-          'float Decay = 0.860;',
+          'float Decay = 0.840;',
           'vec2 TexCoord = vUv;',
           'vec2 Direction = vec2(0.5) - TexCoord;',
           'Direction /= vec2( Samples, Samples );',
           'vec3 Color = texture2D( texture, TexCoord ).rgb;',
           //'vec3 Dim = vec3( 0.0, 0.0, 0.0);',
-
 
           // radial shift from https://www.shadertoy.com/view/llfGD4 - sketch by @pheeelicks
 
@@ -109,6 +108,7 @@ var starShader = {
             'TexCoord += Direction;',
           '}',
 
+          //'Color = (f1.rgb + f2.rgb) * Color + Color;',
           //'gl_FragColor = vec4( Color  * color_shift, 1.0 );',
           //'gl_FragColor = vec4( Color  * vec3( 1.0, 0.8, 0.6 ), Dim.x + ( Color.x + Color.y + Color.z ) / 1.0 );',
           'gl_FragColor = vec4( Color  * vec3( 1.0, 0.8, 0.6 ), 1.0 );',
@@ -119,10 +119,63 @@ var starShader = {
       ].join('\n')
 };
 
+var starShaderSimple = {
+      uniforms: {
+        'texture': { type: 't', value: null },
+        //'texture_color': { type: 't', value: null },
+        'noise_texture': { type: 't', value: null },
+        'time': { type: "f", value: 1.0 },
+        //'resolution': { type: "v2", value: new THREE.Vector2() },
+        //'color_shift' : { type: "c", value: new THREE.Color(1.0) },
+
+        'fogNear' : { type: "f", value: 0 },
+        'fogFar' : { type: "f", value: 2e7 },
+      },
+      vertexShader: [
+        'varying vec2 vUv;',
+        'void main() {',
+          'gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );',
+          'vUv = uv;',
+        '}'
+      ].join('\n'),
+      fragmentShader: [
+        'uniform sampler2D texture;',
+        //'uniform sampler2D texture_color;',
+        'uniform sampler2D noise_texture;',
+        'uniform float time;',
+        //'uniform vec2 resolution;',
+        //'uniform vec3 color_shift;',
+
+        'uniform float fogNear;',
+        'uniform float fogFar;',
+        'varying vec2 vUv;',
+
+        'void main() {',
+
+          'float depth = gl_FragCoord.z / gl_FragCoord.w;',
+          'float alpha = ( fogFar - depth ) / ( fogFar - fogNear );',
+
+          'vec3 Color = texture2D( texture, vUv ).rgb;',
+          'vec2 d = vUv  - vec2(0.5)  ;',
+
+          'vec4 f1 = texture2D( noise_texture, vec2( atan( d.x, d.y ) / 15.0, 0.3 ) + 0.003 * time );',
+          'vec4 f2 = texture2D( noise_texture, vec2( atan( d.y, d.x ) / 10.0, 0.3 ) + 0.003 * time );',
+
+          'Color = (f1.rgb + f2.rgb) * Color + Color;',
+
+          'gl_FragColor = vec4( Color  * vec3( 1.0, 0.8, 0.6 ), 1.0 );',
+
+        '}'
+      ].join('\n')
+};
 
 var maxStarFXRange = global.DistanceScale * LY * global.starsDistanceScale * 2;
 
+//starShader = starShaderSimple;
+
 starShader.uniforms['texture'].value = THREE.ImageUtils.loadTexture("textures/lensflare/star2.png");
+//starShader.uniforms['texture'].value = THREE.ImageUtils.loadTexture("textures/lensflare/star2_128.png");
+
 //starShader.uniforms['texture_color'].value = THREE.ImageUtils.loadTexture("textures/lensflare/lensflare0.png");
 //starShader.uniforms['color_shift'].value = color_shift;
 
@@ -130,8 +183,8 @@ var noise_tex = THREE.ImageUtils.loadTexture("textures/asteroids/noise_displacem
 noise_tex.wrapS = THREE.RepeatWrapping;
 noise_tex.wrapT = THREE.RepeatWrapping;
 starShader.uniforms['noise_texture'].value = noise_tex;
-starShader.uniforms.resolution.value.x = window.innerWidth;
-starShader.uniforms.resolution.value.y = window.innerHeight;
+//starShaderSimple.uniforms.resolution.value.x = window.innerWidth;
+//starShaderSimple.uniforms.resolution.value.y = window.innerHeight;
 
 var starFXmaterial = new THREE.ShaderMaterial({
 
@@ -177,7 +230,7 @@ StarFX.prototype.update = function(){
 
 			scene.add( this.mesh );
 			this.isInView = true;
-			if (debug) console.log("StarFX added");
+			//if (debug) console.log("StarFX added");
 		}
 	}
 	else {
@@ -185,7 +238,7 @@ StarFX.prototype.update = function(){
 			scene.remove( this.mesh );
 
 			this.isInView = false;
-			if (debug) console.log("StarFX removed");
+			//if (debug) console.log("StarFX removed");
 		}
 	}
 
