@@ -1,6 +1,6 @@
 var nebulaFog = new THREE.Fog( 0x4584b4, - 100, 3000 );
 var maxNebulaRange = 10e9;
-var Nebula1, Nebula2, Nebula3, Nebula4;
+var timeOut, timeOutActive = false;
 
 // shader modified from clouds shader by mr.doob (http://mrdoob.com/lab/javascript/webgl/clouds/)
 var nebulaShader = {
@@ -61,6 +61,7 @@ function NebulaCloud(type){
 	this.color = new THREE.Color( 0x4584b4 );
 	this.fadeoutRange;
 	this.blending = THREE.NormalBlending;
+  this.disabled = false;
 
 }
 
@@ -110,12 +111,12 @@ NebulaCloud.prototype.init = function() {
 NebulaCloud.prototype.update = function() {
 
 	this.distFromCamera = camera.position.distanceTo( this.centerPos );			// cloud's center approximation to camera
-	//var deltaZ = this.centerPos.z - distance;
+	var deltaZ = this.centerPos.z - distance;
 
 	if ( this.staticImages.length > 0 ){
 
 		 // add and remove static nebulas
-		 if ( this.distFromCamera < this.fadeoutRange + this.distribution * 5)	// is within approximation range
+		 if ( this.distFromCamera < this.fadeoutRange && deltaZ < 0 )	// is within approximation range
 		 {
 
 			 //for (var i=0; i < this.staticImages.length; i++){
@@ -131,7 +132,7 @@ NebulaCloud.prototype.update = function() {
 					 scene.add( this.staticImages[i] );
 				 }
 
-				 //this.isInView = true;
+				 this.isInView = true;
 
 				 if (debug) console.log("Static nebula added" );
 
@@ -146,7 +147,7 @@ NebulaCloud.prototype.update = function() {
 						 scene.remove( this.staticImages[i] );
 					 }
 
-					 //this.isInView = false;
+					 this.isInView = false;
 
 					 if (debug) console.log("Static nebula removed" );
 
@@ -157,13 +158,14 @@ NebulaCloud.prototype.update = function() {
 	}
 
 	// add and remove nebula clouds
-	if ( this.distFromCamera < this.fadeoutRange + this.distribution * 5 )	// is within approximation range
+	if ( this.distFromCamera < this.fadeoutRange + this.distribution * 5
+				&& deltaZ < this.distribution * 5)	// is within approximation range
 	// if ( this.centerPos.z - this.distribution * 5	 < distance
 	//			 && this.centerPos.z + this.distribution * 5	 > distance
 	//		 )
 	{
 
-		if ( !this.isInView ){
+		if ( !this.isInView && fps > 20 && this.disabled === false ){
 
 			scene.add( this.dustCloud );
 
@@ -178,6 +180,21 @@ NebulaCloud.prototype.update = function() {
 			if (debug) console.log( "Nebula cloud added" );
 
 		}
+
+    if ( this.isInView && fps < 15 && timeOutActive === false ){
+
+      scene.remove( this.dustCloud );
+      this.isInView = false;
+      this.disabled = true;
+
+      if (debug) console.log( "Nebula cloud removed and disabled due to overload" );
+
+      timeOutActive = true;
+
+      setTimeout( function(){ timeOutActive = false; }, 5000 );
+
+    }
+
 
 	}
 	else{
@@ -201,8 +218,6 @@ NebulaCloud.prototype.update = function() {
 	}
 
 }
-
-
 
 function createNebulaCloud ( centerPos, distribution, distributionVector, numPlanes, maxSize, type, color, fadeoutRange, blending ){
 
